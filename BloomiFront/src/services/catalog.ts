@@ -19,6 +19,24 @@ export type CatalogEntry = {
   variants: StoreProduct[];
 };
 
+export type CatalogSort = 'name' | 'price-asc' | 'price-desc';
+
+export function catalogPrice(entry: CatalogEntry): number {
+  return Math.min(...entry.variants.map(variant => variant.salePrice));
+}
+
+export function filterCatalog(entries: CatalogEntry[], query: string, category: string, sort: CatalogSort): CatalogEntry[] {
+  const words = query.trim().split(/\s+/).map(normalizeProductName).filter(Boolean);
+  return entries.filter(entry => {
+    if (category && !entry.variants.some(variant => variant.category === category)) return false;
+    const text = normalizeProductName([entry.name, ...entry.variants.flatMap(variant => [variant.category, variant.brand, variant.shade, variant.presentation, variant.description])].filter(Boolean).join(' '));
+    return words.every(word => text.includes(word));
+  }).sort((a, b) => {
+    const priceDifference = sort === 'price-asc' ? catalogPrice(a) - catalogPrice(b) : sort === 'price-desc' ? catalogPrice(b) - catalogPrice(a) : 0;
+    return priceDifference || a.name.localeCompare(b.name, 'es', { numeric: true, sensitivity: 'base' });
+  });
+}
+
 export function buildCatalog(products: StoreProduct[], includeOutOfStock = false, groupVariants = true): CatalogEntry[] {
   const groups = new Map<string, StoreProduct[]>();
   for (const product of products.filter(p => p.active)) {

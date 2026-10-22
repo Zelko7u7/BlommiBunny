@@ -1,4 +1,18 @@
 import {http} from "./http";import type{Contact,Dashboard,Named,Product,ProductInput,StoreProduct,Session}from"../types";
+
+async function storeProducts(): Promise<StoreProduct[]> {
+ const products: StoreProduct[] = [];
+ let page = 0;
+ let totalPages = 1;
+ do {
+  const { data } = await http.get<{ content: StoreProduct[]; totalPages: number }>(`/store/products?size=100&page=${page}`);
+  products.push(...data.content);
+  totalPages = data.totalPages;
+  page++;
+ } while (page < totalPages);
+ return [...new Map(products.map(product => [product.id, product])).values()];
+}
+
 export const api={
  inventorySummary:(q="")=>http.get<import('../types').InventorySummary>(`/products/summary?q=${encodeURIComponent(q)}`).then(r=>r.data),
  favorites:()=>http.get<StoreProduct[]>("/favorites").then(r=>r.data),
@@ -6,7 +20,7 @@ export const api={
  removeFavorite:(id:number)=>http.delete(`/favorites/${id}`),
  login:(username:string,password:string)=>http.post<Session>("/auth/login",{username,password}).then(r=>r.data),
  signup:(username:string,password:string)=>http.post<Session>("/auth/signup",{username,password}).then(r=>r.data),
- storeProducts:()=>http.get<{content:StoreProduct[]}>("/store/products?size=100").then(r=>r.data.content),
+ storeProducts,
  storeProduct:(id:number)=>http.get<StoreProduct>(`/store/products/${id}`).then(r=>r.data),
  dashboard:()=>http.get<Dashboard>("/dashboard").then(r=>r.data),
  products:(q="")=>http.get<{content:Product[]}>(`/products?q=${encodeURIComponent(q)}&size=100`).then(r=>r.data.content),

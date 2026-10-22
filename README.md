@@ -1,6 +1,6 @@
 # Bloomi Bunny
 
-Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Este avance incluye catálogo, fichas por tonalidad, carrito local, cuentas, favoritos e inventario administrativo. Los pedidos y pagos en línea siguen pendientes.
+Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Este avance incluye catálogo con búsqueda, filtros por categoría y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos e inventario administrativo. Los pedidos y pagos en línea siguen pendientes.
 
 ## Estructura
 
