@@ -2,6 +2,7 @@ import { useRef, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { normalizeProductName } from '../services/catalog';
 import { InventoryDialog } from '../components/inventory/InventoryDialogs';
@@ -17,8 +18,10 @@ const initialFilters:SaleFilters = { q:'',from:'',to:'',channel:'',status:'all',
 function errorMessage(error:unknown) { return (error as {message?:string})?.message || 'No fue posible completar la operación. Inténtalo de nuevo.'; }
 
 export default function SalesPage() {
- const [filters,setFilters] = useState(initialFilters);
- const [creating,setCreating] = useState(false);
+ const [params,setParams] = useSearchParams();
+ const [filters,setFilters] = useState<SaleFilters>(()=>({q:params.get('q')??'',from:/^\d{4}-\d{2}-\d{2}$/.test(params.get('from')??'')?params.get('from')!:'',to:/^\d{4}-\d{2}-\d{2}$/.test(params.get('to')??'')?params.get('to')!:'',channel:['WHATSAPP','INSTAGRAM','OTHER'].includes(params.get('channel')??'')?params.get('channel')!:'',status:['confirmed','cancelled'].includes(params.get('status')??'')?params.get('status')!:'all',page:0}));
+ const [creating,setCreating] = useState(params.get('new')==='1');
+ const closeCreate=()=>{setCreating(false);setParams(current=>{const next=new URLSearchParams(current);next.delete('new');return next;},{replace:true});};
  const [selected,setSelected] = useState<number|null>(null);
  const [cancelling,setCancelling] = useState<Sale|null>(null);
  const qc = useQueryClient();
@@ -47,7 +50,7 @@ export default function SalesPage() {
     <nav className="sales-pagination" aria-label="Páginas de ventas"><button className="inventory-secondary" disabled={filters.page===0} onClick={()=>setFilters(current=>({...current,page:current.page-1}))}>Anterior</button><span>Página {filters.page+1} de {history.data.totalPages}</span><button className="inventory-secondary" disabled={filters.page+1>=history.data.totalPages} onClick={()=>setFilters(current=>({...current,page:current.page+1}))}>Siguiente</button></nav>
    </>}
   </Card>
-  {creating && <NewSaleDialog busy={create.isPending} onClose={()=>setCreating(false)} onSave={async payload=>{const sale=await create.mutateAsync(payload);setCreating(false);setSelected(sale.id);toast.success(`Venta #${sale.id} registrada`);}}/>}
+  {creating && <NewSaleDialog busy={create.isPending} onClose={closeCreate} onSave={async payload=>{const sale=await create.mutateAsync(payload);closeCreate();setSelected(sale.id);toast.success(`Venta #${sale.id} registrada`);}}/>}
   {selected!==null && <InventoryDialog title={`Venta #${selected}`} onClose={()=>setSelected(null)}>{detail.isLoading?<Loading/>:detail.isError?<p className="error" role="alert">No pudimos consultar el detalle. <button onClick={()=>detail.refetch()}>Reintentar</button></p>:detail.data&&<SaleDetails sale={detail.data} onCancel={()=>{setCancelling(detail.data!);setSelected(null);}}/>}</InventoryDialog>}
   {cancelling && <CancelSaleDialog sale={cancelling} busy={cancel.isPending} onClose={()=>{setSelected(cancelling.id);setCancelling(null);}} onConfirm={async reason=>{const sale=await cancel.mutateAsync({id:cancelling.id,reason});setCancelling(null);setSelected(sale.id);toast.success('Venta anulada y existencias devueltas');}}/>}
  </div>;

@@ -40,11 +40,11 @@ npm run build
 .\node_modules\.bin\tsc.cmd --noEmit --noCheck false --incremental false
 ```
 
-Revisión del 22 de octubre de 2026: 25 pruebas backend aprobadas y build frontend aprobado. La comprobación explícita de tipos falla con tres errores en `DashboardPage.tsx`; `tsconfig.json` contiene `noCheck=true` y `CatalogPage.tsx` usa `@ts-nocheck`. El build genera un bundle principal de unos 834 kB y avisa por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
+Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada. Se eliminaron `noCheck=true` y los errores anteriores del dashboard; `CatalogPage.tsx` conserva su exclusión local `@ts-nocheck`. El bundle principal ronda 833 kB y mantiene el aviso por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
 
-El módulo de ventas administrativas cuenta con 15 pruebas de acceso, 14 de ciclo de productos y 10 de integración de ventas en PostgreSQL: 39 aprobadas al habilitar el esquema aislado. Las 10 de integración se omiten en el `mvn test` normal y exigen configuración explícita de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md).
+El backend cuenta con 49 pruebas aprobadas: 15 de acceso, 14 de productos, 5 unitarias del dashboard y 15 de integración PostgreSQL de ventas y dashboard. Las 15 de integración se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md) y [dashboard](docs/DASHBOARD.md).
 
-Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. Compras y gastos mantienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. El dashboard conserva gráficos y porcentajes de muestra y su ganancia necesita corregirse; sus ingresos sí excluyen las ventas anuladas. Las políticas están en borrador.
+Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. El dashboard usa ventas confirmadas, costos históricos, margen de productos, gráficos reales y alertas con filtros de inventario. Trabaja con fechas de Colombia y señala costos desconocidos. Compras y gastos mantienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. Las políticas están en borrador.
 
 ## Repositorio Git
 

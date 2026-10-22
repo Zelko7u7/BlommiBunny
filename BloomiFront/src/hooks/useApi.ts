@@ -1,7 +1,7 @@
 import{useMutation,useQuery,useQueryClient}from"@tanstack/react-query";import{api}from"../services/api";
-export const useDashboard=()=>useQuery({queryKey:["dashboard"],queryFn:api.dashboard});
-export const useProducts=(q="")=>useQuery({queryKey:["products",q],queryFn:()=>api.products(q),refetchInterval:15000,refetchOnWindowFocus:true});
-export const useInventorySummary=(q="")=>useQuery({queryKey:["inventory-summary",q],queryFn:()=>api.inventorySummary(q),refetchInterval:15000,refetchOnWindowFocus:true});
+export const useDashboard=()=>useQuery({queryKey:["dashboard"],queryFn:api.dashboard,refetchInterval:15000,refetchOnWindowFocus:true});
+export const useProducts=(q="",stock="all")=>useQuery({queryKey:["products",q,stock],queryFn:()=>api.products(q,stock),refetchInterval:15000,refetchOnWindowFocus:true});
+export const useInventorySummary=(q="",stock="all")=>useQuery({queryKey:["inventory-summary",q,stock],queryFn:()=>api.inventorySummary(q,stock),refetchInterval:15000,refetchOnWindowFocus:true});
 export const useStoreProducts=()=>useQuery({queryKey:["store-products"],queryFn:api.storeProducts,refetchInterval:15000});
 export function useFavorites(username?:string){
  const qc=useQueryClient();

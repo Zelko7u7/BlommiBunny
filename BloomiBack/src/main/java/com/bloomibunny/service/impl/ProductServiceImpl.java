@@ -13,12 +13,25 @@ public class ProductServiceImpl implements ProductService {
  private final ProductRepository products;private final CategoryRepository categories;private final BrandRepository brands;private final SupplierRepository suppliers;private final InventoryMovementRepository movements;
  public ProductServiceImpl(ProductRepository p,CategoryRepository c,BrandRepository b,SupplierRepository s,InventoryMovementRepository m){products=p;categories=c;brands=b;suppliers=s;movements=m;}
  @Transactional(readOnly=true) public Page<ProductResponse> list(String q,int page,int size,String sort){var pageable=PageRequest.of(page,Math.min(size,100),Sort.by(sort==null?"name":sort));return(q==null||q.isBlank()?products.findByDeletedFalse(pageable):products.search(q,pageable)).map(this::map);}
+ @Transactional(readOnly=true) public Page<ProductResponse> listByStock(String q,int page,int size,String sort,String stock){
+  validateStockFilter(stock);if("all".equals(stock))return list(q,page,size,sort);
+  if(page<0||size<1)throw new BusinessException("Paginación inválida.");
+  return products.searchByStock(q==null?"":q.trim(),stock,PageRequest.of(page,Math.min(size,100),Sort.by(sort==null?"name":sort))).map(this::map);
+ }
+ @Transactional(readOnly=true) public com.bloomibunny.dto.InventorySummary summaryByStock(String q,String stock){
+  validateStockFilter(stock);if("all".equals(stock))return summary(q);
+  return summarize(products.searchByStock(q==null?"":q.trim(),stock,Pageable.unpaged()).getContent());
+ }
+ private void validateStockFilter(String stock){if(!java.util.Set.of("all","low","out").contains(stock==null?"":stock))throw new BusinessException("Filtro de existencias inválido.");}
  @Transactional(readOnly=true) public java.util.List<ProductResponse> variants(String group){return products.findByVariantGroupAndActiveTrueAndDeletedFalseOrderByShadeAsc(group).stream().map(this::map).toList();}
  @Transactional(readOnly=true) public ProductResponse get(Long id){return map(find(id));}
  @Transactional(readOnly=true)
  public com.bloomibunny.dto.InventorySummary summary(String q){
   // Read all matching inventory, including disabled products; never limit totals to a page.
   var inventory=(q==null||q.isBlank()?products.findByDeletedFalse(Pageable.unpaged()):products.search(q,Pageable.unpaged())).getContent();
+  return summarize(inventory);
+ }
+ private com.bloomibunny.dto.InventorySummary summarize(java.util.List<Product> inventory){
   long units=0,unknownProducts=0,unknownUnits=0,provisionalProducts=0,provisionalUnits=0;
   BigDecimal saleValue=BigDecimal.ZERO,costValue=BigDecimal.ZERO;
   for(var p:inventory){

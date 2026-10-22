@@ -31,7 +31,7 @@ export const api={
   do { const {data}=await http.get<{content:Product[];totalPages:number}>(`/products?size=100&page=${page}`);products.push(...data.content);totalPages=data.totalPages;page++; } while(page<totalPages);
   return [...new Map(products.map(product=>[product.id,product])).values()];
  },
- inventorySummary:(q="")=>http.get<import('../types').InventorySummary>(`/products/summary?q=${encodeURIComponent(q)}`).then(r=>r.data),
+ inventorySummary:(q="",stock="all")=>http.get<import('../types').InventorySummary>(`/products/summary?q=${encodeURIComponent(q)}&stock=${encodeURIComponent(stock)}`).then(r=>r.data),
  favorites:()=>http.get<StoreProduct[]>("/favorites").then(r=>r.data),
  addFavorite:(id:number)=>http.put(`/favorites/${id}`),
  removeFavorite:(id:number)=>http.delete(`/favorites/${id}`),
@@ -39,8 +39,11 @@ export const api={
  signup:(username:string,password:string)=>http.post<Session>("/auth/signup",{username,password}).then(r=>r.data),
  storeProducts,
  storeProduct:(id:number)=>http.get<StoreProduct>(`/store/products/${id}`).then(r=>r.data),
- dashboard:()=>http.get<Dashboard>("/dashboard").then(r=>r.data),
- products:(q="")=>http.get<{content:Product[]}>(`/products?q=${encodeURIComponent(q)}&size=100`).then(r=>r.data.content),
+ dashboard:()=>http.get<Dashboard>("/dashboard").then(r=>{
+  if(!Array.isArray(r.data.dailySales)||!Array.isArray(r.data.monthlySales))throw {message:'El backend necesita actualizarse para mostrar el dashboard real.'};
+  return r.data;
+ }),
+ products:(q="",stock="all")=>http.get<{content:Product[]}>(`/products?q=${encodeURIComponent(q)}&stock=${encodeURIComponent(stock)}&size=100`).then(r=>r.data.content),
  createProduct:(data:ProductInput)=>http.post<Product>("/products",data).then(r=>r.data),
  updateProduct:(id:number,data:ProductInput)=>http.put<Product>(`/products/${id}`,data).then(r=>r.data),
  setProductActive:(id:number,active:boolean)=>http.patch<Product>(`/products/${id}/status`,{active}).then(r=>r.data),

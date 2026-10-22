@@ -1,6 +1,7 @@
 import { productImage } from '../services/catalog';
 import { MoreHorizontal, Plus, Eye, EyeOff, Trash2, Pencil } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import { useProducts, useProductActions, useInventorySummary } from '../hooks/useApi';
@@ -9,9 +10,12 @@ import type { Product, ProductInput } from '../types';
 import { Card, Empty, Loading, money, PageHeader, SearchBox } from '../components/common/Ui';
 
 export default function InventoryPage() {
-  const [q, setQ] = useState('');
-  const { data = [], isLoading, isError } = useProducts(q);
-  const summary = useInventorySummary(q);
+  const [params,setParams] = useSearchParams();
+  const q=params.get('q')??'';
+  const stock=params.get('stock')==='low'?'low':params.get('stock')==='out'?'out':'all';
+  const setQ=(value:string)=>setParams(current=>{const next=new URLSearchParams(current);if(value)next.set('q',value);else next.delete('q');return next;},{replace:true});
+  const { data = [], isLoading, isError } = useProducts(q,stock);
+  const summary = useInventorySummary(q,stock);
   const totals = summary.data;
   const { create, update, setActive, remove } = useProductActions();
   const [creating, setCreating] = useState(false);
@@ -33,7 +37,7 @@ export default function InventoryPage() {
     {summary.isLoading && <p role="status">Calculando el valor actual del inventario…</p>}
     {summary.isError ? <p className="error" role="alert">No pudimos actualizar los totales del inventario. <button onClick={() => summary.refetch()}>Reintentar</button></p> : totals && <>
       <div className="inventory-summary">
-        <Card><span>Unidades confirmadas {q ? 'en los resultados' : 'en inventario'}</span><strong>{totals.confirmedUnits}</strong></Card>
+        <Card><span>Unidades confirmadas {q || stock!=='all' ? 'en los resultados' : 'en inventario'}</span><strong>{totals.confirmedUnits}</strong></Card>
         <Card><span>Valor del stock a precio de venta</span><strong>{money(totals.saleValue)}</strong><small>Stock actual × precio de venta actual</small></Card>
         <Card><span>{totals.unknownCostUnits > 0 ? 'Costo de compra registrado (parcial)' : 'Valor del stock a costo de compra'}</span><strong>{money(totals.confirmedCostValue)}</strong></Card>
       </div>
@@ -41,7 +45,7 @@ export default function InventoryPage() {
       {totals.provisionalProducts > 0 && <p className="catalog-notice" role="status">{totals.provisionalProducts} productos tienen precio y stock provisionales ({totals.provisionalUnits} unidades). Se excluyen de los totales confirmados.</p>}
     </>}
     <Card>
-      <div className="table-tools"><SearchBox value={q} onChange={setQ} placeholder="Buscar por nombre o código…"/><span>{!summary.isError && totals ? `${data.length} de ${totals.totalProducts}` : data.length} productos</span></div>
+      <div className="table-tools inventory-filters"><SearchBox value={q} onChange={setQ} placeholder="Buscar por nombre o código…"/><label>Existencias<select aria-label="Filtrar existencias" value={stock} onChange={event=>setParams(current=>{const next=new URLSearchParams(current);if(event.target.value==='all')next.delete('stock');else next.set('stock',event.target.value);return next;},{replace:true})}><option value="all">Todas</option><option value="low">Stock bajo</option><option value="out">Agotados</option></select></label>{(q||stock!=='all')&&<button type="button" className="inventory-secondary" onClick={()=>setParams({},{replace:true})}>Limpiar filtros</button>}<span>{!summary.isError && totals ? `${data.length} de ${totals.totalProducts}` : data.length} productos</span></div>
       {isLoading ? <Loading/> : isError ? <p className="error" role="alert">No pudimos cargar el inventario. Revisa tu sesión y vuelve a intentarlo.</p> : data.length === 0 ? <Empty text="No encontramos productos."/> : <div className="table-wrap"><table>
         <thead><tr><th>Producto</th><th>Categoría</th><th>Costo/u</th><th>Venta/u</th><th>Ganancia/u</th><th>Stock</th><th>Valor stock (venta)</th><th>Estado</th><th/></tr></thead>
         <tbody>{data.map(p => <tr key={p.id}>
