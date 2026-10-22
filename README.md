@@ -1,6 +1,6 @@
 # Bloomi Bunny
 
-Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Este avance incluye catálogo con búsqueda, filtros por categoría y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos e inventario administrativo. Los pedidos y pagos en línea siguen pendientes.
+Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos, inventario y ventas administrativas de canales externos. Los pedidos y pagos en línea siguen pendientes.
 
 ## Estructura
 
@@ -42,7 +42,9 @@ npm run build
 
 Revisión del 22 de octubre de 2026: 25 pruebas backend aprobadas y build frontend aprobado. La comprobación explícita de tipos falla con tres errores en `DashboardPage.tsx`; `tsconfig.json` contiene `noCheck=true` y `CatalogPage.tsx` usa `@ts-nocheck`. El build genera un bundle principal de unos 834 kB y avisa por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
 
-Las pruebas actuales usan mocks y no acreditan una instalación limpia ni integración con PostgreSQL. Ventas, compras y gastos tienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. El dashboard conserva gráficos y porcentajes de muestra y su ganancia necesita corregirse. Las políticas están en borrador.
+El módulo de ventas administrativas cuenta con 15 pruebas de acceso, 14 de ciclo de productos y 10 de integración de ventas en PostgreSQL: 39 aprobadas al habilitar el esquema aislado. Las 10 de integración se omiten en el `mvn test` normal y exigen configuración explícita de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md).
+
+Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. Compras y gastos mantienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. El dashboard conserva gráficos y porcentajes de muestra y su ganancia necesita corregirse; sus ingresos sí excluyen las ventas anuladas. Las políticas están en borrador.
 
 ## Repositorio Git
 

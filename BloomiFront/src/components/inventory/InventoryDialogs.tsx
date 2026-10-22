@@ -8,7 +8,7 @@ import type { Product, ProductInput } from '../../types';
 export function InventoryDialog({ title, children, onClose, busy = false }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => { const dialog = ref.current!; dialog.showModal(); return () => dialog.close(); }, []);
-  return <dialog ref={ref} className="inventory-dialog" aria-labelledby="inventory-dialog-title" onCancel={e => { e.preventDefault(); if (!busy) onClose(); }} onClick={e => { if (e.target === e.currentTarget && !busy) onClose(); }}>
+  return <dialog ref={ref} className="inventory-dialog" aria-labelledby="inventory-dialog-title" onCancel={e => { e.preventDefault(); if (!busy) onClose(); }} onClick={e => { if (e.target !== e.currentTarget || busy) return; const rect=e.currentTarget.getBoundingClientRect(); if(e.clientX<rect.left||e.clientX>rect.right||e.clientY<rect.top||e.clientY>rect.bottom)onClose(); }}>
     <header><h2 id="inventory-dialog-title">{title}</h2><button type="button" onClick={onClose} disabled={busy} aria-label="Cerrar"><X size={20}/></button></header>
     {children}
   </dialog>;

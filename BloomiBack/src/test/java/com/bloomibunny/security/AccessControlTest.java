@@ -31,11 +31,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 class AccessControlTest {
  @Configuration @EnableWebMvc @EnableWebSecurity
- @Import({SecurityConfig.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
+ @Import({SecurityConfig.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
  static class Config {
   @Bean ProductService products(){return mock(ProductService.class);}
   @Bean AuthService auth(){return mock(AuthService.class);}
   @Bean FavoriteService favorites(){return mock(FavoriteService.class);}
+  @Bean AdminSaleService adminSales(){return mock(AdminSaleService.class);}
   @Bean AppUserRepository users(){return mock(AppUserRepository.class);}
   @Bean JwtService jwt(){var jwt=new JwtService();ReflectionTestUtils.setField(jwt,"secret","test-bloomi-secret-long-enough-for-hmac-256-signing");ReflectionTestUtils.setField(jwt,"expiration",86400000L);return jwt;}
   @Bean JwtAuthFilter filter(JwtService jwt,AppUserRepository users){return new JwtAuthFilter(jwt,users);}
@@ -46,12 +47,13 @@ class AccessControlTest {
  @Autowired ProductService products;
  @Autowired AuthService auth;
  @Autowired FavoriteService favorites;
+ @Autowired AdminSaleService adminSales;
  @Autowired AppUserRepository users;
  @Autowired JwtService jwt;
  MockMvc mvc;
 
  @BeforeEach void setup(){
-  reset(products,auth,users,favorites);
+  reset(products,auth,users,favorites,adminSales);
   mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null);
   when(products.list(anyString(),anyInt(),anyInt(),anyString())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
@@ -134,6 +136,27 @@ class AccessControlTest {
   verify(auth).register(new RegisterRequest("cliente","password123",Role.CUSTOMER));
  }
 
+ @Test void guestCannotAccessSalesDetailsOrCancellation()throws Exception{
+  mvc.perform(get("/api/sales/1")).andExpect(status().isUnauthorized());
+  mvc.perform(post("/api/sales").contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
+  mvc.perform(post("/api/sales/1/cancel").contentType("application/json").content("{\"reason\":\"Cancelar compra\"}")).andExpect(status().isUnauthorized());verifyNoInteractions(adminSales);
+ }
+ @Test @WithMockUser(roles="CUSTOMER") void customerCannotAccessSalesDetailsOrCancellation()throws Exception{
+  mvc.perform(get("/api/sales/1")).andExpect(status().isForbidden());
+  mvc.perform(post("/api/sales").contentType("application/json").content("{}")).andExpect(status().isForbidden());
+  mvc.perform(post("/api/sales/1/cancel").contentType("application/json").content("{\"reason\":\"Cancelar compra\"}")).andExpect(status().isForbidden());verifyNoInteractions(adminSales);
+ }
+ @Test @WithMockUser(username="administradora",roles="ADMIN") void adminCanListCreateAndCancelUsingAuthenticatedIdentity()throws Exception{
+  when(adminSales.list("",null,null,null,null,0,20)).thenReturn(new PageImpl<>(List.of(),org.springframework.data.domain.PageRequest.of(0,20),0));
+  mvc.perform(get("/api/sales")).andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+  mvc.perform(post("/api/sales").contentType("application/json").content("{\"requestId\":\"00000000-0000-0000-0000-000000000001\",\"paymentMethod\":\"CASH\",\"channel\":\"WHATSAPP\",\"discount\":0,\"items\":[{\"productId\":1,\"quantity\":1}]}")).andExpect(status().isCreated());
+  verify(adminSales).create(any(),eq("administradora"));
+  mvc.perform(post("/api/sales/1/cancel").contentType("application/json").content("{\"reason\":\"Cliente cancela\"}")).andExpect(status().isOk());verify(adminSales).cancel(1L,"Cliente cancela","administradora");
+ }
+ @Test @WithMockUser(roles="ADMIN") void invalidSalesNeverReachTheService()throws Exception{
+  mvc.perform(post("/api/sales").contentType("application/json").content("{\"paymentMethod\":\"CASH\",\"items\":[]}")).andExpect(status().isBadRequest());
+  mvc.perform(post("/api/sales/1/cancel").contentType("application/json").content("{\"reason\":\"no\"}")).andExpect(status().isBadRequest());verifyNoInteractions(adminSales);
+ }
  @Test void tokenDoesNotKeepOldAdminPrivileges()throws Exception{
   var user=new AppUser();user.setUsername("oldadmin");user.setRole(Role.ADMIN);
   String token=jwt.generate(user);

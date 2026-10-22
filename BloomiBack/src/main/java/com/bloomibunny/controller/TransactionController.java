@@ -10,10 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 @RestController @RequestMapping("/api")
 public class TransactionController {
- private final TransactionService service;private final SaleRepository sales;private final PurchaseRepository purchases;private final ExpenseRepository expenses;
- public TransactionController(TransactionService s,SaleRepository a,PurchaseRepository p,ExpenseRepository e){service=s;sales=a;purchases=p;expenses=e;}
- @PostMapping("/sales") @ResponseStatus(HttpStatus.CREATED) SaleResponse sale(@Valid @RequestBody SaleRequest r){return service.sale(r);}
- @GetMapping("/sales") List<?> sales(){return sales.findAll();}
+ private final TransactionService service;private final PurchaseRepository purchases;private final ExpenseRepository expenses;
+ public TransactionController(TransactionService s,PurchaseRepository p,ExpenseRepository e){service=s;purchases=p;expenses=e;}
  @PostMapping("/purchases") @ResponseStatus(HttpStatus.CREATED) PurchaseResponse purchase(@Valid @RequestBody PurchaseRequest r){return service.purchase(r);}
  @GetMapping("/purchases") List<?> purchases(){return purchases.findAll();}
  @GetMapping("/expenses") List<Expense> expenses(){return expenses.findAll();}

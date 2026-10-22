@@ -7,6 +7,7 @@ import InventoryPage from './pages/InventoryPage';
 import { NamedCatalog, ContactsPage } from './pages/CatalogPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 import StorePage from './pages/StorePage';
+import SalesPage from './pages/SalesPage';
 
 function AdminOnly() {
   const { session } = useAuth();
@@ -28,6 +29,7 @@ export default function App() {
     <Route path="/admin" element={<AdminOnly/>}>
       <Route index element={<DashboardPage/>}/>
       <Route path="inventario" element={<InventoryPage/>}/>
+      <Route path="ventas" element={<SalesPage/>}/>
       <Route path="categorias" element={<NamedCatalog kind="categories" title="Categorías" subtitle="Organiza tu catálogo por familias."/>}/>
       <Route path="marcas" element={<NamedCatalog kind="brands" title="Marcas" subtitle="Gestiona las marcas que comercializas."/>}/>
       <Route path="proveedores" element={<ContactsPage kind="suppliers" title="Proveedores" subtitle="Tus aliados de abastecimiento."/>}/>
