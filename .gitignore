@@ -1,0 +1,37 @@
+# Copias privadas, sesiones de pruebas y memoria comercial local
+/.local/
+/PROJECT_MEMORY.md
+/*.xlsx
+/tools/add_provisional_products.sql
+/tools/confirm_kitty_skull_inventory.sql
+
+# Configuración real del equipo; versionar solo las plantillas
+/BloomiBack/src/main/resources/application.properties
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.dump
+*.backup
+*.log
+
+# Dependencias y archivos generados
+node_modules/
+target/
+dist/
+*.tsbuildinfo
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Estructura duplicada inactiva; se conserva en el equipo
+/Django/

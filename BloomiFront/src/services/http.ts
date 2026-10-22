@@ -1,0 +1,4 @@
+import axios from 'axios';
+export const http = axios.create({ baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api', headers: { 'Content-Type': 'application/json' } });
+http.interceptors.request.use(config => { try { const raw = localStorage.getItem('bloomi.session'); if (raw) config.headers.Authorization = `Bearer ${(JSON.parse(raw) as { token: string }).token}`; } catch { localStorage.removeItem('bloomi.session'); } return config; });
+http.interceptors.response.use(response => response, error => { if (error.response?.status === 401 && !error.config?.url?.includes('/auth/login')) { localStorage.removeItem('bloomi.session'); window.dispatchEvent(new Event('bloomi:logout')); } const data = error.response?.data; return Promise.reject(data ?? { message: 'No fue posible conectar con el servidor.' }); });
