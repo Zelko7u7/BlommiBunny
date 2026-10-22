@@ -1,0 +1,10 @@
+.operation-filters { grid-template-columns:2fr 1fr 1fr 1fr auto; }
+.operation-summary { display:grid; grid-template-columns:2fr 1fr 1fr; gap:16px; border:1px solid #eadadd; border-radius:12px; background:#fffafa; padding:18px; }
+.operation-summary span { display:block; font-size:12px; color:#84656d; line-height:1.6; }
+.operation-summary strong { display:block; font-size:24px; margin-top:8px; overflow-wrap:anywhere; }
+.operation-detail .sale-cancelled-note { margin-top:20px; }
+.operations-page td { overflow-wrap:anywhere; max-width:320px; }
+.operation-form footer,.sale-detail footer { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; margin-top:12px; }
+@media(max-width:1199px) { .operation-filters { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:639px) { .operation-summary { grid-template-columns:1fr; gap:20px; } .operation-summary>div+div { border-top:1px solid #eadadd; padding-top:16px; } .operation-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:479px) { .operation-filters { grid-template-columns:minmax(0,1fr); } }

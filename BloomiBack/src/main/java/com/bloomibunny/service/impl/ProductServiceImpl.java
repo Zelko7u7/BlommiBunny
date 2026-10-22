@@ -12,18 +12,25 @@ import java.math.BigDecimal;
 public class ProductServiceImpl implements ProductService {
  private final ProductRepository products;private final CategoryRepository categories;private final BrandRepository brands;private final SupplierRepository suppliers;private final InventoryMovementRepository movements;
  public ProductServiceImpl(ProductRepository p,CategoryRepository c,BrandRepository b,SupplierRepository s,InventoryMovementRepository m){products=p;categories=c;brands=b;suppliers=s;movements=m;}
- @Transactional(readOnly=true) public Page<ProductResponse> list(String q,int page,int size,String sort){var pageable=PageRequest.of(page,Math.min(size,100),Sort.by(sort==null?"name":sort));return(q==null||q.isBlank()?products.findByDeletedFalse(pageable):products.search(q,pageable)).map(this::map);}
+ private PageRequest pageable(int page,int size,String sort){
+  var field=sort==null?"name":sort;
+  if(page<0||size<1||size>100)throw new BusinessException("Paginación inválida: usa entre 1 y 100 registros.");
+  if(!java.util.Set.of("name","code","stock","salePrice","purchasePrice","createdAt","id").contains(field))throw new BusinessException("Orden de productos inválido.");
+  return PageRequest.of(page,size,"id".equals(field)?Sort.by(field):Sort.by(field).and(Sort.by("id")));
+ }
+ @Transactional(readOnly=true) public Page<ProductResponse> publicList(String q,int page,int size){return products.publicSearch(q==null?"":q.trim(),pageable(page,size,"name")).map(this::map);}
+ @Transactional(readOnly=true) public Page<ProductResponse> list(String q,int page,int size,String sort){var pageable=pageable(page,size,sort);return(q==null||q.isBlank()?products.findByDeletedFalse(pageable):products.search(q.trim(),pageable)).map(this::map);}
  @Transactional(readOnly=true) public Page<ProductResponse> listByStock(String q,int page,int size,String sort,String stock){
   validateStockFilter(stock);if("all".equals(stock))return list(q,page,size,sort);
   if(page<0||size<1)throw new BusinessException("Paginación inválida.");
-  return products.searchByStock(q==null?"":q.trim(),stock,PageRequest.of(page,Math.min(size,100),Sort.by(sort==null?"name":sort))).map(this::map);
+  return products.searchByStock(q==null?"":q.trim(),stock,pageable(page,size,sort)).map(this::map);
  }
  @Transactional(readOnly=true) public com.bloomibunny.dto.InventorySummary summaryByStock(String q,String stock){
   validateStockFilter(stock);if("all".equals(stock))return summary(q);
   return summarize(products.searchByStock(q==null?"":q.trim(),stock,Pageable.unpaged()).getContent());
  }
  private void validateStockFilter(String stock){if(!java.util.Set.of("all","low","out").contains(stock==null?"":stock))throw new BusinessException("Filtro de existencias inválido.");}
- @Transactional(readOnly=true) public java.util.List<ProductResponse> variants(String group){return products.findByVariantGroupAndActiveTrueAndDeletedFalseOrderByShadeAsc(group).stream().map(this::map).toList();}
+ @Transactional(readOnly=true) public java.util.List<ProductResponse> variants(String group){return products.findByVariantGroupAndActiveTrueAndDeletedFalseOrderByShadeAsc(group).stream().filter(p->!p.isProvisionalData()).map(this::map).toList();}
  @Transactional(readOnly=true) public ProductResponse get(Long id){return map(find(id));}
  @Transactional(readOnly=true)
  public com.bloomibunny.dto.InventorySummary summary(String q){
@@ -45,8 +52,8 @@ public class ProductServiceImpl implements ProductService {
   return new com.bloomibunny.dto.InventorySummary(inventory.size(),units,saleValue,costValue,unknownProducts,unknownUnits,provisionalProducts,provisionalUnits);
  }
  public ProductResponse create(ProductRequest r){if(products.existsByCode(r.code().trim()))throw new BusinessException("Ya existe un producto con ese código. Usa un código diferente.");var p=new Product();apply(p,r);var saved=products.save(p);movement(saved,MovementType.ADJUSTMENT_IN,saved.getStock(),"Inventario inicial");return map(saved);}
- public ProductResponse update(Long id,ProductRequest r){var p=find(id);if(r.expectedVersion()!=null&&r.expectedVersion()!=p.getVersion())throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Product.class,id);if(products.existsByCodeAndIdNot(r.code().trim(),id))throw new BusinessException("Ya existe otro producto con ese código. Usa un código diferente.");int old=p.getStock();apply(p,r);var saved=products.saveAndFlush(p);int delta=saved.getStock()-old;if(delta!=0)movement(saved,delta>0?MovementType.ADJUSTMENT_IN:MovementType.ADJUSTMENT_OUT,Math.abs(delta),"Actualización de producto");return map(saved);}
- public ProductResponse adjust(Long id,StockAdjustment r){var p=find(id);int value=p.getStock()+r.quantity();if(value<0)throw new BusinessException("El ajuste dejaría el stock en negativo");p.setStock(value);products.save(p);movement(p,r.quantity()>=0?MovementType.ADJUSTMENT_IN:MovementType.ADJUSTMENT_OUT,Math.abs(r.quantity()),r.reason());return map(p);}
+ public ProductResponse update(Long id,ProductRequest r){var p=find(id);if(r.expectedVersion()==null)throw new BusinessException("Recarga el producto antes de editarlo: falta su versión actual.");if(r.expectedVersion()!=p.getVersion())throw new org.springframework.orm.ObjectOptimisticLockingFailureException(Product.class,id);if(products.existsByCodeAndIdNot(r.code().trim(),id))throw new BusinessException("Ya existe otro producto con ese código. Usa un código diferente.");int old=p.getStock();apply(p,r);var saved=products.saveAndFlush(p);int delta=saved.getStock()-old;if(delta!=0)movement(saved,delta>0?MovementType.ADJUSTMENT_IN:MovementType.ADJUSTMENT_OUT,Math.abs(delta),"Actualización de producto");return map(saved);}
+ public ProductResponse adjust(Long id,StockAdjustment r){var p=products.lockById(id).filter(product->!product.isDeleted()).orElseThrow(()->new ResourceNotFoundException("Producto no encontrado"));if(r.quantity()==null||r.quantity()==0)throw new BusinessException("Indica un ajuste distinto de cero.");long value=(long)p.getStock()+r.quantity();if(value<0||value>Integer.MAX_VALUE)throw new BusinessException("El ajuste dejaría el stock fuera del rango permitido.");p.setStock((int)value);products.saveAndFlush(p);movement(p,r.quantity()>0?MovementType.ADJUSTMENT_IN:MovementType.ADJUSTMENT_OUT,Math.abs(r.quantity()),r.reason());return map(p);}
  public ProductResponse setActive(Long id,boolean active){var p=find(id);p.setActive(active);var saved=products.saveAndFlush(p);return map(saved);}
  public void delete(Long id){var p=find(id);p.setDeleted(true);p.setActive(false);products.save(p);}
  private Product find(Long id){return products.findById(id).filter(p->!p.isDeleted()).orElseThrow(()->new ResourceNotFoundException("Producto "+id+" no encontrado"));}

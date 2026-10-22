@@ -4,4 +4,4 @@ export function Card({children,className=""}:{children:ReactNode;className?:stri
 export function Loading(){return <div className="state"><LoaderCircle className="spin"/> Cargando información…</div>}
 export function Empty({text="No hay registros todavía."}:{text?:string}){return <div className="state">{text}</div>}
 export function SearchBox({value,onChange,placeholder="Buscar…"}:{value:string;onChange:(v:string)=>void;placeholder?:string}){return <label className="search"><Search size={18}/><input value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/></label>}
-export const money=(n=0)=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(n);
+export const money=(n=0)=>new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",minimumFractionDigits:0,maximumFractionDigits:2}).format(n);

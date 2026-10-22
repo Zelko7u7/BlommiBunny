@@ -31,12 +31,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 class AccessControlTest {
  @Configuration @EnableWebMvc @EnableWebSecurity
- @Import({SecurityConfig.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
+ @Import({SecurityConfig.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,TransactionController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
  static class Config {
   @Bean ProductService products(){return mock(ProductService.class);}
   @Bean AuthService auth(){return mock(AuthService.class);}
   @Bean FavoriteService favorites(){return mock(FavoriteService.class);}
   @Bean AdminSaleService adminSales(){return mock(AdminSaleService.class);}
+  @Bean AdminPurchaseService adminPurchases(){return mock(AdminPurchaseService.class);}
+  @Bean AdminExpenseService adminExpenses(){return mock(AdminExpenseService.class);}
   @Bean AppUserRepository users(){return mock(AppUserRepository.class);}
   @Bean JwtService jwt(){var jwt=new JwtService();ReflectionTestUtils.setField(jwt,"secret","test-bloomi-secret-long-enough-for-hmac-256-signing");ReflectionTestUtils.setField(jwt,"expiration",86400000L);return jwt;}
   @Bean JwtAuthFilter filter(JwtService jwt,AppUserRepository users){return new JwtAuthFilter(jwt,users);}
@@ -48,15 +50,18 @@ class AccessControlTest {
  @Autowired AuthService auth;
  @Autowired FavoriteService favorites;
  @Autowired AdminSaleService adminSales;
+ @Autowired AdminPurchaseService adminPurchases;
+ @Autowired AdminExpenseService adminExpenses;
  @Autowired AppUserRepository users;
  @Autowired JwtService jwt;
  MockMvc mvc;
 
  @BeforeEach void setup(){
-  reset(products,auth,users,favorites,adminSales);
+  reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses);
   mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null);
   when(products.list(anyString(),anyInt(),anyInt(),anyString())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
+  when(products.publicList(anyString(),anyInt(),anyInt())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
   when(products.get(1L)).thenReturn(product);
  }
 
@@ -66,6 +71,12 @@ class AccessControlTest {
   mvc.perform(get("/api/products/summary")).andExpect(status().isUnauthorized());
  }
 
+ @Test @WithMockUser(roles="ADMIN") void malformedDatesAndProductMoneyAreRejected()throws Exception{
+  mvc.perform(get("/api/purchases?from=fecha-invalida")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+  mvc.perform(post("/api/expenses").contentType("application/json").content("{\"date\":\"fecha-invalida\"}")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+  for(String price:List.of("1.001","1000000000000"))mvc.perform(post("/api/products").contentType("application/json").content("{\"name\":\"Producto\",\"code\":\"TEST\",\"categoryId\":1,\"purchasePrice\":0,\"salePrice\":"+price+",\"stock\":0,\"minimumStock\":0}")).andExpect(status().isBadRequest());
+  verify(products,never()).create(any());verifyNoInteractions(adminPurchases,adminExpenses);
+ }
  @Test void guestsCannotReadOrChangeFavorites()throws Exception{
   mvc.perform(get("/api/favorites")).andExpect(status().isUnauthorized());
   mvc.perform(put("/api/favorites/1")).andExpect(status().isUnauthorized());
@@ -156,6 +167,21 @@ class AccessControlTest {
  @Test @WithMockUser(roles="ADMIN") void invalidSalesNeverReachTheService()throws Exception{
   mvc.perform(post("/api/sales").contentType("application/json").content("{\"paymentMethod\":\"CASH\",\"items\":[]}")).andExpect(status().isBadRequest());
   mvc.perform(post("/api/sales/1/cancel").contentType("application/json").content("{\"reason\":\"no\"}")).andExpect(status().isBadRequest());verifyNoInteractions(adminSales);
+ }
+ @Test void guestsCannotAccessPurchasesOrExpenses()throws Exception{
+  for(var kind:List.of("purchases","expenses")){mvc.perform(get("/api/"+kind)).andExpect(status().isUnauthorized());mvc.perform(get("/api/"+kind+"/1")).andExpect(status().isUnauthorized());mvc.perform(post("/api/"+kind).contentType("application/json").content("{}")).andExpect(status().isUnauthorized());mvc.perform(post("/api/"+kind+"/1/cancel").contentType("application/json").content("{\"reason\":\"Cancelar registro\"}")).andExpect(status().isUnauthorized());}verifyNoInteractions(adminPurchases,adminExpenses);
+ }
+ @Test @WithMockUser(roles="CUSTOMER") void customersCannotAccessPurchasesOrExpenses()throws Exception{
+  for(var kind:List.of("purchases","expenses")){mvc.perform(get("/api/"+kind)).andExpect(status().isForbidden());mvc.perform(post("/api/"+kind).contentType("application/json").content("{}")).andExpect(status().isForbidden());mvc.perform(post("/api/"+kind+"/1/cancel").contentType("application/json").content("{\"reason\":\"Cancelar registro\"}")).andExpect(status().isForbidden());}verifyNoInteractions(adminPurchases,adminExpenses);
+ }
+ @Test @WithMockUser(username="administradora",roles="ADMIN") void purchaseAndExpenseUseAuthenticatedActor()throws Exception{
+  mvc.perform(post("/api/purchases").contentType("application/json").content("{\"requestId\":\"00000000-0000-0000-0000-000000000001\",\"supplierId\":1,\"date\":\"2026-01-15\",\"items\":[{\"productId\":1,\"quantity\":2,\"unitCost\":1000}]}" )).andExpect(status().isCreated());verify(adminPurchases).create(any(),eq("administradora"));
+  mvc.perform(post("/api/expenses").contentType("application/json").content("{\"requestId\":\"00000000-0000-0000-0000-000000000002\",\"category\":\"Publicidad\",\"description\":\"Campaña\",\"date\":\"2026-01-15\",\"amount\":1000,\"paymentMethod\":\"TRANSFER\"}" )).andExpect(status().isCreated());verify(adminExpenses).create(any(),eq("administradora"));
+  mvc.perform(post("/api/purchases/1/cancel").contentType("application/json").content("{\"reason\":\"Recepción duplicada\"}")).andExpect(status().isOk());verify(adminPurchases).cancel(1L,"Recepción duplicada","administradora");
+  mvc.perform(post("/api/expenses/1/cancel").contentType("application/json").content("{\"reason\":\"Gasto duplicado\"}")).andExpect(status().isOk());verify(adminExpenses).cancel(1L,"Gasto duplicado","administradora");
+ }
+ @Test @WithMockUser(roles="ADMIN") void invalidOperationsAreRejectedAndExpenseCannotBeDeleted()throws Exception{
+  for(var kind:List.of("purchases","expenses")){mvc.perform(post("/api/"+kind).contentType("application/json").content("{}")).andExpect(status().isBadRequest());mvc.perform(post("/api/"+kind+"/1/cancel").contentType("application/json").content("{\"reason\":\"no\"}")).andExpect(status().isBadRequest());}mvc.perform(delete("/api/expenses/1")).andExpect(status().isMethodNotAllowed());verifyNoInteractions(adminPurchases,adminExpenses);
  }
  @Test void tokenDoesNotKeepOldAdminPrivileges()throws Exception{
   var user=new AppUser();user.setUsername("oldadmin");user.setRole(Role.ADMIN);

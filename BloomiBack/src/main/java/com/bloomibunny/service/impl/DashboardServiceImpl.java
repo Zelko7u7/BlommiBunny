@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.*;
-@Service @Transactional(readOnly=true)
+@Service @Transactional(readOnly=true,isolation=org.springframework.transaction.annotation.Isolation.REPEATABLE_READ)
 public class DashboardServiceImpl implements DashboardService {
  private static final ZoneId ZONE=ZoneId.of("America/Bogota");
  private final DashboardRepository data;

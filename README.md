@@ -1,6 +1,6 @@
 # Bloomi Bunny
 
-Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos, inventario y ventas administrativas de canales externos. Los pedidos y pagos en línea siguen pendientes.
+Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos y pagos en línea siguen pendientes.
 
 ## Estructura
 
@@ -40,13 +40,15 @@ npm run build
 .\node_modules\.bin\tsc.cmd --noEmit --noCheck false --incremental false
 ```
 
-Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada. Se eliminaron `noCheck=true` y los errores anteriores del dashboard; el código actual de `src` no contiene exclusiones `@ts-nocheck`. El bundle principal ronda 844 kB y mantiene el aviso por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
+Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada, sin exclusiones `@ts-nocheck`. Las pantallas administrativas se cargan bajo demanda: el JavaScript inicial ronda 421 kB y el gráfico se descarga al abrir Dashboard. La compilación ya no muestra el aviso de tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
 
-El backend cuenta con 49 pruebas aprobadas: 15 de acceso, 14 de productos, 5 unitarias del dashboard y 15 de integración PostgreSQL de ventas y dashboard. Las 15 de integración se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md) y [dashboard](docs/DASHBOARD.md).
+El backend cuenta con 77 pruebas aprobadas: 20 de acceso/validación, 17 de productos, 5 unitarias del dashboard y 35 de integración PostgreSQL de ventas, dashboard, compras, gastos y revisión general. Las 35 de integración se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md), [dashboard](docs/DASHBOARD.md) y [compras y gastos](docs/COMPRAS_GASTOS.md).
 
-Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. El dashboard usa ventas confirmadas, costos históricos, margen de productos, gráficos reales y alertas con filtros de inventario. Trabaja con fechas de Colombia y señala costos desconocidos. Compras y gastos mantienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. Las políticas están en borrador.
+Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. El dashboard usa ventas confirmadas, costos históricos, margen de productos, gráficos reales y alertas con filtros de inventario. Trabaja con fechas de Colombia y señala costos desconocidos. Compras registra recepciones de proveedores y suma inventario; Gastos conserva conceptos, importes y referencias de comprobantes. Ambos tienen historial, detalle, filtros, totales y anulación auditada. Caja/movimientos de dinero, reportes y configuración siguen pendientes. Las políticas están en borrador.
 
 Categorías, marcas, proveedores y clientes permiten crear, consultar el detalle y editar todos sus campos, además de eliminar con confirmación. Los directorios muestran descripción o teléfono, correo, dirección y notas completos; clientes incluye cumpleaños. Incorporan estado activo/inactivo, búsqueda, orden y páginas de 12 registros con filtros en URL. Un registro relacionado que la API impide eliminar puede conservarse como inactivo.
+
+La API pública excluye productos deshabilitados, eliminados y provisionales. Inventario, selectores de ventas/compras y catálogo consultan todas sus páginas; la ordenación por ID evita empates inestables entre productos con el mismo nombre. El formulario de inventario permite seleccionar marca, proveedor y fecha de ingreso, conserva centavos y exige versión al editar. El buscador del panel abre el inventario filtrado. Los módulos aplazados se ocultan del menú.
 
 ## Repositorio Git
 

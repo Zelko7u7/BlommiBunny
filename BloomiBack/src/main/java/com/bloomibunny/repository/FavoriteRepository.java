@@ -6,7 +6,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface FavoriteRepository extends JpaRepository<Favorite,Long> {
- @Query("select f from Favorite f join fetch f.product p join fetch p.category left join fetch p.brand where f.user.username=:username and p.active=true and p.deleted=false order by f.id desc")
+ @Query("select f from Favorite f join fetch f.product p join fetch p.category left join fetch p.brand where f.user.username=:username and p.active=true and p.deleted=false and p.provisionalData=false order by f.id desc")
  List<Favorite> visible(@Param("username") String username);
 
  @Modifying

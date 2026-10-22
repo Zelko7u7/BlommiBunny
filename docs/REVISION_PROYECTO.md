@@ -256,3 +256,44 @@ Se eliminaron los errores previos del dashboard y `noCheck=true`; el build ya co
 Se añaden búsqueda sin distinguir tildes, filtros por estado, orden por nombre y páginas de 12 registros, conservados en la URL. Crear/editar reutiliza POST/PUT existentes; eliminar usa confirmación y explica los conflictos por relaciones. Los formularios respetan límites de la API, conservan datos ante error y bloquean controles durante guardado. Las mutaciones refrescan también los datos relacionados de inventario, tienda y dashboard.
 
 El build con tipos pasa y la revisión actual de `src` no encuentra `@ts-nocheck`. Las pruebas de navegador simulan creación, edición completa, desactivación, borrado y fallos en los cuatro directorios; verifican detalle, filtros, paginación, foco inicial y anchos 320/390/768/1440 px. La API real se comprobó por lectura; inventario, ventas y los cuatro directorios comerciales permanecen intactos. No cambia el backend ni requiere migración. El bundle ronda 844 kB y conserva el aviso de tamaño.
+
+## Compras recibidas y gastos
+
+`/admin/compras` y `/admin/gastos` reemplazan las pantallas de Próximamente. `OperationsPage.tsx` incorpora formularios, historial paginado, detalle, filtros persistentes y totales agregados. La API devuelve DTO e importes confirmados que excluyen anulaciones. Los importes abarcan todas las páginas coincidentes.
+
+`AdminPurchaseService` recibe mercancía bajo bloqueos de productos, conserva snapshots y evita duplicación de recepciones mediante UUID/huella. Anular retira unidades una sola vez; si falta stock para cualquier referencia, toda la anulación se revierte. El costo de cada compra queda guardado sin sobrescribir el costo de referencia de los productos. `AdminExpenseService` agrega registro validado y anulación auditada; se retira el borrado físico. Los servicios anteriores de transacciones se reemplazan por estas implementaciones. Se conserva el historial.
+
+La migración manual aditiva `008_admin_purchases_expenses.sql` agrega columnas e índices, sin modificar productos. Fue aplicada localmente después de respaldo y comparación de datos. Pasan 67 pruebas backend con PostgreSQL aislado, build frontend y pruebas de navegador a 320/390/768/1440 px. No se crearon operaciones comerciales para probar. El bundle ronda 864 kB. Caja/movimientos de dinero queda aplazado por decisión de la propietaria. Alcance y limitaciones en [COMPRAS_GASTOS.md](COMPRAS_GASTOS.md).
+
+## Revisión funcional general y correcciones
+
+Se revisaron los flujos existentes de tienda, cuentas, favoritos, carrito, inventario, catálogos, dashboard, ventas, compras y gastos, junto con sus servicios, DTO, protección de acceso y relaciones. Las escrituras se comprobaron en PostgreSQL aislado o mediante respuestas de navegador simuladas; la base comercial solo se consultó por lectura. No se realizó una auditoría de dependencias, prueba de penetración ni validación legal nueva.
+
+| Hallazgo confirmado | Corrección |
+| --- | --- |
+| El listado público reutilizaba la consulta administrativa y entregaba referencias deshabilitadas. | Consulta pública propia: solo productos activos, no eliminados y confirmados. Fichas, variantes y favoritos también excluyen los provisionales. Las fichas agotadas siguen disponibles. |
+| Inventario solo cargaba las primeras 100 referencias y los empates de nombre podían desordenar páginas. | Carga de todas las páginas y orden secundario por ID. Catálogo y selectores comparten el lector paginado con validación de respuesta. |
+| Ajustes manuales podían desbordar enteros o perder incrementos simultáneos. | Bloqueo de producto, cálculo en long, rango válido y rechazo de ajuste cero; edición exige versión. |
+| Precios de producto aceptaban precisión o magnitud incompatibles con sus columnas. | Validación de 12 enteros y dos decimales; errores de formato de fechas/opciones devuelven 400 con DTO de error. |
+| Inventario redondeaba importes a pesos completos y no permitía elegir marca/proveedor. | Hasta dos decimales y selectores opcionales de marca/proveedor/fecha, preservando relaciones existentes inactivas. |
+| Buscador del panel sin acción y accesos a módulos aplazados. | Enter abre inventario filtrado; se ocultan Caja, Reportes y Configuración del menú y se retira el indicador estático «Todo al día». |
+| Filtros de ventas se perdían al recargar y sesión almacenada no contemplaba base64url/sincronización. | Filtros en URL, lectura validada de sesión y actualización/caché limpia ante cambios en otra pestaña. |
+| La tienda descargaba también todas las pantallas y gráficos administrativos. | Importaciones bajo demanda y estilos compartidos independientes de la ruta; JavaScript inicial 421,05 kB frente a unos 866 kB. Sin aviso de tamaño en build. |
+| Inventario desbordaba en móvil de 320 px. | Cabecera apilada y buscador adaptable, comprobados también abriendo directamente la ruta. |
+| Varias consultas del dashboard podían leer momentos diferentes durante una venta concurrente. | Transacción de lectura con snapshot consistente REPEATABLE_READ. |
+
+La validación final aprueba **77 pruebas backend**: 20 de acceso/validación, 17 de productos, 5 unitarias del dashboard y 35 PostgreSQL. Incluye protección de información pública, paginación con 101 nombres iguales, ajustes concurrentes, aislamiento de favoritos y persistencia de marca/proveedor/fecha. La compilación frontend con tipos pasa.
+
+Las cinco regresiones de navegador de tienda, dashboard, catálogos, ventas y compras/gastos pasaron. Se añaden pruebas de 101 referencias administrativas, centavos, edición de relaciones, búsqueda del panel, filtros al recargar y sesión entre pestañas. Se verifican anchos 320/390/768/1440, foco y errores. Evidencias locales privadas en `.local/final-review/`. La API real responde con 15 referencias públicas filtradas, fichas ocultas 404 e inputs inválidos 400. Comparación final de productos, operaciones, movimientos, favoritos, catálogos y cuentas: datos comerciales idénticos.
+
+Para esta etapa conviene mantener fuera del menú Caja/movimientos de dinero, reportes avanzados y configuración sin funciones. Antes de usar la tienda para recibir pedidos faltan el flujo real de pedido/confirmación desde carrito y las condiciones comerciales definitivas. Fotografías y descripciones deben completarse con información real. Antes de desplegar faltan configurar alojamiento/HTTPS/orígenes/secretos de producción y automatizar respaldos con prueba de restauración. El costo de referencia sigue siendo manual: las compras guardan su costo propio, sin implementar promedio o lotes; el margen mostrado no es utilidad neta. Estas tareas pendientes no se presentan como implementadas.
+
+## Recapitulación de la jornada y siguiente sesión
+
+Durante la jornada se preparó el repositorio independiente de Bloomi Bunny y se completaron la experiencia del catálogo/carrito, ventas externas con anulación segura, dashboard real y directorios administrativos con toda su información. El avance final incorpora compras recibidas, gastos, la migración correspondiente y la revisión funcional de los módulos anteriores.
+
+La revisión corrigió publicación de referencias ocultas/provisionales, el límite de 100 productos administrativos, precisión de importes, ajustes concurrentes de inventario, selección de marca/proveedor, filtros de ventas, sesiones y buscador del panel. También redujo la descarga inicial mediante carga de pantallas bajo demanda y retiró del menú las funciones aplazadas. Validación de cierre: 77 pruebas backend, build frontend con tipos, regresiones de los cinco flujos y comparación de datos comerciales intactos.
+
+La siguiente prioridad sugerida es conectar el carrito con un pedido real y confirmación por WhatsApp. Pedidos y cobros públicos siguen pendientes. Caja/movimientos de dinero, reportes avanzados y configuración continúan aplazados. También quedan por completar contenido real de productos, condiciones comerciales definitivas y preparación del despliegue con respaldos automáticos y restauración comprobada.
+
+La memoria privada de continuidad se actualizó en `PROJECT_MEMORY.md`, conservada localmente y excluida de Git. Los respaldos, datos comerciales y evidencias privadas también permanecen locales. Este informe y las guías de los módulos forman parte de la documentación versionada del proyecto.

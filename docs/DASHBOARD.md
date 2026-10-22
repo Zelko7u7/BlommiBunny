@@ -18,7 +18,7 @@ El gráfico diario cubre 30 días; el mensual, siete meses hasta hoy. Los period
 
 El ranking muestra hasta cinco referencias/tonalidades por unidades vendidas este mes, usando nombres y códigos guardados al vender. Sus enlaces abren el historial del mes buscando ese código. Las anulaciones también se excluyen del ranking.
 
-Las alertas muestran hasta ocho referencias, primero las de menor stock. Sus enlaces abren inventario buscando el código; los contadores abren `?stock=low` o `?stock=out`. El inventario permite combinar búsqueda y existencias, conserva los filtros en la URL y calcula sus totales sobre todos los resultados coincidentes. El listado administrativo mantiene su límite previo de 100 filas visibles.
+Las alertas muestran hasta ocho referencias, primero las de menor stock. Sus enlaces abren inventario buscando el código; los contadores abren `?stock=low` o `?stock=out`. El inventario permite combinar búsqueda y existencias, conserva los filtros en la URL y calcula sus totales sobre todos los resultados coincidentes. La revisión general corrigió el límite anterior de 100 filas: ahora el frontend consulta todas las páginas del listado.
 
 Los diez últimos movimientos muestran tipo, referencia, cantidad, stock resultante y fecha reales. Registrar venta abre el formulario existente; el historial y los clientes tienen accesos directos.
 

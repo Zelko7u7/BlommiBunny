@@ -12,10 +12,12 @@ function readSession(): Session | null {
     const value = localStorage.getItem(STORAGE_KEY);
     if (!value) return null;
     const session = JSON.parse(value) as Session;
-    const payload = JSON.parse(atob(session.token.split('.')[1])) as { exp?: number };
-    if (payload.exp && payload.exp * 1000 <= Date.now()) { localStorage.removeItem(STORAGE_KEY); return null; }
+    if(!session||typeof session.token!=='string'||typeof session.username!=='string'||!session.username.trim()||!['ADMIN','CUSTOMER','EMPLOYEE'].includes(session.role))throw new Error('Sesión inválida');
+    const encoded=session.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+    const payload = JSON.parse(atob(encoded.padEnd(Math.ceil(encoded.length/4)*4,'='))) as { exp?: number };
+    if (typeof payload.exp!=='number'||payload.exp * 1000 <= Date.now()) { localStorage.removeItem(STORAGE_KEY); return null; }
     return session;
-  } catch { localStorage.removeItem(STORAGE_KEY); return null; }
+  } catch { try{localStorage.removeItem(STORAGE_KEY);}catch{/* Storage may be unavailable. */} return null; }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -26,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => saveSession(await api.login(username.trim(), password));
   const signup = async (username: string, password: string) => saveSession(await api.signup(username.trim(), password));
   useEffect(() => { const onLogout = () => logout(); window.addEventListener('bloomi:logout', onLogout); return () => window.removeEventListener('bloomi:logout', onLogout); }, []);
+  useEffect(()=>{const sync=(event:StorageEvent)=>{if(event.key===STORAGE_KEY||event.key===null){queryClient.clear();setSession(readSession());}};window.addEventListener('storage',sync);return ()=>window.removeEventListener('storage',sync);},[queryClient]);
   return <AuthContext.Provider value={{ session, login, signup, logout }}>{children}</AuthContext.Provider>;
 }
 export function useAuth() { const context = useContext(AuthContext); if (!context) throw new Error('useAuth debe usarse dentro de AuthProvider'); return context; }

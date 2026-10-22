@@ -19,7 +19,9 @@ function errorMessage(error:unknown) { return (error as {message?:string})?.mess
 
 export default function SalesPage() {
  const [params,setParams] = useSearchParams();
- const [filters,setFilters] = useState<SaleFilters>(()=>({q:params.get('q')??'',from:/^\d{4}-\d{2}-\d{2}$/.test(params.get('from')??'')?params.get('from')!:'',to:/^\d{4}-\d{2}-\d{2}$/.test(params.get('to')??'')?params.get('to')!:'',channel:['WHATSAPP','INSTAGRAM','OTHER'].includes(params.get('channel')??'')?params.get('channel')!:'',status:['confirmed','cancelled'].includes(params.get('status')??'')?params.get('status')!:'all',page:0}));
+ const requestedPage=Number(params.get('page')??'0');
+ const filters:SaleFilters={q:params.get('q')??'',from:params.get('from')??'',to:params.get('to')??'',channel:['WHATSAPP','INSTAGRAM','OTHER'].includes(params.get('channel')??'')?params.get('channel')!:'',status:['confirmed','cancelled'].includes(params.get('status')??'')?params.get('status')!:'all',page:Number.isSafeInteger(requestedPage)&&requestedPage>=0?requestedPage:0};
+ const setFilters=(value:SaleFilters|((current:SaleFilters)=>SaleFilters))=>{const next=typeof value==='function'?value(filters):value;setParams(current=>{const result=new URLSearchParams(current);for(const key of ['q','from','to','channel','status','page'] as const){const value=String(next[key]);if(!value||key==='status'&&value==='all'||key==='page'&&value==='0')result.delete(key);else result.set(key,value);}return result;},{replace:true});};
  const [creating,setCreating] = useState(params.get('new')==='1');
  const closeCreate=()=>{setCreating(false);setParams(current=>{const next=new URLSearchParams(current);next.delete('new');return next;},{replace:true});};
  const [selected,setSelected] = useState<number|null>(null);
@@ -28,7 +30,7 @@ export default function SalesPage() {
  const invalidDates = !!(filters.from && filters.to && filters.from>filters.to);
  const history = useQuery({queryKey:['sales',filters],queryFn:()=>api.sales(filters),enabled:!invalidDates,refetchOnWindowFocus:true,refetchInterval:15000});
  const detail = useQuery({queryKey:['sale',selected],queryFn:()=>api.sale(selected!),enabled:selected!==null,refetchOnWindowFocus:true});
- const refresh = async () => { await Promise.all(['sales','sale','sale-products','products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]}))); };
+ const refresh = async () => { await Promise.all(['sales','sale','sale-products','purchase-products','products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]}))); };
  const create = useMutation({mutationFn:api.createSale,onSuccess:refresh});
  const cancel = useMutation({mutationFn:({id,reason}:{id:number;reason:string})=>api.cancelSale(id,reason),onSuccess:refresh});
  const changeFilter = (key:keyof SaleFilters,value:string) => setFilters(current=>({...current,[key]:value,page:0}));

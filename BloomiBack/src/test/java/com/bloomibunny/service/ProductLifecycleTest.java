@@ -127,6 +127,15 @@ class ProductLifecycleTest {
   var summary=service.summary("");assertEquals(0,summary.confirmedUnits());assertEquals(BigDecimal.ZERO,summary.saleValue());assertEquals(0,summary.unknownCostUnits());
  }
 
+ @Test void invalidStockAdjustmentsNeverWriteMovements(){
+  var p=product();p.setStock(Integer.MAX_VALUE);when(products.lockById(1L)).thenReturn(Optional.of(p));
+  assertThrows(BusinessException.class,()->service.adjust(1L,new StockAdjustment(1,"Prueba")));
+  assertThrows(BusinessException.class,()->service.adjust(1L,new StockAdjustment(Integer.MIN_VALUE,"Prueba")));
+  assertThrows(BusinessException.class,()->service.adjust(1L,new StockAdjustment(0,"Prueba")));
+  assertEquals(Integer.MAX_VALUE,p.getStock());verifyNoInteractions(movements);verify(products,never()).saveAndFlush(any());
+ }
+ @Test void editWithoutVersionCannotOverwriteInventory(){var p=product();when(products.findById(1L)).thenReturn(Optional.of(p));assertThrows(BusinessException.class,()->service.update(1L,request()));assertEquals(3,p.getStock());verifyNoInteractions(categories,movements);}
+ @Test void invalidPaginationAndSortAreRejectedBeforeQuery(){assertThrows(BusinessException.class,()->service.list("",-1,20,"name"));assertThrows(BusinessException.class,()->service.list("",0,0,"name"));assertThrows(BusinessException.class,()->service.list("",0,101,"name"));assertThrows(BusinessException.class,()->service.list("",0,20,"fieldThatDoesNotExist"));verifyNoInteractions(products);}
  @Test void variantsAreLoadedFromOnlyThePublishedNonDeletedGroup(){
   var p=product();p.setVariantGroup("toy-story-labial");p.setShade("Tono 3");
   when(products.findByVariantGroupAndActiveTrueAndDeletedFalseOrderByShadeAsc("toy-story-labial")).thenReturn(List.of(p));

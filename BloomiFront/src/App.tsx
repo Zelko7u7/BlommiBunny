@@ -1,13 +1,17 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom';
 import { useAuth } from './contexts/AuthContext';
 import AppLayout from './layouts/AppLayout';
-import LoginPage from './pages/LoginPage';
-import DashboardPage from './pages/DashboardPage';
-import InventoryPage from './pages/InventoryPage';
-import { NamedCatalog, ContactsPage } from './pages/CatalogPage';
+import { Loading } from './components/common/Ui';
 import PlaceholderPage from './pages/PlaceholderPage';
 import StorePage from './pages/StorePage';
-import SalesPage from './pages/SalesPage';
+const LoginPage=lazy(()=>import('./pages/LoginPage'));
+const DashboardPage=lazy(()=>import('./pages/DashboardPage'));
+const InventoryPage=lazy(()=>import('./pages/InventoryPage'));
+const NamedCatalog=lazy(()=>import('./pages/CatalogPage').then(module=>({default:module.NamedCatalog})));
+const ContactsPage=lazy(()=>import('./pages/CatalogPage').then(module=>({default:module.ContactsPage})));
+const SalesPage=lazy(()=>import('./pages/SalesPage'));
+const OperationsPage=lazy(()=>import('./pages/OperationsPage'));
 
 function AdminOnly() {
   const { session } = useAuth();
@@ -18,7 +22,7 @@ function AdminOnly() {
 
 export default function App() {
   const { session } = useAuth();
-  return <Routes>
+  return <Suspense fallback={<Loading/>}><Routes>
     <Route path="/" element={<StorePage/>}/>
     <Route path="/producto/:id" element={<StorePage/>}/>
     <Route path="/favoritos" element={<StorePage/>}/>
@@ -30,6 +34,8 @@ export default function App() {
       <Route index element={<DashboardPage/>}/>
       <Route path="inventario" element={<InventoryPage/>}/>
       <Route path="ventas" element={<SalesPage/>}/>
+      <Route path="compras" element={<OperationsPage key="purchases" kind="purchases"/>}/>
+      <Route path="gastos" element={<OperationsPage key="expenses" kind="expenses"/>}/>
       <Route path="categorias" element={<NamedCatalog kind="categories" title="Categorías" subtitle="Organiza tu catálogo por familias."/>}/>
       <Route path="marcas" element={<NamedCatalog kind="brands" title="Marcas" subtitle="Gestiona las marcas que comercializas."/>}/>
       <Route path="proveedores" element={<ContactsPage kind="suppliers" title="Proveedores" subtitle="Tus aliados de abastecimiento."/>}/>
@@ -37,5 +43,5 @@ export default function App() {
       <Route path="*" element={<PlaceholderPage title="Próximamente" description="Este módulo está preparado para crecer."/>}/>
     </Route>
     <Route path="*" element={<Navigate to="/" replace/>}/>
-  </Routes>;
+  </Routes></Suspense>;
 }

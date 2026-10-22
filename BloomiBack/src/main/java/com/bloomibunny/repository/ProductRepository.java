@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 public interface ProductRepository extends JpaRepository<Product,Long>{
+ @Query("select p from Product p where p.active=true and p.deleted=false and p.provisionalData=false and (:q='' or lower(p.name) like lower(concat('%',:q,'%')) or lower(p.code) like lower(concat('%',:q,'%')))")
+ Page<Product> publicSearch(@Param("q") String q,Pageable pageable);
  @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
  @Query("select p from Product p where p.id=:id")
  java.util.Optional<Product> lockById(@Param("id") Long id);

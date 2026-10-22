@@ -20,7 +20,7 @@ public class FavoriteService {
  }
  public void add(String username,Long productId){
   var user=users.findByUsername(username).filter(u->u.isActive()).orElseThrow(()->new ResourceNotFoundException("Cuenta no disponible"));
-  var product=products.findById(productId).filter(p->p.isActive()&&!p.isDeleted()).orElseThrow(()->new ResourceNotFoundException("Producto no disponible"));
+  var product=products.findById(productId).filter(p->p.isActive()&&!p.isDeleted()&&!p.isProvisionalData()).orElseThrow(()->new ResourceNotFoundException("Producto no disponible"));
   favorites.add(user.getId(),product.getId());
  }
  public void remove(String username,Long productId){favorites.remove(username,productId);}

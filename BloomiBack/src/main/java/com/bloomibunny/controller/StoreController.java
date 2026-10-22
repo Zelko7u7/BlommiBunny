@@ -19,13 +19,13 @@ public class StoreController {
 
  @GetMapping("/products")
  Page<StoreProduct> list(@RequestParam(defaultValue="") String q,@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size){
-  return products.list(q,page,size,"name").map(this::publicProduct);
+  return products.publicList(q,page,size).map(this::publicProduct);
  }
 
  @GetMapping("/products/{id}")
- StoreProduct get(@PathVariable Long id){
+ public StoreProduct get(@PathVariable Long id){
   var product=products.get(id);
-  if(!product.active())throw new ResourceNotFoundException("Producto no disponible");
+  if(!product.active()||product.provisionalData())throw new ResourceNotFoundException("Producto no disponible");
   var variants=product.variantGroup()==null?List.<StoreProduct>of():products.variants(product.variantGroup()).stream().map(this::publicProduct).toList();
   return new StoreProduct(product.id(),product.name(),product.category(),product.brand(),product.description(),product.shade(),product.presentation(),product.salePrice(),product.stock(),product.active(),product.imageUrl(),product.variantGroup(),variants);
  }

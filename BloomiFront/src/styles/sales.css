@@ -48,12 +48,6 @@
 .sale-cancelled-note { border:1px solid #e8c3cb; background:#fff0f2; padding:16px; border-radius:10px; font-size:13px; line-height:1.6; }
 .sales-page :focus-visible { outline:2px solid #a45665; outline-offset:3px; }
 .sales-page button:disabled { opacity:.55; cursor:not-allowed; }
-.shell .mobile-menu,.shell .admin-nav-close { display:none; }
-.shell .global-search,.shell .global-search input { min-width:0; }
-.shell .global-search input { width:100%; }
-.shell .admin-nav-backdrop { position:fixed; inset:0; z-index:180; border:0; background:#332a2d88; }
-@media(min-width:901px) { .shell .admin-nav-backdrop { display:none; } .shell.compact aside { width:85px; } .shell.compact aside :is(.brand>div:last-child,.nav-group span,.nav-group>small,.profile>div:not(.avatar)) { display:none; } .shell.compact .store-return { font-size:11px; } }
-@media(max-width:900px) { .shell .mobile-menu,.shell .admin-nav-close { display:inline-flex; align-items:center; justify-content:center; min-height:44px; min-width:44px; border:0; background:transparent; color:#765963; cursor:pointer; } .shell .topbar { padding-inline:16px; gap:10px; } .shell aside.open { display:flex; flex-direction:column; position:fixed; inset:0 auto 0 0; z-index:190; width:min(280px,90vw); } .shell aside.open .admin-nav-close { position:absolute; right:8px; top:8px; } .shell aside.open .brand { padding-top:28px; } .shell aside.open nav { overflow-y:auto; min-height:0; flex:1; } .shell aside.open .profile { position:static; margin-top:12px; padding-block:12px; } .shell aside.open .collapse { display:none; } }
 @media(max-width:1199px) { .sales-filters { grid-template-columns:repeat(3,minmax(0,1fr)); } .sales-search { grid-column:1/-1; } }
 @media(max-width:639px) { .sales-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } .sales-filters input,.sales-filters select,.sale-form input,.sale-form select,.sale-form textarea { font-size:16px; } .sales-page .page-header { align-items:stretch; flex-direction:column; } .sale-draft-line { grid-template-columns:1fr 1fr; padding:12px; } .sale-line-total { grid-column:1/-1; } .sale-form-grid { grid-template-columns:1fr; } .sales-pagination { justify-content:center; gap:10px; } }
-@media(max-width:479px) { .sales-filters { grid-template-columns:minmax(0,1fr); } .shell .content { padding:18px 12px; } }
+@media(max-width:479px) { .sales-filters { grid-template-columns:minmax(0,1fr); } }

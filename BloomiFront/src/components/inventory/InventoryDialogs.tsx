@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
-import { useNamed } from '../../hooks/useApi';
+import { useContacts, useNamed } from '../../hooks/useApi';
 import images from '../../data/product-images.json';
 import type { Product, ProductInput } from '../../types';
 
@@ -24,6 +24,10 @@ export function ProductEditDialog({ product, onClose, onSave, busy }: { product:
 
 function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Product; onClose: () => void; onSave: (data: ProductInput) => Promise<void>; busy: boolean }) {
   const { data: categories = [], isLoading, isError } = useNamed('categories');
+  const brands=useNamed('brands');
+  const suppliers=useContacts('suppliers');
+  const [brandId,setBrandId]=useState(String(product?.brandId??''));
+  const [supplierId,setSupplierId]=useState(String(product?.supplierId??''));
   const activeCategories = categories.filter(category => category.active !== false || category.id === product?.categoryId);
   const [code, setCode] = useState(() => product?.code ?? `BB-${crypto.randomUUID().slice(0, 8).toUpperCase()}`);
   const [categoryId, setCategoryId] = useState(String(product?.categoryId ?? ''));
@@ -43,7 +47,7 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
         presentation: String(form.get('presentation') ?? '').trim(),
         shade: String(form.get('shade') ?? '').trim(),
         variantGroup: String(form.get('variantGroup') ?? '').trim() || null,
-        brandId: product?.brandId ?? null, supplierId: product?.supplierId ?? null, entryDate: product?.entryDate ?? null,
+        brandId: brandId?Number(brandId):null, supplierId: supplierId?Number(supplierId):null, entryDate: String(form.get('entryDate')??'')||null,
         purchasePrice: costKnown ? Number(form.get('purchasePrice')) : product?.purchasePrice ?? 0,
         salePrice: Number(form.get('salePrice')), stock: Number(form.get('stock')),
         minimumStock: Number(form.get('minimumStock')), imageUrl: imageUrl.trim(),
@@ -59,6 +63,9 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
           <label className="form-wide">Nombre<input name="name" maxLength={140} required autoFocus placeholder="Nombre del producto" defaultValue={product?.name ?? ''}/></label>
           <label>Código<input value={code} onChange={e => setCode(e.target.value)} maxLength={60} required/></label>
           <label>Categoría<select name="categoryId" required disabled={isLoading || isError} value={categoryId} onChange={e => setCategoryId(e.target.value)}><option value="">{isLoading ? 'Cargando…' : 'Selecciona una categoría'}</option>{activeCategories.map(category => <option key={category.id} value={category.id}>{category.name}{category.active === false ? ' (inactiva)' : ''}</option>)}</select></label>
+          <label>Marca<select name="brandId" disabled={brands.isLoading||brands.isError} value={brandId} onChange={event=>setBrandId(event.target.value)}><option value="">Sin marca</option>{brands.data?.filter(row=>row.active||row.id===product?.brandId).map(row=><option key={row.id} value={row.id}>{row.name}{!row.active?' (inactiva)':''}</option>)}{product?.brandId&&!brands.data?.some(row=>row.id===product.brandId)&&<option value={product.brandId}>{product.brand||'Marca actual'}</option>}</select></label>
+          <label>Proveedor<select name="supplierId" disabled={suppliers.isLoading||suppliers.isError} value={supplierId} onChange={event=>setSupplierId(event.target.value)}><option value="">Sin proveedor</option>{suppliers.data?.filter(row=>row.active||row.id===product?.supplierId).map(row=><option key={row.id} value={row.id}>{row.name}{!row.active?' (inactivo)':''}</option>)}{product?.supplierId&&!suppliers.data?.some(row=>row.id===product.supplierId)&&<option value={product.supplierId}>{product.supplier||'Proveedor actual'}</option>}</select></label>
+          <label>Fecha de ingreso<input type="date" name="entryDate" defaultValue={product?.entryDate??''}/></label>
           <label>Costo de compra (COP)<input name="purchasePrice" type="number" min="0" step="0.01" required={costKnown} disabled={!costKnown} defaultValue={product?.costConfirmed ? product.purchasePrice : ''} placeholder={costKnown ? 'Ej. 10000' : 'Por confirmar'}/></label>
           <label>Precio de venta (COP)<input name="salePrice" type="number" min="0" step="0.01" required placeholder="Ej. 15000" defaultValue={product?.salePrice ?? ''}/></label>
           <label>{product ? 'Stock actual' : 'Stock inicial'}<input name="stock" type="number" min="0" max="2147483647" step="1" defaultValue={product?.stock ?? 0} required/></label>
@@ -75,7 +82,8 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
           <label><input type="checkbox" checked={costKnown} onChange={e => setCostKnown(e.target.checked)}/> Costo de compra confirmado</label>
           <label><input type="checkbox" name="provisionalData" defaultChecked={product?.provisionalData ?? false}/> Precio y stock provisionales</label>
         </div>
-        <p className="product-form-hint">Un producto habilitado aparece en la tienda cuando tiene unidades disponibles. Los datos provisionales se excluyen de los totales confirmados.</p>
+        <p className="product-form-hint">La tienda publica productos habilitados con datos confirmados. Los agotados pueden consultarse desde su ficha; los datos provisionales se excluyen de la tienda y de los totales confirmados.</p>
+        {(brands.isError||suppliers.isError)&&<p className="product-form-hint" role="status">No pudimos actualizar marcas o proveedores. Sus valores actuales se conservan. <button type="button" onClick={()=>{brands.refetch();suppliers.refetch();}}>Reintentar</button></p>}
         {product && <p className="product-form-hint">Los cambios de stock se registran como ajustes de inventario.</p>}
         {isError && <p className="error" role="alert">No pudimos cargar las categorías.</p>}
         {!isLoading && !isError && activeCategories.length === 0 && <p className="error">Primero <Link to="/admin/categorias" onClick={onClose}>crea una categoría</Link>.</p>}

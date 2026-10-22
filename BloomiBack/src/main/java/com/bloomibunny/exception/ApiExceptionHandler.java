@@ -9,6 +9,7 @@ import java.util.*;
 @RestControllerAdvice
 public class ApiExceptionHandler {
  record ApiError(String code,String message,Instant timestamp,String path,Map<String,String> fields){}
+ @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class}) ResponseEntity<ApiError> malformed(Exception e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"VALIDATION_ERROR",new RuntimeException("Revisa el formato de fechas, cantidades y opciones seleccionadas."),r,Map.of());}
  @ExceptionHandler(ResourceNotFoundException.class) ResponseEntity<ApiError> notFound(RuntimeException e,HttpServletRequest r){return response(HttpStatus.NOT_FOUND,"NOT_FOUND",e,r,Map.of());}
  @ExceptionHandler({BusinessException.class,IllegalArgumentException.class}) ResponseEntity<ApiError> business(RuntimeException e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"BUSINESS_ERROR",e,r,Map.of());}
  @ExceptionHandler(BadCredentialsException.class) ResponseEntity<ApiError> auth(RuntimeException e,HttpServletRequest r){return response(HttpStatus.UNAUTHORIZED,"INVALID_CREDENTIALS",new RuntimeException("Usuario o contraseña incorrectos"),r,Map.of());}

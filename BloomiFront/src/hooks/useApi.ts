@@ -13,7 +13,7 @@ export const validProductId=(id:string|undefined)=>!!id&&/^[1-9][0-9]*$/.test(id
 export const useStoreProduct=(id:string|undefined)=>useQuery({queryKey:["store-product",id],queryFn:()=>api.storeProduct(Number(id)),enabled:validProductId(id),refetchInterval:15000});
 export function useProductActions(){
  const qc=useQueryClient();
- const refresh=async()=>{await Promise.all([qc.invalidateQueries({queryKey:["products"]}),qc.invalidateQueries({queryKey:["sale-products"]}),qc.invalidateQueries({queryKey:["inventory-summary"]}),qc.invalidateQueries({queryKey:["store-products"]}),qc.invalidateQueries({queryKey:["store-product"]}),qc.invalidateQueries({queryKey:["favorites"]}),qc.invalidateQueries({queryKey:["dashboard"]})]);};
+ const refresh=async()=>{await Promise.all(['products','sale-products','purchase-products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]})));};
  const create=useMutation({mutationFn:api.createProduct,onSuccess:refresh});
  const update=useMutation({mutationFn:({id,data}:{id:number;data:import('../types').ProductInput})=>api.updateProduct(id,data),onSuccess:refresh,onError:(error:any)=>{if(error?.code==='CONFLICT'||error?.code==='NOT_FOUND')return qc.invalidateQueries({queryKey:["products"]});}});
  const setActive=useMutation({mutationFn:({id,active}:{id:number;active:boolean})=>api.setProductActive(id,active),onSuccess:refresh});
@@ -22,7 +22,7 @@ export function useProductActions(){
 }
 function useCatalogRefresh(kind:string){
  const qc=useQueryClient();
- return ()=>Promise.all([kind,'products','sale-products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]})));
+ return ()=>Promise.all([kind,'products','sale-products','purchase-products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]})));
 }
 export function useNamed(kind:"categories"|"brands"){
  const refresh=useCatalogRefresh(kind);
