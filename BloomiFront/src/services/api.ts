@@ -50,9 +50,11 @@ export const api={
  deleteProduct:(id:number)=>http.delete(`/products/${id}`),
  named:(kind:"categories"|"brands")=>http.get<Named[]>(`/${kind}`).then(r=>r.data),
  createNamed:(kind:"categories"|"brands",data:Partial<Named>)=>http.post(`/${kind}`,data),
+ updateNamed:(kind:"categories"|"brands",id:number,data:Partial<Named>)=>http.put(`/${kind}/${id}`,data),
  removeNamed:(kind:"categories"|"brands",id:number)=>http.delete(`/${kind}/${id}`),
  contacts:(kind:"customers"|"suppliers")=>http.get<Contact[]>(`/${kind}`).then(r=>r.data),
  createContact:(kind:"customers"|"suppliers",data:Partial<Contact>)=>http.post(`/${kind}`,data),
+ updateContact:(kind:"customers"|"suppliers",id:number,data:Partial<Contact>)=>http.put(`/${kind}/${id}`,data),
  removeContact:(kind:"customers"|"suppliers",id:number)=>http.delete(`/${kind}/${id}`),
  expenses:()=>http.get("/expenses").then(r=>r.data),
  createExpense:(data:unknown)=>http.post("/expenses",data)

@@ -40,11 +40,13 @@ npm run build
 .\node_modules\.bin\tsc.cmd --noEmit --noCheck false --incremental false
 ```
 
-Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada. Se eliminaron `noCheck=true` y los errores anteriores del dashboard; `CatalogPage.tsx` conserva su exclusión local `@ts-nocheck`. El bundle principal ronda 833 kB y mantiene el aviso por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
+Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada. Se eliminaron `noCheck=true` y los errores anteriores del dashboard; el código actual de `src` no contiene exclusiones `@ts-nocheck`. El bundle principal ronda 844 kB y mantiene el aviso por tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
 
 El backend cuenta con 49 pruebas aprobadas: 15 de acceso, 14 de productos, 5 unitarias del dashboard y 15 de integración PostgreSQL de ventas y dashboard. Las 15 de integración se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md) y [dashboard](docs/DASHBOARD.md).
 
 Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. El dashboard usa ventas confirmadas, costos históricos, margen de productos, gráficos reales y alertas con filtros de inventario. Trabaja con fechas de Colombia y señala costos desconocidos. Compras y gastos mantienen API inicial; sus pantallas, caja, reportes y configuración están pendientes. Las políticas están en borrador.
+
+Categorías, marcas, proveedores y clientes permiten crear, consultar el detalle y editar todos sus campos, además de eliminar con confirmación. Los directorios muestran descripción o teléfono, correo, dirección y notas completos; clientes incluye cumpleaños. Incorporan estado activo/inactivo, búsqueda, orden y páginas de 12 registros con filtros en URL. Un registro relacionado que la API impide eliminar puede conservarse como inactivo.
 
 ## Repositorio Git
 

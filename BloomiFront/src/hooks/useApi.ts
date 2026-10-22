@@ -20,5 +20,23 @@ export function useProductActions(){
  const remove=useMutation({mutationFn:api.deleteProduct,onSuccess:refresh});
  return{create,update,setActive,remove};
 }
-export function useNamed(kind:"categories"|"brands"){const qc=useQueryClient();const query=useQuery({queryKey:[kind],queryFn:()=>api.named(kind)});const create=useMutation({mutationFn:api.createNamed.bind(null,kind),onSuccess:()=>qc.invalidateQueries({queryKey:[kind]})});const remove=useMutation({mutationFn:api.removeNamed.bind(null,kind),onSuccess:()=>qc.invalidateQueries({queryKey:[kind]})});return{...query,create,remove}}
-export function useContacts(kind:"customers"|"suppliers"){const qc=useQueryClient();const query=useQuery({queryKey:[kind],queryFn:()=>api.contacts(kind)});const create=useMutation({mutationFn:api.createContact.bind(null,kind),onSuccess:()=>qc.invalidateQueries({queryKey:[kind]})});const remove=useMutation({mutationFn:api.removeContact.bind(null,kind),onSuccess:()=>qc.invalidateQueries({queryKey:[kind]})});return{...query,create,remove}}
+function useCatalogRefresh(kind:string){
+ const qc=useQueryClient();
+ return ()=>Promise.all([kind,'products','sale-products','inventory-summary','store-products','store-product','favorites','dashboard'].map(key=>qc.invalidateQueries({queryKey:[key]})));
+}
+export function useNamed(kind:"categories"|"brands"){
+ const refresh=useCatalogRefresh(kind);
+ const query=useQuery({queryKey:[kind],queryFn:()=>api.named(kind),refetchOnWindowFocus:true});
+ const create=useMutation({mutationFn:(data:Partial<import('../types').Named>)=>api.createNamed(kind,data),onSuccess:refresh});
+ const update=useMutation({mutationFn:({id,data}:{id:number;data:Partial<import('../types').Named>})=>api.updateNamed(kind,id,data),onSuccess:refresh});
+ const remove=useMutation({mutationFn:(id:number)=>api.removeNamed(kind,id),onSuccess:refresh});
+ return {...query,create,update,remove};
+}
+export function useContacts(kind:"customers"|"suppliers"){
+ const refresh=useCatalogRefresh(kind);
+ const query=useQuery({queryKey:[kind],queryFn:()=>api.contacts(kind),refetchOnWindowFocus:true});
+ const create=useMutation({mutationFn:(data:Partial<import('../types').Contact>)=>api.createContact(kind,data),onSuccess:refresh});
+ const update=useMutation({mutationFn:({id,data}:{id:number;data:Partial<import('../types').Contact>})=>api.updateContact(kind,id,data),onSuccess:refresh});
+ const remove=useMutation({mutationFn:(id:number)=>api.removeContact(kind,id),onSuccess:refresh});
+ return {...query,create,update,remove};
+}
