@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Minus, Plus, ShoppingBag, ZoomIn, X, Heart } from 'lucide-react';
-import { productImage } from '../../services/catalog';
+import { ArrowLeft, Minus, Plus, ShoppingBag, Heart } from 'lucide-react';
+import ProductGallery from './ProductGallery';
 import type { StoreProduct } from '../../types';
 import { whatsappUrl } from '../../data/legal';
 
@@ -13,25 +13,19 @@ export default function ProductDetails({ product, variants = [], onSelectVariant
   onAdd: (quantity: number) => void; onOpenCart: (trigger: HTMLButtonElement) => void; onRetry: () => void;
 }) {
   const [quantity, setQuantity] = useState(1);
-  const [zoom, setZoom] = useState(false);
-  const [failedImage, setFailedImage] = useState<string>();
-  useEffect(() => { setQuantity(1); setZoom(false); }, [product?.id]);
+  useEffect(() => { setQuantity(1); }, [product?.id]);
   useEffect(() => { document.title = product && !error ? `${product.name} · Bloomi Bunny` : 'Producto · Bloomi Bunny'; return () => { document.title = 'Bloomi Bunny'; }; }, [product?.name, error]);
   if (loading) return <main className="product-detail"><p className="state" role="status">Cargando producto…</p></main>;
   if (!validId || error || !product) {
     const missing = !validId || error?.code === 'NOT_FOUND';
     return <main className="product-detail"><div className="detail-unavailable"><h1>{missing ? 'Producto no disponible' : 'No pudimos cargar el producto'}</h1><p>{missing ? 'Este producto no existe o ya no está publicado en la tienda.' : 'Revisa tu conexión y vuelve a intentarlo.'}</p><Link className="primary" to="/">Volver a la tienda</Link>{!missing && <button className="detail-secondary" onClick={onRetry}>Reintentar</button>}</div></main>;
   }
-  const source = productImage(product);
-  const image = source !== failedImage ? source : undefined;
   const available = Math.max(0, product.stock - cartQuantity);
   const selected = Math.min(quantity, Math.max(1, available));
   return <main className="product-detail">
     <nav className="detail-breadcrumb" aria-label="Ubicación"><Link to={backTo}><ArrowLeft size={15}/> Volver al catálogo</Link><span>/</span><span>{product.category}</span></nav>
     <section className="detail-panel">
-      <div className="detail-gallery">
-        {image ? <><button className="detail-photo" onClick={() => setZoom(true)} aria-label={`Ampliar foto de ${product.name}`}><img src={image} alt={product.name} onError={() => { setFailedImage(image); setZoom(false); }}/><span><ZoomIn size={16}/> Ampliar imagen</span></button>{zoom && <PhotoZoom image={image} name={product.name} onClose={() => setZoom(false)}/>}</> : <div className="detail-photo-placeholder"><span aria-hidden="true">✦</span><p>Foto próximamente</p></div>}
-      </div>
+      <div className="detail-gallery"><ProductGallery key={product.id} product={product}/></div>
       <div className="detail-purchase">
         <span className="eyebrow">{product.category}</span>
         <h1>{product.name}</h1>
@@ -51,12 +45,6 @@ export default function ProductDetails({ product, variants = [], onSelectVariant
         <button className="detail-secondary" onClick={event => onOpenCart(event.currentTarget)}>Ver carrito</button>
       </div>
     </section>
-    <section className="detail-description"><h2>Descripción del producto</h2><p>{product.description?.trim() || 'La descripción de este producto estará disponible pronto.'}</p><a className="detail-question" href={whatsappUrl(`Hola, Bloomi Bunny. Quisiera más información sobre ${product.name}${product.shade ? `, ${product.shade}` : ''}${product.presentation ? ` (${product.presentation})` : ''}.`)} target="_blank" rel="noopener noreferrer">¿Tienes dudas sobre este producto? Escríbenos →</a></section>
+    <section className="detail-description"><h2>Descripción del producto</h2>{(product.description?.trim() || 'La descripción de este producto estará disponible pronto.').split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}<a className="detail-question" href={whatsappUrl(`Hola, Bloomi Bunny. Quisiera más información sobre ${product.name}${product.shade ? `, ${product.shade}` : ''}${product.presentation ? ` (${product.presentation})` : ''}.`)} target="_blank" rel="noopener noreferrer">¿Tienes dudas sobre este producto? Escríbenos →</a></section>
   </main>;
-}
-
-function PhotoZoom({ image, name, onClose }: { image: string; name: string; onClose: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => { const dialog = ref.current!; dialog.showModal(); return () => dialog.close(); }, []);
-  return <dialog ref={ref} className="detail-zoom" aria-label={`Foto ampliada de ${name}`} onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }}><button onClick={onClose} aria-label="Cerrar foto" autoFocus><X/></button><img src={image} alt={name}/></dialog>;
 }

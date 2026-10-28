@@ -32,6 +32,7 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
   const [code, setCode] = useState(() => product?.code ?? `BB-${crypto.randomUUID().slice(0, 8).toUpperCase()}`);
   const [categoryId, setCategoryId] = useState(String(product?.categoryId ?? ''));
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? '');
+  const [galleryText, setGalleryText] = useState((product?.galleryImages ?? []).join('\n'));
   const [costKnown, setCostKnown] = useState(product?.costConfirmed ?? true);
   const [error, setError] = useState('');
   async function submit(e: React.FormEvent<HTMLFormElement>) {
@@ -51,6 +52,7 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
         purchasePrice: costKnown ? Number(form.get('purchasePrice')) : product?.purchasePrice ?? 0,
         salePrice: Number(form.get('salePrice')), stock: Number(form.get('stock')),
         minimumStock: Number(form.get('minimumStock')), imageUrl: imageUrl.trim(),
+        galleryImages: galleryText.split(/\r?\n/).map(url => url.trim()).filter(Boolean),
         active: form.has('active'), provisionalData: form.has('provisionalData'), costConfirmed: costKnown,
         ...(product ? { expectedVersion: product.version } : {}),
       });
@@ -76,6 +78,8 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
           <label className="form-wide">Descripción<textarea name="description" maxLength={1200} rows={2} defaultValue={product?.description ?? ''}/></label>
           <label className="form-wide">Foto de la colección<select value={images.some(image => image.imageUrl === imageUrl) ? imageUrl : ''} onChange={e => setImageUrl(e.target.value)}><option value="">Sin foto seleccionada</option>{images.map(image => <option value={image.imageUrl} key={image.imageUrl}>{image.name}</option>)}</select></label>
           <label className="form-wide">Ruta o enlace de otra foto<input value={imageUrl} onChange={e => setImageUrl(e.target.value)} maxLength={500} placeholder="https://… o /products/…"/></label>
+          <label className="form-wide">Fotografías secundarias<textarea name="galleryImages" value={galleryText} onChange={event => setGalleryText(event.target.value)} maxLength={10020} rows={4} placeholder={'/products/gallery/foto-01.webp\n/products/gallery/foto-02.webp'}/><small>Una ruta /products/ o enlace HTTP/HTTPS por línea. Se muestran en este orden después de la portada, con un máximo de 20. Cada tono conserva su propia galería.</small></label>
+          {galleryText.trim() && <div className="form-wide product-gallery-preview" aria-label="Vista previa de fotografías secundarias">{galleryText.split(/\r?\n/).map(url => url.trim()).filter(Boolean).slice(0,20).map((url,index) => <figure key={`${index}-${url}`}><img src={url} alt={`Fotografía secundaria ${index + 1}`} loading="lazy"/><figcaption>{index + 1}</figcaption></figure>)}</div>}
         </div>
         <div className="product-form-options">
           <label><input type="checkbox" name="active" defaultChecked={product?.active ?? true}/> Habilitar en la tienda</label>

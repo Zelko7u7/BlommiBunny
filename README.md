@@ -2,6 +2,8 @@
 
 Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos y pagos en línea siguen pendientes.
 
+Las fichas incorporan galerías ordenadas por producto/tono, miniaturas, flechas, ampliación y descripciones oficiales persistidas en PostgreSQL. Inventario permite editar las fotografías secundarias. Alcance, productos actualizados, excepciones y procedimiento seguro de importación en [galerías de productos](docs/GALERIAS_PRODUCTOS.md).
+
 ## Estructura
 
 | Carpeta | Contenido |

@@ -26,7 +26,7 @@ class ProductLifecycleTest {
  @InjectMocks ProductServiceImpl service;
 
  Product product(){var c=new Category();c.setName("Labios");var p=new Product();p.setName("Gloss");p.setCode("TEST-GLOSS");p.setCategory(c);p.setStock(3);p.setPurchasePrice(new BigDecimal("5000"));p.setSalePrice(new BigDecimal("12000"));p.setImageUrl("/products/gloss.png");return p;}
- ProductRequest request(){return new ProductRequest("Gloss","TEST-GLOSS",1L,null,null,null,null,null,new BigDecimal("5000"),new BigDecimal("12000"),3,1,null,true,"/products/gloss.png",false,true,null,null);}
+ ProductRequest request(){return new ProductRequest("Gloss","TEST-GLOSS",1L,null,null,null,null,null,new BigDecimal("5000"),new BigDecimal("12000"),3,1,null,true,"/products/gloss.png",false,true,null,null,null);}
 
  @Test void disablingAndEnablingChangesOnlyPublication(){
   var p=product();when(products.findById(1L)).thenReturn(Optional.of(p));when(products.saveAndFlush(p)).thenReturn(p);
@@ -61,7 +61,7 @@ class ProductLifecycleTest {
   assertThrows(BusinessException.class,()->service.create(request()));verify(products,never()).save(any());verifyNoInteractions(categories,movements);
  }
 
- ProductRequest edit(int stock,BigDecimal price,long expectedVersion){return new ProductRequest("Gloss editado","TEST-GLOSS",1L,null,null,"Descripción actualizada","Rosa","3 ml",new BigDecimal("5000"),price,stock,1,null,true,"/products/gloss.png",false,true,expectedVersion,null);}
+ ProductRequest edit(int stock,BigDecimal price,long expectedVersion){return new ProductRequest("Gloss editado","TEST-GLOSS",1L,null,null,"Descripción actualizada","Rosa","3 ml",new BigDecimal("5000"),price,stock,1,null,true,"/products/gloss.png",false,true,expectedVersion,null,null);}
 
  @Test void editingStockRecordsOnlyTheDifference(){
   var p=product();var category=new Category();category.setName("Labios");

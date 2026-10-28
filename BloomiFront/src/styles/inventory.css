@@ -13,3 +13,7 @@
 .inventory-filters select { margin-left:8px; min-height:42px; padding:8px; border:1px solid var(--color-border-strong); border-radius:8px; background:white; color:var(--color-text); font:inherit; }
 @media(max-width:639px) { .inventory-filters { align-items:stretch; gap:12px; } .inventory-filters .search { flex-basis:100%; min-width:0; } .inventory-filters input { min-width:0; width:100%; } .inventory-filters select { font-size:16px; } .inventory-filters > span { margin-left:0; } }
 @media(max-width:600px){.inventory-dialog{padding:18px}.product-form-grid{grid-template-columns:1fr}.inventory-dialog footer{flex-wrap:wrap}.inventory-dialog h2{font-size:23px}}
+.product-gallery-preview { display:flex; flex-wrap:wrap; gap:10px; }
+.product-gallery-preview figure { width:64px; margin:0; padding:4px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-surface); }
+.product-gallery-preview img { display:block; width:54px; height:64px; object-fit:contain; }
+.product-gallery-preview figcaption { text-align:center; color:var(--color-text-secondary); font-size:11px; margin-top:4px; }

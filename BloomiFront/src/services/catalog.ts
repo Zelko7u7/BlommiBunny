@@ -11,6 +11,10 @@ export function productImage(product: Pick<Product, 'name' | 'imageUrl'>): strin
   return product.imageUrl !== undefined ? product.imageUrl || undefined : imagesByName.get(normalizeProductName(product.name));
 }
 
+export function productGallery(product: Pick<Product, 'name' | 'imageUrl' | 'galleryImages'>): string[] {
+  return [...new Set([productImage(product), ...(product.galleryImages ?? [])].filter((url): url is string => typeof url === 'string' && !!url.trim()))];
+}
+
 export type CatalogEntry = {
   key: string;
   name: string;

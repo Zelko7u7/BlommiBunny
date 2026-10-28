@@ -59,7 +59,7 @@ class AccessControlTest {
  @BeforeEach void setup(){
   reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses);
   mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
-  var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null);
+  var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null,null);
   when(products.list(anyString(),anyInt(),anyInt(),anyString())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
   when(products.publicList(anyString(),anyInt(),anyInt())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
   when(products.get(1L)).thenReturn(product);
@@ -98,14 +98,14 @@ class AccessControlTest {
  }
 
  @Test void disabledAndDeletedProductLinksReturnNotFound()throws Exception{
-  var disabled=new ProductResponse(2L,"Gloss oculto","HIDDEN",1L,"Labiales",null,null,null,null,null,null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,false,null,"OK",false,true,0L,null);
+  var disabled=new ProductResponse(2L,"Gloss oculto","HIDDEN",1L,"Labiales",null,null,null,null,null,null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,false,null,"OK",false,true,0L,null,null);
   when(products.get(2L)).thenReturn(disabled);
   when(products.get(3L)).thenThrow(new com.bloomibunny.exception.ResourceNotFoundException("Producto no encontrado"));
   mvc.perform(get("/api/store/products/2")).andExpect(status().isNotFound());
   mvc.perform(get("/api/store/products/3")).andExpect(status().isNotFound());
  }
 
- ProductResponse variant(Long id,String shade){return new ProductResponse(id,"Labial Doble Vaquero Toy Story","TONE-"+id,1L,"Labios",null,null,2L,"Proveedor privado",null,shade,null,new BigDecimal("10000"),new BigDecimal("15000"),new BigDecimal("5000"),4,1,null,true,null,"OK",false,true,0L,"toy-story-labial");}
+ ProductResponse variant(Long id,String shade){return new ProductResponse(id,"Labial Doble Vaquero Toy Story","TONE-"+id,1L,"Labios",null,null,2L,"Proveedor privado",null,shade,null,new BigDecimal("10000"),new BigDecimal("15000"),new BigDecimal("5000"),4,1,null,true,null,"OK",false,true,0L,"toy-story-labial",null);}
 
  @Test void variantDetailsExposeAvailableTonesWithoutPrivateInventoryData()throws Exception{
   var tone2=variant(11L,"Tono 2");var tone3=variant(12L,"Tono 3");

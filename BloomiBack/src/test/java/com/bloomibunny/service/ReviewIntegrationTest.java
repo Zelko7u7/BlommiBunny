@@ -53,6 +53,6 @@ class ReviewIntegrationTest {
  }
  @Test void editingStoresBrandSupplierDateAndPreservesPrecisePrices(){
   var p=product("A",2);var brand=new Brand();brand.setName("Marca "+UUID.randomUUID());brand=brands.saveAndFlush(brand);var supplier=new Supplier();supplier.setName("Proveedor de revisión");supplier=suppliers.saveAndFlush(supplier);var date=java.time.LocalDate.of(2026,1,15);
-  var result=service.update(p.getId(),new ProductRequest(p.getName(),p.getCode(),p.getCategory().getId(),brand.getId(),supplier.getId(),"Detalle","Rosa","3 ml",p.getPurchasePrice(),p.getSalePrice(),2,1,date,true,null,false,true,p.getVersion(),null));assertEquals(brand.getId(),result.brandId());assertEquals(supplier.getId(),result.supplierId());assertEquals(date,result.entryDate());assertEquals(0,new BigDecimal("12000.25").compareTo(result.salePrice()));assertEquals(0,movements.count());
+  var result=service.update(p.getId(),new ProductRequest(p.getName(),p.getCode(),p.getCategory().getId(),brand.getId(),supplier.getId(),"Detalle","Rosa","3 ml",p.getPurchasePrice(),p.getSalePrice(),2,1,date,true,null,false,true,p.getVersion(),null,null));assertEquals(brand.getId(),result.brandId());assertEquals(supplier.getId(),result.supplierId());assertEquals(date,result.entryDate());assertEquals(0,new BigDecimal("12000.25").compareTo(result.salePrice()));assertEquals(0,movements.count());
  }
 }

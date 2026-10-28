@@ -3,6 +3,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 @Entity @Table(uniqueConstraints=@UniqueConstraint(name="uk_product_code",columnNames="code"),indexes={@Index(name="idx_product_name",columnList="name"),@Index(name="idx_product_stock",columnList="stock")})
 @Getter @Setter @NoArgsConstructor
 public class Product extends BaseEntity {
@@ -22,6 +24,12 @@ public class Product extends BaseEntity {
  private LocalDate entryDate;
  @Column(nullable=false) private boolean active=true;
  @Column(length=500) private String imageUrl;
+ @ElementCollection
+ @CollectionTable(name="product_image",joinColumns=@JoinColumn(name="product_id"))
+ @OrderColumn(name="sort_order",nullable=false)
+ @Column(name="image_url",nullable=false,length=500)
+ @org.hibernate.annotations.BatchSize(size=100)
+ private List<String> galleryImages=new ArrayList<>();
  @Column(nullable=false,columnDefinition="boolean default false") private boolean provisionalData=false;
  @Column(nullable=false,columnDefinition="boolean default true") private boolean costConfirmed=true;
  @Column(nullable=false,columnDefinition="boolean default false") private boolean deleted=false;
