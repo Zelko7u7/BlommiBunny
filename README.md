@@ -4,6 +4,8 @@ Tienda virtual de maquillaje y cuidado de belleza con administración de inventa
 
 Las fichas incorporan galerías ordenadas por producto/tono, miniaturas, flechas, ampliación y descripciones oficiales persistidas en PostgreSQL. Inventario permite editar las fotografías secundarias. Alcance, productos actualizados, excepciones y procedimiento seguro de importación en [galerías de productos](docs/GALERIAS_PRODUCTOS.md).
 
+Las fichas también incluyen **Te puede interesar**, un carrusel de hasta seis productos disponibles relacionados por categoría, tipo, complementariedad y temática. Reutiliza el catálogo público y las tarjetas existentes, respeta tonos y límites del carrito y no requiere consultas individuales ni migraciones. Reglas y validación en [productos relacionados](docs/PRODUCTOS_RELACIONADOS.md).
+
 ## Estructura
 
 | Carpeta | Contenido |

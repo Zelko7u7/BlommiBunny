@@ -5,7 +5,10 @@ import { toast } from 'sonner';
 import { useStoreProducts, useStoreProduct, useFavorites, validProductId } from '../hooks/useApi';
 import ProductDetails from '../components/store/ProductDetails';
 import { LegalPage, SocialLinks, StoreFooter } from '../components/store/LegalPages';
-import { buildCatalog, productImage, catalogPrice, filterCatalog, type CatalogSort } from '../services/catalog';
+import { buildCatalog, productImage, filterCatalog, type CatalogSort } from '../services/catalog';
+import type { StoreProduct } from '../types';
+import ProductCard from '../components/store/ProductCard';
+import ProductRecommendations from '../components/store/ProductRecommendations';
 import CatalogFilters from '../components/store/CatalogFilters';
 import CartDialog from '../components/store/CartDialog';
 import ProductPhoto from '../components/store/ProductPhoto';
@@ -77,6 +80,10 @@ function Storefront({ cartKey }: { cartKey: string }) {
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   const total = lines.reduce((sum, line) => sum + line.product.salePrice * line.quantity, 0);
   const currency = (value: number) => `${value.toLocaleString('es-CO')} COP`;
+  const addProduct = (product: StoreProduct) => {
+    setCart(current => changeQuantity(current, product, (current.find(item => item.productId === product.id)?.quantity ?? 0) + 1));
+    toast.success('Producto agregado al carrito', { description: product.shade ? `${product.name} · ${product.shade}` : product.name });
+  };
   useEffect(() => {
     if (productId) window.scrollTo(0, 0);
     else if (location.hash === '#catalogo') document.getElementById('catalogo')?.scrollIntoView();
@@ -99,7 +106,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       const product = purchaseProduct;
       setCart(current => changeQuantity(current, product, (current.find(item => item.productId === product.id)?.quantity ?? 0) + quantity));
       toast.success('Producto agregado al carrito', {description: product.shade ? `${product.name} · ${product.shade}` : product.name});
-    }}/> : <>
+    }} recommendations={purchaseProduct && !detail.isError && !isError ? <ProductRecommendations key={purchaseProduct.id} current={purchaseProduct} products={data} cart={cart} backTo={location.state?.catalogBackTo ?? '/#catalogo'} onAdd={addProduct}/> : undefined}/> : <>
     {!favoritesPage && <section className="store-hero">
       <div><span className="eyebrow">MAQUILLAJE · CUIDADO · BELLEZA</span><h1>Tu ritual de belleza,<br/><i>hecho para florecer.</i></h1><p>Descubre productos seleccionados para resaltar tu belleza todos los días.</p><a className="primary" href="#catalogo">Explorar colección</a></div>
       <div className="hero-flower">✦</div>
@@ -114,18 +121,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       </>}
       {session && favorites.isError && !favoritesPage && <p role="alert" className="catalog-notice">No pudimos consultar tus favoritos. <button onClick={() => favorites.refetch()}>Reintentar</button></p>}
       <div className="product-grid">
-        {catalog.map(entry => <article className="product-card" key={entry.key}>
-          <button className={`favorite-toggle ${favoriteIds.has(entry.product!.id) ? 'is-saved' : ''}`} aria-label={`${favoriteIds.has(entry.product!.id) ? 'Quitar de' : 'Guardar en'} favoritos: ${entry.name}`} aria-pressed={favoriteIds.has(entry.product!.id)} disabled={favoriteDisabled} onClick={() => toggleFavorite(entry.product!.id)}><Heart size={19} fill={favoriteIds.has(entry.product!.id) ? 'currentColor' : 'none'}/></button>
-          <Link className="product-image" to={`/producto/${entry.product!.id}`} state={{catalogBackTo}} aria-label={`Ver detalle de ${entry.name}`}><ProductPhoto src={entry.imageUrl} name={entry.name}/></Link>
-          <div className="product-info">
-            <small>{entry.product?.category || 'Belleza'}</small>
-            <h3><Link className="product-title-link" to={`/producto/${entry.product!.id}`} state={{catalogBackTo}}>{entry.name}</Link></h3>
-            {entry.product?.presentation && <p>{entry.product.presentation}</p>}
-            {entry.product?.variantGroup && <p className="catalog-tones">{favoritesPage ? entry.product.shade : `${entry.variants.length} ${entry.variants.length === 1 ? 'tonalidad' : 'tonalidades'}`}</p>}
-            <strong>{`${entry.variants.some(v => v.salePrice !== entry.product!.salePrice) ? 'Desde ' : ''}${catalogPrice(entry).toLocaleString('es-CO')} COP`}</strong>
-            {entry.product?.variantGroup ? <Link className="primary catalog-choose-tone" to={`/producto/${entry.product.id}`} state={{catalogBackTo}}>Elegir tonalidad</Link> : entry.product ? <button className="primary" disabled={entry.product.stock <= 0 || (cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0) >= entry.product.stock} onClick={() => { setCart(current => changeQuantity(current, entry.product!, (current.find(item => item.productId === entry.product!.id)?.quantity ?? 0) + 1)); toast.success("Producto agregado al carrito", { description: entry.name }); }}><Plus size={16}/> {entry.product.stock <= 0 ? 'Agotado' : (cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0) >= entry.product.stock ? 'Máximo disponible' : 'Agregar'}</button> : null}
-          </div>
-        </article>)}
+        {catalog.map(entry => <ProductCard key={entry.key} entry={entry} backTo={catalogBackTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={addProduct} individualTone={favoritesPage} favorite={favoriteIds.has(entry.product!.id)} favoriteDisabled={favoriteDisabled} onFavorite={() => toggleFavorite(entry.product!.id)}/>)}
       </div>
     </main>
     {!favoritesPage && <section id="nosotros" className="store-about"><h2>Belleza que florece, desde Pasto</h2><p>Somos una tienda virtual de maquillaje y cuidado en Pasto, Nariño, Colombia. Conoce nuestros canales oficiales y consulta la información de la tienda.</p><SocialLinks/><Link className="about-more" to="/nosotros">Conocer Bloomi Bunny →</Link></section>}
