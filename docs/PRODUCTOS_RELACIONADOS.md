@@ -28,6 +28,8 @@ Si hay menos de cuatro candidatos adecuados se muestran únicamente los que exis
 
 `ProductCard.tsx` extrae la tarjeta que ya utilizaban catálogo y favoritos; el carrusel usa ese mismo componente. Muestra portada, nombre, categoría, precio real en COP y acción. Imágenes y nombres enlazan a la ficha, y el fondo de la tarjeta también permite abrirla. Se conserva el enlace de regreso al catálogo y sus filtros.
 
+Al pasar el mouse por la foto, la tarjeta muestra mediante un fundido suave la primera imagen secundaria ordenada del mismo SKU y vuelve a la portada al salir. La secundaria se carga bajo demanda; si no existe o falla, la portada permanece visible. El efecto respeta movimiento reducido y solo se activa con mouse y soporte de hover: en móvil el toque sigue abriendo la ficha normalmente. Este comportamiento se comparte con catálogo y favoritos sin modificar las imágenes ni sus referencias persistidas.
+
 Los productos con variantes muestran **Elegir tonalidad**, que abre el detalle sin agregar un SKU automáticamente. Los demás muestran **Agregar** y usan la función existente `changeQuantity`, con el stock y precio del catálogo. El evento del botón se detiene para evitar navegación accidental. Al alcanzar el stock disponible el botón se deshabilita. El carrito sigue siendo local y no reserva ni descuenta existencias comerciales.
 
 ## Carrusel responsive

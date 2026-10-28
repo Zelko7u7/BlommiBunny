@@ -23,11 +23,12 @@ export default function ProductCard({ entry, backTo, cartQuantity, onAdd, indivi
   const to = `/producto/${product.id}`;
   const state = { catalogBackTo: backTo };
   const maximum = cartQuantity >= product.stock;
+  const previewImage = product.galleryImages?.find(url => url.trim() && url !== entry.imageUrl);
   return <article className="product-card catalog-product-card" data-product-id={product.id} data-product-key={entry.key} onClick={event => {
     if (!(event.target as Element).closest('a,button') && !window.getSelection()?.toString()) navigate(to, { state });
   }}>
     {onFavorite && <button type="button" className={`favorite-toggle ${favorite ? 'is-saved' : ''}`} aria-label={`${favorite ? 'Quitar de' : 'Guardar en'} favoritos: ${entry.name}`} aria-pressed={favorite} disabled={favoriteDisabled} onClick={event => { event.stopPropagation(); onFavorite(); }}><Heart size={19} fill={favorite ? 'currentColor' : 'none'}/></button>}
-    <Link className="product-image" to={to} state={state} aria-label={`Ver detalle de ${entry.name}`}><ProductPhoto src={entry.imageUrl} name={entry.name}/></Link>
+    <Link className="product-image" to={to} state={state} aria-label={`Ver detalle de ${entry.name}`}><ProductPhoto src={entry.imageUrl} previewSrc={previewImage} name={entry.name}/></Link>
     <div className="product-info">
       <small>{product.category || 'Belleza'}</small>
       <h3><Link className="product-title-link" to={to} state={state}>{entry.name}</Link></h3>
