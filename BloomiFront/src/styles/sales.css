@@ -1,7 +1,7 @@
 .sales-page { min-width: 0; }
 .sales-intro,.sales-hint { color:var(--color-text-secondary); font-size:13px; line-height:1.6; }
 .sales-intro { margin:-10px 0 22px; }
-.sales-filters { display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr auto; gap:12px; align-items:end; margin-bottom:22px; }
+.sales-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; align-items:end; margin-bottom:22px; }
 .sales-filters label,.sale-form label { display:grid; gap:6px; min-width:0; color:var(--color-text-secondary); font-size:13px; }
 .sales-filters input,.sales-filters select,.sale-form input,.sale-form select,.sale-form textarea { width:100%; min-width:0; min-height:44px; border:1px solid var(--color-border-strong); border-radius:8px; padding:10px; background:var(--color-surface); color:var(--color-text); font:inherit; }
 .sales-filters button { min-height:44px; }
@@ -13,6 +13,16 @@
 .sale-status { display:inline-block; padding:6px 9px; border-radius:8px; font-size:12px; white-space:nowrap; }
 .sale-status.confirmed { background:var(--color-success-surface); color:var(--color-success); }
 .sale-status.cancelled { background:var(--color-danger-surface); color:var(--color-danger); }
+.sale-status.pending { background:var(--color-primary-light); color:var(--color-primary-hover); white-space:normal; }
+.sale-payments { margin-block:24px; padding-block:16px; border-block:1px solid var(--color-border); }
+.sale-payments h3,.sale-payments h4 { margin:12px 0; }
+.payment-entry { padding:16px; margin-block:16px; border:1px solid var(--color-border-strong); border-radius:10px; }
+.payment-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:12px; }
+.collection-control { display:grid; gap:8px; margin-block:16px; font-size:13px; }
+.collection-control select { width:100%; min-height:44px; padding:10px; border:1px solid var(--color-border-strong); border-radius:8px; background:var(--color-surface); color:var(--color-text); font:inherit; }
+.collection-history { margin-top:20px; font-size:13px; }
+.collection-history summary { cursor:pointer; padding:10px 0; }
+.collection-history li { padding:12px 0; overflow-wrap:anywhere; }
 .sales-pagination { display:flex; align-items:center; justify-content:flex-end; flex-wrap:wrap; gap:16px; margin-top:20px; font-size:13px; }
 .sales-count { color:var(--color-text-secondary); font-size:13px; }
 .sales-empty { padding:40px 16px; text-align:center; color:var(--color-text-secondary); }

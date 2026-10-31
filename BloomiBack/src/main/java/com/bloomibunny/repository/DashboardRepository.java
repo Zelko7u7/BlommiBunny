@@ -49,4 +49,17 @@ public interface DashboardRepository extends Repository<SaleItem,Long> {
   group by i.product_id order by sum(i.quantity) desc,i.product_id asc limit 5
   """,nativeQuery=true)
  List<BestSeller> bestSellers(@Param("from") Instant from,@Param("to") Instant to);
+
+ @Query("select coalesce(sum(s.total),0) from Sale s where s.cancelled=false and s.collectionAuthorized=true and s.collectionAuthorizedAt>=:from and s.collectionAuthorizedAt<:to")
+ BigDecimal authorizedCollections(@Param("from") Instant from,@Param("to") Instant to);
+ @Query("select coalesce(sum(p.amount),0) from SalePayment p where p.cancelled=false and p.sale.cancelled=false and p.paymentDate>=:from and p.paymentDate<:to")
+ BigDecimal recordedPayments(@Param("from") java.time.LocalDate from,@Param("to") java.time.LocalDate to);
+ @Query(value="""
+  select coalesce(sum(s.total-coalesce(p.paid,0)),0) from sale s
+  left join (select sale_id,sum(amount) paid from sale_payment where cancelled=false group by sale_id) p on p.sale_id=s.id
+  where s.cancelled=false and s.payments_reviewed=true
+  """,nativeQuery=true)
+ BigDecimal outstandingBalance();
+ @Query("select count(s) from Sale s where s.cancelled=false and s.paymentsReviewed=false")
+ long unreviewedPayments();
 }

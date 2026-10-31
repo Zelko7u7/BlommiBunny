@@ -24,5 +24,13 @@ public class Sale extends BaseEntity {
  @Column(length=500) private String cancellationReason;
  @Column(length=80) private String cancelledBy;
  @Version @Column(nullable=false,columnDefinition="bigint default 0") private long version;
+ // Historical sales are explicitly left unreviewed by migration 010.
+ @Column(nullable=false,columnDefinition="boolean default false") private boolean paymentsReviewed=true;
+ @Column(nullable=false,columnDefinition="boolean default false") private boolean collectionAuthorized=false;
+ private Instant collectionAuthorizedAt;
+ @Column(length=80) private String collectionAuthorizedBy;
+ private Instant paymentsChangedAt;
+ private Instant paymentsReviewedAt;
+ @Column(length=80) private String paymentsReviewedBy;
  @OneToMany(mappedBy="sale",cascade=CascadeType.ALL,orphanRemoval=true) private List<SaleItem> items=new ArrayList<>();
 }

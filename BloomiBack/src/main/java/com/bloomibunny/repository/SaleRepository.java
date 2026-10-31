@@ -13,6 +13,12 @@ public interface SaleRepository extends JpaRepository<Sale,Long>{
   select s from Sale s left join s.customer c where
   (cast(:from as timestamp) is null or s.saleDate>=:from) and (cast(:to as timestamp) is null or s.saleDate<:to)
   and (cast(:cancelled as boolean) is null or s.cancelled=:cancelled) and (cast(:channel as string) is null or s.channel=:channel)
+  and (:paymentStatus='' or
+   (:paymentStatus='UNREVIEWED' and s.paymentsReviewed=false) or
+   (:paymentStatus='AUTHORIZED' and s.collectionAuthorized=true and s.cancelled=false) or
+   (:paymentStatus='PENDING' and s.paymentsReviewed=true and s.cancelled=false and s.total>0 and not exists(select p.id from SalePayment p where p.sale=s and p.cancelled=false)) or
+   (:paymentStatus='PARTIAL' and s.paymentsReviewed=true and s.cancelled=false and (select coalesce(sum(p.amount),0) from SalePayment p where p.sale=s and p.cancelled=false)>0 and (select coalesce(sum(p.amount),0) from SalePayment p where p.sale=s and p.cancelled=false)<s.total) or
+   (:paymentStatus='PAID' and s.paymentsReviewed=true and s.cancelled=false and s.collectionAuthorized=false and (select coalesce(sum(p.amount),0) from SalePayment p where p.sale=s and p.cancelled=false)=s.total))
   and (:q='' or cast(s.id as string)=:q
     or lower(coalesce(s.customerName,c.name,'Consumidor final')) like lower(concat('%',:q,'%'))
     or exists(select i.id from SaleItem i where i.sale=s and
@@ -22,7 +28,7 @@ public interface SaleRepository extends JpaRepository<Sale,Long>{
   """)
  org.springframework.data.domain.Page<Sale> search(@Param("q") String q,@Param("from") Instant from,
   @Param("to") Instant to,@Param("cancelled") Boolean cancelled,@Param("channel") com.bloomibunny.entity.SaleChannel channel,
-  org.springframework.data.domain.Pageable pageable);
+  @Param("paymentStatus") String paymentStatus,org.springframework.data.domain.Pageable pageable);
  List<Sale> findBySaleDateBetweenOrderBySaleDateDesc(Instant from,Instant to);
  @Query("select coalesce(sum(s.total),0) from Sale s where s.cancelled=false and s.saleDate>=:from and s.saleDate<:to") BigDecimal total(@Param("from") Instant from,@Param("to") Instant to);
 }

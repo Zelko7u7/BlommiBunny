@@ -8,7 +8,9 @@ public record DashboardResponse(LocalDate today,String timezone,Instant generate
  BigDecimal costMonth,BigDecimal knownCostMonth,BigDecimal grossProfit,long unknownCostSales,long unknownCostUnits,
  long lowStock,long outOfStock,long totalProducts,long activeProducts,long customers,
  List<PeriodSales> dailySales,List<PeriodSales> monthlySales,List<TopProduct> topProducts,
- List<StockAlert> stockAlerts,List<Movement> recentMovements){
+ List<StockAlert> stockAlerts,List<Movement> recentMovements,
+ BigDecimal authorizedCollectionsToday,BigDecimal authorizedCollectionsMonth,
+ BigDecimal recordedPaymentsMonth,BigDecimal outstandingBalance,long unreviewedPayments){
  public record PeriodSales(LocalDate date,BigDecimal total,long count){}
  public record TopProduct(Long id,String product,String code,String shade,long units){}
  public record StockAlert(Long id,String product,String code,String shade,int stock,int minimumStock,boolean active){}

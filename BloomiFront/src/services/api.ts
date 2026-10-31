@@ -27,7 +27,7 @@ export const api={
  cancelOperation:(kind:'purchases'|'expenses',id:number,reason:string)=>http.post<import('../types').Purchase|import('../types').Expense>(`/${kind}/${id}/cancel`,{reason}).then(r=>r.data),
  sales:(filters:import('../types').SaleFilters)=>{
   const params = new URLSearchParams({ page:String(filters.page),size:'20' });
-  for(const key of ['q','from','to','channel'] as const) if(filters[key])params.set(key,filters[key]);
+  for(const key of ['q','from','to','channel','paymentStatus'] as const) if(filters[key])params.set(key,filters[key]);
   if(filters.status!=='all')params.set('cancelled',String(filters.status==='cancelled'));
   return http.get<import('../types').SalePage>(`/sales?${params}`).then(r=>{
    if(!Array.isArray(r.data.content))throw {code:'API_VERSION',message:'El backend necesita reiniciarse para activar el módulo de ventas.'};
@@ -37,6 +37,10 @@ export const api={
  sale:(id:number)=>http.get<import('../types').Sale>(`/sales/${id}`).then(r=>r.data),
  createSale:(data:import('../types').CreateSale)=>http.post<import('../types').Sale>('/sales',data).then(r=>r.data),
  cancelSale:(id:number,reason:string)=>http.post<import('../types').Sale>(`/sales/${id}/cancel`,{reason}).then(r=>r.data),
+ addSalePayment:(id:number,data:import('../types').CreateSalePayment)=>http.post<import('../types').Sale>(`/sales/${id}/payments`,data).then(r=>r.data),
+ cancelSalePayment:(id:number,paymentId:number,reason:string)=>http.post<import('../types').Sale>(`/sales/${id}/payments/${paymentId}/cancel`,{reason}).then(r=>r.data),
+ authorizeSaleCollection:(id:number,expectedVersion:number,authorized:boolean,reason:string)=>http.post<import('../types').Sale>(`/sales/${id}/collection`,{expectedVersion,authorized,reason}).then(r=>r.data),
+ reviewSalePayments:(id:number,expectedVersion:number,reason:string)=>http.post<import('../types').Sale>(`/sales/${id}/payments/review`,{expectedVersion,reason}).then(r=>r.data),
  saleProducts:()=>allProducts<Product>('/products'),
  inventorySummary:(q="",stock="all")=>http.get<import('../types').InventorySummary>(`/products/summary?q=${encodeURIComponent(q)}&stock=${encodeURIComponent(stock)}`).then(r=>r.data),
  favorites:()=>http.get<StoreProduct[]>("/favorites").then(r=>r.data),
@@ -47,7 +51,7 @@ export const api={
  storeProducts:()=>allProducts<StoreProduct>('/store/products'),
  storeProduct:(id:number)=>http.get<StoreProduct>(`/store/products/${id}`).then(r=>r.data),
  dashboard:()=>http.get<Dashboard>("/dashboard").then(r=>{
-  if(!Array.isArray(r.data.dailySales)||!Array.isArray(r.data.monthlySales))throw {message:'El backend necesita actualizarse para mostrar el dashboard real.'};
+  if(!Array.isArray(r.data.dailySales)||!Array.isArray(r.data.monthlySales)||typeof r.data.authorizedCollectionsMonth!=='number')throw {message:'El backend necesita reiniciarse para mostrar cobros, abonos y saldos.'};
   return r.data;
  }),
  products:(q="",stock="all")=>allProducts<Product>(`/products?q=${encodeURIComponent(q)}&stock=${encodeURIComponent(stock)}`),

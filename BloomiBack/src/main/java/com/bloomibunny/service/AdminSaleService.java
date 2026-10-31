@@ -23,8 +23,10 @@ public class AdminSaleService {
  private final CustomerRepository customers;
  private final InventoryMovementRepository movements;
  private final JdbcTemplate jdbc;
- public AdminSaleService(SaleRepository sales,ProductRepository products,CustomerRepository customers,InventoryMovementRepository movements,JdbcTemplate jdbc){
-  this.sales=sales;this.products=products;this.customers=customers;this.movements=movements;this.jdbc=jdbc;
+ private final SalePaymentRepository payments;
+ private final SaleCollectionEventRepository collectionEvents;
+ public AdminSaleService(SaleRepository sales,ProductRepository products,CustomerRepository customers,InventoryMovementRepository movements,JdbcTemplate jdbc,SalePaymentRepository payments,SaleCollectionEventRepository collectionEvents){
+  this.sales=sales;this.products=products;this.customers=customers;this.movements=movements;this.jdbc=jdbc;this.payments=payments;this.collectionEvents=collectionEvents;
  }
 
  public SaleResponse create(CreateSaleRequest request,String actor){
@@ -63,7 +65,17 @@ public class AdminSaleService {
   var discount=amount(request.discount()==null?BigDecimal.ZERO:request.discount());
   if(discount.compareTo(subtotal)>0)throw new BusinessException("El descuento no puede superar el subtotal.");
   sale.setSubtotal(subtotal);sale.setDiscount(discount);sale.setTotal(subtotal.subtract(discount));
+  var paymentStatus=request.paymentStatus()==null?InitialPaymentStatus.PENDING:request.paymentStatus();
+  var initial=request.initialPayment()==null?(paymentStatus==InitialPaymentStatus.PAID?sale.getTotal():BigDecimal.ZERO):amount(request.initialPayment());
+  if(paymentStatus==InitialPaymentStatus.PENDING&&initial.signum()!=0)throw new BusinessException("Una venta pendiente no puede incluir un pago inicial.");
+  if(paymentStatus==InitialPaymentStatus.PARTIAL&&(initial.signum()<=0||initial.compareTo(sale.getTotal())>=0))throw new BusinessException("El abono inicial debe ser mayor que cero y menor que el total de la venta.");
+  if(paymentStatus==InitialPaymentStatus.PAID&&initial.compareTo(sale.getTotal())!=0)throw new BusinessException("El pago completo debe coincidir con el total de la venta.");
   var saved=sales.saveAndFlush(sale);
+  if(initial.signum()>0){
+   var payment=new SalePayment();payment.setSale(saved);payment.setRequestId(UUID.nameUUIDFromBytes(("sale-initial-payment:"+key).getBytes(StandardCharsets.UTF_8)));
+   payment.setRequestFingerprint(fingerprint);payment.setAmount(initial);payment.setPaymentDate(saved.getSaleDate().atZone(BUSINESS_ZONE).toLocalDate());
+   payment.setPaymentMethod(request.paymentMethod());payment.setNotes("Pago inicial al registrar la venta");payment.setRecordedBy(actor);payments.saveAndFlush(payment);
+  }
   for(var line:saved.getItems()){
    var product=line.getProduct();product.setStock(product.getStock()-line.getQuantity());
    movement(product,MovementType.SALE,line.getQuantity(),"Venta #"+saved.getId()+" · "+actor);
@@ -84,14 +96,24 @@ public class AdminSaleService {
    movement(product,MovementType.ADJUSTMENT_IN,entry.getValue(),"Anulación venta #"+sale.getId()+" · "+actor);
   }
   sale.setCancelled(true);sale.setCancelledAt(Instant.now());sale.setCancellationReason(reason.trim());sale.setCancelledBy(actor);
+  if(sale.isCollectionAuthorized()){
+   var event=new SaleCollectionEvent();event.setSale(sale);event.setAction("REVOKED");event.setReason(reason.trim());event.setRecordedBy(actor);collectionEvents.save(event);
+   sale.setCollectionAuthorized(false);sale.setCollectionAuthorizedAt(null);sale.setCollectionAuthorizedBy(null);
+  }
   sales.flush();return map(sale);
  }
 
  @Transactional(readOnly=true)
  public Page<SaleResponse> list(String q,LocalDate from,LocalDate to,Boolean cancelled,SaleChannel channel,int page,int size){
+  return list(q,from,to,cancelled,channel,page,size,"");
+ }
+ @Transactional(readOnly=true)
+ public Page<SaleResponse> list(String q,LocalDate from,LocalDate to,Boolean cancelled,SaleChannel channel,int page,int size,String paymentStatus){
   if(page<0||size<1||size>100)throw new BusinessException("Paginación inválida.");
   if(from!=null&&to!=null&&from.isAfter(to))throw new BusinessException("La fecha inicial no puede superar la final.");
-  return sales.search(q==null?"":q.trim(),from==null?null:from.atStartOfDay(BUSINESS_ZONE).toInstant(),to==null?null:to.plusDays(1).atStartOfDay(BUSINESS_ZONE).toInstant(),cancelled,channel,PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"saleDate","id"))).map(this::map);
+  var status=paymentStatus==null?"":paymentStatus;
+  if(!Set.of("","PENDING","PARTIAL","PAID","AUTHORIZED","UNREVIEWED").contains(status))throw new BusinessException("Estado de pago inválido.");
+  return sales.search(q==null?"":q.trim(),from==null?null:from.atStartOfDay(BUSINESS_ZONE).toInstant(),to==null?null:to.plusDays(1).atStartOfDay(BUSINESS_ZONE).toInstant(),cancelled,channel,status,PageRequest.of(page,size,Sort.by(Sort.Direction.DESC,"saleDate","id"))).map(this::map);
  }
  @Transactional(readOnly=true)
  public SaleResponse get(Long id){return map(sales.findById(id).orElseThrow(()->new ResourceNotFoundException("Venta no encontrada")));}
@@ -100,10 +122,21 @@ public class AdminSaleService {
   boolean snapshot=sale.getItems().stream().allMatch(item->item.getProductName()!=null);
   var lines=sale.getItems().stream().map(item->new SaleLine(item.getProduct().getId(),item.getProductName()==null?item.getProduct().getName():item.getProductName(),item.getProductCode()==null?item.getProduct().getCode():item.getProductCode(),item.getProductName()==null?item.getProduct().getShade():item.getShade(),item.getQuantity(),item.getUnitPrice(),item.getUnitCost(),item.getSubtotal())).toList();
   BigDecimal cost=lines.stream().anyMatch(line->line.unitCost()==null)?null:lines.stream().map(line->line.unitCost().multiply(BigDecimal.valueOf(line.quantity()))).reduce(BigDecimal.ZERO,BigDecimal::add);
-  return new SaleResponse(sale.getId(),sale.getCustomerName()!=null?sale.getCustomerName():sale.getCustomer()==null?"Consumidor final":sale.getCustomer().getName(),sale.getSaleDate(),sale.getPaymentMethod(),sale.getChannel()==null?SaleChannel.OTHER:sale.getChannel(),sale.getSubtotal(),sale.getDiscount(),sale.getTotal(),cost,cost==null?null:sale.getTotal().subtract(cost),sale.getNotes(),sale.getRecordedBy(),sale.isCancelled(),sale.getCancelledAt(),sale.getCancellationReason(),sale.getCancelledBy(),snapshot,lines);
+  var paymentRows=payments.findBySaleIdOrderByPaymentDateAscIdAsc(sale.getId());
+  var paid=paymentRows.stream().filter(p->!p.isCancelled()).map(SalePayment::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
+  var balance=sale.getTotal().subtract(paid);
+  var status=!sale.isPaymentsReviewed()?"UNREVIEWED":balance.signum()==0?"PAID":paid.signum()>0?"PARTIAL":"PENDING";
+  var paymentDtos=paymentRows.stream().map(p->new PaymentResponse(p.getId(),p.getAmount(),p.getPaymentDate(),p.getPaymentMethod(),p.getReference(),p.getNotes(),p.getRecordedBy(),p.getCreatedAt(),p.isCancelled(),p.getCancelledAt(),p.getCancellationReason(),p.getCancelledBy())).toList();
+  var events=collectionEvents.findBySaleIdOrderByIdAsc(sale.getId()).stream().map(e->new CollectionEventResponse(e.getId(),e.getAction(),e.getReason(),e.getRecordedBy(),e.getCreatedAt())).toList();
+  return new SaleResponse(sale.getId(),sale.getCustomerName()!=null?sale.getCustomerName():sale.getCustomer()==null?"Consumidor final":sale.getCustomer().getName(),sale.getSaleDate(),sale.getPaymentMethod(),sale.getChannel()==null?SaleChannel.OTHER:sale.getChannel(),sale.getSubtotal(),sale.getDiscount(),sale.getTotal(),cost,cost==null?null:sale.getTotal().subtract(cost),sale.getNotes(),sale.getRecordedBy(),sale.isCancelled(),sale.getCancelledAt(),sale.getCancellationReason(),sale.getCancelledBy(),snapshot,lines,sale.isPaymentsReviewed()?paid:null,sale.isPaymentsReviewed()?balance:null,status,sale.isPaymentsReviewed(),paymentDtos,sale.getVersion(),sale.isCollectionAuthorized(),sale.getCollectionAuthorizedAt(),sale.getCollectionAuthorizedBy(),events);
  }
  private BigDecimal amount(BigDecimal value){if(value.signum()<0||value.stripTrailingZeros().scale()>2||value.compareTo(MAX_AMOUNT)>0)throw new BusinessException("Revisa los importes: deben ser positivos o cero, con hasta dos decimales y dentro del límite permitido.");return value;}
  private String tone(Product product){return product.getShade()==null?"":" · "+product.getShade();}
  private void movement(Product product,MovementType type,int quantity,String reference){var movement=new InventoryMovement();movement.setProduct(product);movement.setType(type);movement.setQuantity(quantity);movement.setResultingStock(product.getStock());movement.setReference(reference);movements.save(movement);}
- private String fingerprint(CreateSaleRequest request){try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(request.toString().getBytes(StandardCharsets.UTF_8)));}catch(java.security.NoSuchAlgorithmException ex){throw new IllegalStateException(ex);}}
+ private String fingerprint(CreateSaleRequest request){
+  var content=request.toString();
+  // Preserve retries submitted by clients before payment fields were introduced.
+  if(request.paymentStatus()==null&&request.initialPayment()==null)content=content.substring(0,content.length()-", paymentStatus=null, initialPayment=null]".length())+"]";
+  try{return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(content.getBytes(StandardCharsets.UTF_8)));}catch(java.security.NoSuchAlgorithmException ex){throw new IllegalStateException(ex);}
+ }
 }

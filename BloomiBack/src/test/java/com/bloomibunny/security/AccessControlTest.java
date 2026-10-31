@@ -37,6 +37,7 @@ class AccessControlTest {
   @Bean AuthService auth(){return mock(AuthService.class);}
   @Bean FavoriteService favorites(){return mock(FavoriteService.class);}
   @Bean AdminSaleService adminSales(){return mock(AdminSaleService.class);}
+  @Bean SalePaymentService salePayments(){return mock(SalePaymentService.class);}
   @Bean AdminPurchaseService adminPurchases(){return mock(AdminPurchaseService.class);}
   @Bean AdminExpenseService adminExpenses(){return mock(AdminExpenseService.class);}
   @Bean AppUserRepository users(){return mock(AppUserRepository.class);}
@@ -50,6 +51,7 @@ class AccessControlTest {
  @Autowired AuthService auth;
  @Autowired FavoriteService favorites;
  @Autowired AdminSaleService adminSales;
+ @Autowired SalePaymentService salePayments;
  @Autowired AdminPurchaseService adminPurchases;
  @Autowired AdminExpenseService adminExpenses;
  @Autowired AppUserRepository users;
@@ -57,7 +59,7 @@ class AccessControlTest {
  MockMvc mvc;
 
  @BeforeEach void setup(){
-  reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses);
+  reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses,salePayments);
   mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null,null);
   when(products.list(anyString(),anyInt(),anyInt(),anyString())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
@@ -191,5 +193,22 @@ class AccessControlTest {
   mvc.perform(get("/api/products").header("Authorization","Bearer "+token)).andExpect(status().isForbidden());
   user.setActive(false);
   mvc.perform(get("/api/products").header("Authorization","Bearer "+token)).andExpect(status().isUnauthorized());
+ }
+ @Test void guestsCannotRecordPaymentsOrAuthorizeCollections()throws Exception{
+  for(var path:List.of("/api/sales/1/payments","/api/sales/1/payments/2/cancel","/api/sales/1/collection","/api/sales/1/payments/review"))mvc.perform(post(path).contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
+  verifyNoInteractions(salePayments);
+ }
+ @Test @WithMockUser(roles="CUSTOMER") void customersCannotChangePaymentsOrCollections()throws Exception{
+  for(var path:List.of("/api/sales/1/payments","/api/sales/1/payments/2/cancel","/api/sales/1/collection","/api/sales/1/payments/review"))mvc.perform(post(path).contentType("application/json").content("{}")).andExpect(status().isForbidden());
+  verifyNoInteractions(salePayments);
+ }
+ @Test @WithMockUser(username="administradora",roles="ADMIN") void paymentAndAuthorizationUseAuthenticatedActor()throws Exception{
+  mvc.perform(post("/api/sales/1/payments").contentType("application/json").content("{\"requestId\":\"00000000-0000-0000-0000-000000000003\",\"amount\":5000,\"date\":\"2026-10-30\",\"paymentMethod\":\"CASH\",\"recordedBy\":\"suplantada\"}")).andExpect(status().isCreated());
+  verify(salePayments).add(eq(1L),any(),eq("administradora"));
+  mvc.perform(post("/api/sales/1/collection").contentType("application/json").content("{\"expectedVersion\":1,\"authorized\":true,\"reason\":\"Comprobante revisado\"}")).andExpect(status().isOk());verify(salePayments).authorize(eq(1L),any(),eq("administradora"));
+ }
+ @Test @WithMockUser(roles="ADMIN") void invalidPaymentRequestsNeverReachService()throws Exception{
+  for(var value:List.of("0","-1","0.001"))mvc.perform(post("/api/sales/1/payments").contentType("application/json").content("{\"requestId\":\"00000000-0000-0000-0000-000000000003\",\"amount\":"+value+",\"date\":\"2026-10-30\",\"paymentMethod\":\"CASH\"}")).andExpect(status().isBadRequest());
+  mvc.perform(post("/api/sales/1/collection").contentType("application/json").content("{\"authorized\":true,\"reason\":\"ok\"}")).andExpect(status().isBadRequest());verifyNoInteractions(salePayments);
  }
 }

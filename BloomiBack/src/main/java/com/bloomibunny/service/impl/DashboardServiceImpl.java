@@ -27,9 +27,12 @@ public class DashboardServiceImpl implements DashboardService {
   var top=data.bestSellers(start(month),end).stream().map(item->new TopProduct(item.getId(),item.getProduct(),item.getCode(),item.getShade(),item.getUnits())).toList();
   var alerts=products.alerts(org.springframework.data.domain.PageRequest.of(0,8)).stream().map(product->new StockAlert(product.getId(),product.getName(),product.getCode(),product.getShade(),product.getStock(),product.getMinimumStock(),product.isActive())).toList();
   var recent=movements.findTop10ByOrderByCreatedAtDesc().stream().map(m->{var product=m.getProduct();return new Movement(product.getId(),product.getName(),product.getCode(),product.getShade(),product.isDeleted(),m.getType().name(),m.getQuantity(),m.getResultingStock(),m.getReference(),m.getCreatedAt());}).toList();
-  return new DashboardResponse(today,ZONE.getId(),now,todayRevenue.getTotal(),todayRevenue.getCount(),monthRevenue.getTotal(),monthRevenue.getCount(),complete?costs.getKnownCost():null,costs.getKnownCost(),complete?monthRevenue.getTotal().subtract(costs.getKnownCost()):null,costs.getUnknownSales(),costs.getUnknownUnits(),products.countLowStock(),products.countByStockAndDeletedFalse(0),products.countByDeletedFalse(),products.countByActiveTrueAndDeletedFalse(),customers.count(),daily,monthly,top,alerts,recent);
+  return new DashboardResponse(today,ZONE.getId(),now,todayRevenue.getTotal(),todayRevenue.getCount(),monthRevenue.getTotal(),monthRevenue.getCount(),complete?costs.getKnownCost():null,costs.getKnownCost(),complete?monthRevenue.getTotal().subtract(costs.getKnownCost()):null,costs.getUnknownSales(),costs.getUnknownUnits(),products.countLowStock(),products.countByStockAndDeletedFalse(0),products.countByDeletedFalse(),products.countByActiveTrueAndDeletedFalse(),customers.count(),daily,monthly,top,alerts,recent,
+   zero(data.authorizedCollections(start(today),end)),zero(data.authorizedCollections(start(month),end)),
+   zero(data.recordedPayments(month,today.plusDays(1))),zero(data.outstandingBalance()),data.unreviewedPayments());
  }
  private Instant start(LocalDate date){return date.atStartOfDay(ZONE).toInstant();}
+ private BigDecimal zero(BigDecimal value){return value==null?BigDecimal.ZERO:value;}
  private List<PeriodSales> fill(List<DashboardRepository.Period> rows,LocalDate first,int count,boolean months){
   var grouped=new HashMap<LocalDate,PeriodSales>();
   for(var row:rows){var date=LocalDate.parse(row.getDate());grouped.put(date,new PeriodSales(date,row.getTotal(),row.getCount()));}
