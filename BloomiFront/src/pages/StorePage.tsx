@@ -4,7 +4,7 @@ import { Link, useLocation, useParams, useNavigate, useSearchParams } from 'reac
 import { toast } from 'sonner';
 import { useStoreProducts, useStoreProduct, useFavorites, validProductId } from '../hooks/useApi';
 import ProductDetails from '../components/store/ProductDetails';
-import { LegalPage, SocialLinks, StoreFooter } from '../components/store/LegalPages';
+import { LegalPage, StoreFooter } from '../components/store/LegalPages';
 import { buildCatalog, productImage, filterCatalog, type CatalogSort } from '../services/catalog';
 import type { StoreProduct } from '../types';
 import ProductCard from '../components/store/ProductCard';
@@ -12,6 +12,7 @@ import ProductRecommendations from '../components/store/ProductRecommendations';
 import CatalogFilters from '../components/store/CatalogFilters';
 import CartDialog from '../components/store/CartDialog';
 import ProductPhoto from '../components/store/ProductPhoto';
+import StoreHero from '../components/store/StoreHero';
 import WhatsAppCheckout from '../components/store/WhatsAppCheckout';
 import { useAuth } from '../contexts/AuthContext';
 import { readCart, changeQuantity, cartLines } from '../services/cart';
@@ -88,7 +89,6 @@ function Storefront({ cartKey }: { cartKey: string }) {
   useEffect(() => {
     if (productId) window.scrollTo(0, 0);
     else if (location.hash === '#catalogo') document.getElementById('catalogo')?.scrollIntoView();
-    else if (location.hash === '#nosotros') document.getElementById('nosotros')?.scrollIntoView();
     else window.scrollTo(0, 0);
   }, [productId, location.hash, location.pathname]);
 
@@ -108,10 +108,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       setCart(current => changeQuantity(current, product, (current.find(item => item.productId === product.id)?.quantity ?? 0) + quantity));
       toast.success('Producto agregado al carrito', {description: product.shade ? `${product.name} · ${product.shade}` : product.name});
     }} recommendations={purchaseProduct && !detail.isError && !isError ? <ProductRecommendations key={purchaseProduct.id} current={purchaseProduct} products={data} cart={cart} backTo={location.state?.catalogBackTo ?? '/#catalogo'} onAdd={addProduct}/> : undefined}/> : <>
-    {!favoritesPage && <section className="store-hero">
-      <div><span className="eyebrow">MAQUILLAJE · CUIDADO · BELLEZA</span><h1>Tu ritual de belleza,<br/><i>hecho para florecer.</i></h1><p>Descubre productos seleccionados para resaltar tu belleza todos los días.</p><a className="primary" href="#catalogo">Explorar colección</a></div>
-      <div className="hero-flower">✦</div>
-    </section>}
+    {!favoritesPage && <StoreHero categories={categories}/>}
     <main id="catalogo" className="store-catalog">
       <div className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div><span role="status" aria-live="polite" aria-atomic="true">{catalogLoading ? 'Consultando…' : catalogError ? 'Sin actualizar' : `${catalog.length}${filtersActive ? ` de ${fullCatalog.length}` : ''} ${catalog.length === 1 && !filtersActive ? 'producto' : 'productos'}`}</span></div>
       {(!favoritesPage || session) && <CatalogFilters query={query} category={category} sort={sort} categories={categories} onChange={updateFilter} onReset={resetFilters}/>}
@@ -125,7 +122,6 @@ function Storefront({ cartKey }: { cartKey: string }) {
         {catalog.map(entry => <ProductCard key={entry.key} entry={entry} backTo={catalogBackTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={addProduct} individualTone={favoritesPage} favorite={favoriteIds.has(entry.product!.id)} favoriteDisabled={favoriteDisabled} onFavorite={() => toggleFavorite(entry.product!.id)}/>)}
       </div>
     </main>
-    {!favoritesPage && <section id="nosotros" className="store-about"><h2>Belleza que florece, desde Pasto</h2><p>Somos una tienda virtual de maquillaje y cuidado en Pasto, Nariño, Colombia. Conoce nuestros canales oficiales y consulta la información de la tienda.</p><SocialLinks/><Link className="about-more" to="/nosotros">Conocer Bloomi Bunny →</Link></section>}
     </>}
     <StoreFooter/>
     {cartOpen && <CartDialog onClose={() => setCartOpen(false)} returnFocusTo={cartTrigger.current}>

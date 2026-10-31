@@ -1,0 +1,8 @@
+Bloomi Bunny - banners para carrusel
+
+banner-bienvenida.webp: 1800 x 310, imagen original del primer banner.
+banner-labios.webp: 1800 x 310, nuevo banner de labios.
+
+Ambas imagenes no contienen texto ni botones.
+Colocar los titulos, descripciones y botones como HTML sobre cada imagen.
+En moviles, usar fondo lavanda + texto y boton HTML con layout adaptativo.
