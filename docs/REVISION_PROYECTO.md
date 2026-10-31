@@ -1,6 +1,88 @@
-# Revisión de Bloomi Bunny para Git
+# Revisión técnica y estado de Bloomi Bunny
 
-Fecha: 22 de octubre de 2026.
+## Cierre de implementación del 30 de octubre de 2026
+
+Este resumen prevalece sobre los estados históricos siguientes. Quedan implementadas las ventas con pagos pendientes, parciales y completos, abonos y autorización auditada de cobros; las solicitudes manuales por WhatsApp desde el carrito; y el carrusel responsive de Bienvenida/Labios con flechas laterales e indicadores, sin control visible de pausa. Se retiró el bloque de presentación/redes duplicado bajo el catálogo, conservando el pie y la página Nosotros.
+
+El carrusel mantiene textos y enlaces HTML. Hacer toda la imagen clicable se conversó como alternativa para los banners definitivos, pero no se implementó. Las imágenes actuales son provisionales; cambiar a artes definitivos y sus destinos requiere una decisión posterior. La guía para añadir banners está en el README.
+
+Validaciones acumuladas de esta sesión: 111 pruebas backend aprobadas en la ejecución completa de ventas, incluidas 59 integraciones PostgreSQL aisladas; 38 pruebas frontend y compilación con TypeScript aprobadas. El carrusel se comprobó en navegador a 375/768/1024/1440/1920 px, incluyendo flechas, indicadores, gesto táctil, foco, rotación, visibilidad de pestaña y movimiento reducido. Las pruebas de WhatsApp no enviaron mensajes reales. La apertura de WhatsApp no modifica inventario ni registra ventas; estas se confirman manualmente desde administración.
+
+Se guardan los cambios en commits por funcionalidad y documentación. La memoria comercial, configuración real, evidencias y respaldos permanecen privados y excluidos de Git. Backend y frontend continúan activos. Próximos pendientes: banners definitivos, costos por lote con método por acordar y contenido/tonos aún sin confirmar; los pedidos persistidos y pagos electrónicos siguen fuera de esta etapa.
+
+## Solicitudes por WhatsApp desde el carrito
+
+Actualización posterior del 30 de octubre de 2026: el carrito prepara una solicitud completa por WhatsApp con precios COP, cantidades y tonos del SKU, previa actualización y validación del catálogo. El cliente decide enviar el mensaje. No vacía el carrito ni crea pedidos persistidos, pagos, ventas, reservas o movimientos. Destino por variable pública validada; copia/contacto manual para ventanas bloqueadas, portapapeles no disponible o mensaje largo, sin truncar artículos. No se modifica backend ni esquema. Guía en [VENTAS_WHATSAPP.md](VENTAS_WHATSAPP.md).
+
+Build con tipos, 33 pruebas frontend y 52 backend aprobados; 59 integraciones omitidas. Chrome aislado verificó los flujos y responsive a 320/390/768/1440 px, sin enviar mensajes ni escrituras API. Comparación de catálogo y 16 tablas comerciales sin cambios. Las pruebas previas de 111 corresponden a las ventas administrativas; no se reejecutaron integraciones para esta tarea de frontend.
+
+## Estado vigente del 30 de octubre de 2026
+
+Mejora posterior de registro: el formulario inicial permite Pago pendiente, Pago parcial con abono inicial, o Pago completo; venta y pago se guardan juntos sin autorización automática. Resumen de recibido/saldo y medio del pago real. Conjunto actualizado de111 pruebas aprobado sin omisiones, incluidas59 PostgreSQL aisladas, build con tipos y navegador. No necesita otra migración. Esta mejora sustituye la regla inicial de registrar siempre la venta sin abonos.
+
+Esta actualización prevalece sobre los pendientes y el apagado históricos del 28 de octubre. Backend y frontend están activos. Ventas incorpora abonos parciales/completos, saldo, filtros de pago y autorización explícita del cobro completo solo al llegar a saldo cero. Ni el registro de venta ni el último abono autorizan el cobro automáticamente. Correcciones y autorizaciones tienen auditoría; se conservan precios, costos históricos y las reglas de inventario. Detalle en [Ventas](VENTAS_ADMIN.md#abonos-saldo-y-autorización-de-cobros).
+
+El Dashboard separa importe vendido/margen por fecha de venta, abonos por fecha de pago, cobros completos autorizados por fecha de autorización y saldo pendiente total. Los pagos históricos no se reconstruyen: ventas anteriores requieren revisión expresa. La migración 010 es aditiva y quedó aplicada localmente después de respaldo privado. Comparación comercial intacta: 25 referencias, 84 unidades y cero ventas/abonos comerciales de prueba.
+
+Se comprobaron 105 pruebas distintas en dos ejecuciones: 101 completas sin omisiones, incluidas 53 PostgreSQL aisladas, y 52 sin base de datos tras añadir cuatro pruebas de seguridad. Build con TypeScript y navegador aprobados: respuesta perdida/reintento sin duplicación, pagos parciales/completos, autorización con motivo, revocación, filtros en URL, revisión histórica y responsive hasta 320 px. Nueve escrituras interceptadas y cero escrituras comerciales. Evidencias privadas conservadas en `.local/sales-payments-2026-10-30/`.
+
+Próximo pendiente funcional: costos y unidades restantes por recepción/lote, con método de asignación todavía por acordar. Después, contenido pendiente y pedidos desde carrito. Calendarios de cuotas, intereses, caja, reportes avanzados y pagos públicos no forman parte de esta implementación. Sin commit/push; se preservaron las modificaciones previas de documentación.
+
+Revisión original: 22 de octubre de 2026. Última actualización: cierre del 28 de octubre de 2026.
+
+## Estado vigente al cierre del 28 de octubre de 2026
+
+Esta sección prevalece sobre los diagnósticos y prioridades históricos que se conservan más abajo. La tienda tiene catálogo, variantes, carrito local, cuentas, favoritos y administración operativos. Pedidos, cobros públicos, abonos y valoración por lotes todavía están pendientes.
+
+| Avance del día | Resultado |
+| --- | --- |
+| Identidad visual | Paleta lavanda/lila centralizada en tokens y aplicada a tienda y administración, conservando las fotografías originales. |
+| Fotografías y descripciones | 21 textos oficiales en 23 SKU, once portadas conservadas, doce completadas, 43 fotos secundarias y 66 fotos públicas en total. Importación con respaldo e idempotencia; migración aditiva 009 aplicada localmente. |
+| Galerías y tonos | Miniaturas verticales circulares, flechas, zoom, teclado, carga/fallos y descripciones en párrafos. Fotos independientes por SKU de Toy Story; edición de secundarias desde Inventario. |
+| Te puede interesar | Hasta seis familias disponibles, puntuadas por tipo, categoría, complementariedad y temática; tarjetas compartidas y carrusel táctil, sin consultas individuales ni datos ficticios. |
+| Previsualización con mouse | Primera secundaria ordenada del mismo SKU, cargada bajo demanda y con fundido; vuelve a la portada al salir y conserva esta si la secundaria falla. El toque móvil sigue abriendo el detalle. |
+| Distribución responsive | Contenedor máximo de 1400 px con márgenes interiores de 16–32 px; ancho útil amplio de 1132 a 1336 px (+18 %). Cinco columnas desde 1440 px, cuatro desde 1100, tres desde 740, dos desde 360 y una por debajo. Banner, catálogo, fichas y pie alineados; galería equilibrada y descripciones de lectura limitada. |
+
+Guías de implementación: [galerías y descripciones](GALERIAS_PRODUCTOS.md) y [productos relacionados y previsualización](PRODUCTOS_RELACIONADOS.md). Se preservaron precios, existencias, categorías, identidades y fotografías originales. La última lectura de la jornada entregó 23 SKU públicos, equivalentes a 21 tarjetas agrupadas; estas cifras son referencias verificadas, no constantes del catálogo.
+
+## Comprobaciones de la jornada
+
+- Backend: 89 pruebas aprobadas al integrar medios, incluidas 41 PostgreSQL en un esquema aislado; cero fallos, errores u omisiones en esa ejecución completa. No ejecutar las integraciones contra datos comerciales.
+- Frontend: `npm run build` con tipos aprobado, diez pruebas de recomendaciones aprobadas y `git diff --check` sin errores. JavaScript inicial de aproximadamente 430 kB, sin aviso de tamaño.
+- Medios: 66 rutas HTTP 200, formatos/decodificación y huellas de las copias comprobados; párrafos oficiales y separación de tonos verificados. Datos comerciales comparados antes/después de la importación y de las pruebas.
+- Navegador: capturas antes/después a 375/430/768/1024/1440/1920 px sin desbordamiento horizontal. Comprobados miniaturas circulares verticales, flechas, zoom/Escape/foco, tonos y SKU del carrito, precio, carrusel y extremos, navegación al inicio, hover y movimiento reducido, toque y deslizamiento móvil. Las pruebas de interacción no emitieron escrituras API.
+- Los ajustes finales de distribución modificaron solo cuatro CSS; no cambiaron React/TypeScript, backend, base de datos ni imágenes. En el cierre se revisó documentación y apagado; no se repitieron pruebas de aplicación ni se arrancaron otra vez los servicios.
+
+## Publicación y apagado
+
+Los cinco avances se publicaron mediante push normal en `main` de [Zelko7u7/BlommiBunny](https://github.com/Zelko7u7/BlommiBunny):
+
+| Commit | Contenido |
+| --- | --- |
+| `6ac4bfa` | Identidad lavanda en toda la interfaz. |
+| `b387b64` | Fotografías, descripciones y galerías por producto/tono. |
+| `88f12fb` | Recomendaciones y carrusel en las fichas. |
+| `6ca4b19` | Previsualización de fotografías al pasar el mouse. |
+| `da7b119` | Distribución y aprovechamiento del espacio de la tienda. |
+
+Al finalizar, por petición expresa de la propietaria, se cerraron los árboles verificados de Maven/Spring Boot y npm/Vite, con sus auxiliares Java, Node, esbuild y consolas. A las 15:39:54 de Colombia se verificaron cero procesos de desarrollo asociados al proyecto y cero escuchas en 8080, 5173 y los puertos de depuración 9240–9245. Los navegadores aislados ya estaban cerrados. El servicio PostgreSQL existente y los procesos ajenos al proyecto se conservaron. No reiniciar automáticamente al retomar; comprobar la nueva tarea.
+
+Los respaldos, perfiles, registros y evidencias privadas permanecen en `.local/`; la memoria privada y la configuración real siguen fuera de Git. No se eliminaron archivos ni se modificaron proyectos vecinos.
+
+## Pendientes vigentes, en orden de trabajo
+
+1. **Ventas a cuotas y cobros pendientes.** Registrar importe, abonos y saldo, distinguiendo venta de dinero recibido. La propietaria exige autorización explícita mediante selector de estado o control equivalente antes de incorporar una venta al total final de cobros/ingresos confirmados. Registrar una venta o un abono no autoriza sumar su importe completo. Precisar qué indicadores se afectan y cómo se contabilizan los abonos antes de implementar. Detalle en [Ventas](VENTAS_ADMIN.md#pendiente-prioritario-ventas-a-cuotas-y-abonos).
+2. **Costos variables por resurtido.** Conservar costo y unidades restantes por recepción/lote, fecha e identificador de compra; valorar el stock sumando unidades restantes por su costo de origen. Las recepciones nuevas no revalorizan mercancía anterior ni ganancias históricas. Falta acordar asignación a ventas, por ejemplo FIFO; todavía no está elegida. Detalle en [Compras](COMPRAS_GASTOS.md#pendiente-costos-variables-por-resurtido).
+3. **Contenido pendiente.** Fotografías y descripción oficiales de Kit Pizza Planet (ID 3) y Rubor En Crema Lotso (ID 5). Para separar Gloss Corazón (ID 18) en tonos 03/05/06, confirmar existencias reales por tono y fotografías identificables, sin inventar reparto, precios ni imágenes.
+4. **Compra pública real.** Pedido persistido desde carrito y confirmación por WhatsApp propuestos para después de las prioridades anteriores; checkout, cobros y pagos públicos siguen sin implementar. El carrito actual no crea pedidos ni reserva stock.
+5. **Condiciones y despliegue.** Confirmar identidad y condiciones comerciales de pagos/envíos y finalizar políticas; preparar alojamiento, HTTPS, orígenes, secretos de producción y respaldos automáticos con restauración comprobada.
+6. **Aplazados.** Caja/movimientos de dinero, reportes avanzados y configuración permanecen fuera del menú hasta que se autorice su alcance. No incorporarlos por inferencia a un ajuste visual o al retomar contexto.
+
+Antes de futuras migraciones o ajustes de inventario, consultar la base actual y respaldar. No reimportar el Excel histórico ni ejecutar migraciones locales ya aplicadas por suposición. Los valores y PID de revisiones anteriores son antecedentes.
+
+## Revisión original y avances históricos
+
+Las siguientes secciones conservan la secuencia de revisiones anteriores. Sus cifras, hallazgos ya corregidos y sugerencias de prioridad deben interpretarse según su fecha; el estado actual está arriba.
 
 Bloomi Bunny tiene una base funcional para presentar como avance de tienda y administración de inventario. Todavía no es una tienda con pedidos y pagos completos. Esta revisión cubre el código propio, configuración, SQL, herramientas y recursos del proyecto; dependencias, compilados, perfiles de navegador y copias privadas se clasifican como artefactos, sin auditarlos como código propio.
 
@@ -294,6 +376,6 @@ Durante la jornada se preparó el repositorio independiente de Bloomi Bunny y se
 
 La revisión corrigió publicación de referencias ocultas/provisionales, el límite de 100 productos administrativos, precisión de importes, ajustes concurrentes de inventario, selección de marca/proveedor, filtros de ventas, sesiones y buscador del panel. También redujo la descarga inicial mediante carga de pantallas bajo demanda y retiró del menú las funciones aplazadas. Validación de cierre: 77 pruebas backend, build frontend con tipos, regresiones de los cinco flujos y comparación de datos comerciales intactos.
 
-La siguiente prioridad sugerida es conectar el carrito con un pedido real y confirmación por WhatsApp. Pedidos y cobros públicos siguen pendientes. Caja/movimientos de dinero, reportes avanzados y configuración continúan aplazados. También quedan por completar contenido real de productos, condiciones comerciales definitivas y preparación del despliegue con respaldos automáticos y restauración comprobada.
+En esa revisión se propuso conectar el carrito con un pedido real y confirmación por WhatsApp. La decisión posterior de la propietaria prioriza ventas a cuotas/abonos y costos por resurtido, como se precisa en el estado vigente del 28 de octubre. Pedidos y cobros públicos siguen pendientes; Caja, reportes avanzados y configuración continúan aplazados.
 
 La memoria privada de continuidad se actualizó en `PROJECT_MEMORY.md`, conservada localmente y excluida de Git. Los respaldos, datos comerciales y evidencias privadas también permanecen locales. Este informe y las guías de los módulos forman parte de la documentación versionada del proyecto.

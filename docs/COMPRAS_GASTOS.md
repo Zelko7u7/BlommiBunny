@@ -48,3 +48,16 @@ El conjunto backend tiene 77 pruebas aprobadas después de la revisión general.
 Las 35 pruebas de integración requieren `BLOOMI_TEST_DB_URL`, `BLOOMI_TEST_DB_USERNAME` y `BLOOMI_TEST_DB_PASSWORD`, con un esquema nuevo cuyo nombre empiece por `bloomi_sales_test_`. Usan `create-drop`: no ejecutarlas contra datos comerciales. El procedimiento de configuración es el de [ventas administrativas](VENTAS_ADMIN.md).
 
 Build frontend con tipos aprobado. Las pruebas del navegador usan respuestas simuladas para recibir/anular mercancía, registrar/anular gastos y recuperar respuestas inciertas; verifican formularios, detalles e historiales a 320/390/768/1440 px. Los datos comerciales se compararon antes y después de la migración y pruebas, sin registrar operaciones reales.
+
+## Pendiente: costos variables por resurtido
+
+Decisión de continuidad vigente al cierre del 28 de octubre de 2026. **Todavía no implementada:** la compra actual guarda su costo histórico, pero el inventario no conserva unidades restantes por lote y las ventas utilizan el costo de referencia del producto.
+
+- Permitir que una recepción tenga un costo distinto para el mismo SKU/tono, conservando costo unitario y unidades restantes por recepción/lote.
+- Identificar cada recepción por fecha e identificador de compra para mantener la trazabilidad.
+- Calcular «Valor del stock a costo de compra» sumando las unidades restantes por su costo de origen. La mercancía nueva aumenta el total por su propio costo y cantidad, sin revalorizar las unidades anteriores.
+- Conservar los costos y márgenes de ventas históricas; no sobrescribirlos al recibir mercancía o cambiar un precio de referencia.
+- Acordar cómo se asignan unidades de cada lote a una venta. FIFO es una posibilidad, todavía no una decisión. La fecha de compra por sí sola no demuestra qué costo se vendió.
+- Antes de migrar, verificar existencias actuales, respaldar y definir el tratamiento del stock previo y de anulaciones, sin inventar procedencias ni costos desconocidos.
+
+Actualización del 30 de octubre: [abonos y autorización de cobros](VENTAS_ADMIN.md#pendiente-prioritario-ventas-a-cuotas-y-abonos) implementados. Los costos por recepción/lote pasan a ser el siguiente pendiente funcional; aún falta acordar el método de asignación. Caja y saldos de dinero continúan aplazados. Las 77 pruebas descritas antes corresponden al cierre de la revisión general; el conjunto posterior a galerías aprobó 89, incluidas 41 PostgreSQL aisladas. Resumen vigente en [revisión técnica](REVISION_PROYECTO.md).

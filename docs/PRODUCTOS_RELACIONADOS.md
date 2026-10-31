@@ -58,3 +58,13 @@ Diez pruebas de recomendaciones cubren prioridades, complementos, Toy Story/Lots
 Pruebas de navegador con el catálogo real: recomendaciones de labios, ojos y Toy Story; exclusión del actual y duplicados; precios/portadas; flechas y límites a 1440/1024/768/390/320 px; arrastre táctil con eventos de pantalla; agregado sin navegación ni salto del carrusel; límite de stock; selección de tono; cambio de producto con regreso al inicio y nuevo resultado; tarjetas compartidas del catálogo. Escenarios de pocos productos, inactivos y agotados se simularon interceptando exclusivamente respuestas de lectura. Sin coincidencias la sección se oculta y con un solo resultado no hay flechas. No hubo errores JavaScript ni peticiones de escritura desde las pruebas.
 
 Evidencias privadas en `.local/related-products-2026-10-28/`, con capturas y `browser-results.json`. La comparación comercial incluye productos, imágenes ordenadas, operaciones, movimientos, cuentas, favoritos y catálogos. La actualización no modifica sus datos.
+
+## Distribución final y cierre del 28 de octubre de 2026
+
+El carrusel comparte el contenedor público máximo de 1400 px y los espaciados fluidos definidos en `store.css`. El cálculo de cada tarjeta contempla el espacio entre tarjetas y los márgenes interiores de la pista: conserva cuatro visibles desde 1200 px, tres entre 900–1199, dos entre 640–899 y tarjetas del 76 % de la pista en móvil. El catálogo utiliza sus propios puntos de cambio, con hasta cinco columnas; no se fuerza ese número en el carrusel.
+
+Las fotografías mantienen `object-fit:contain`, con alturas proporcionadas y limitadas; los precios y botones siguen alineados. La previsualización publicada en `6ca4b19` conserva ambas capas dentro del mismo marco, respeta movimiento reducido y no requiere un segundo toque en móvil. El ajuste de distribución se publicó en `da7b119`, sin cambios del motor de recomendaciones, API, stock ni precios.
+
+La comprobación final incluyó 375/430/768/1024/1440/1920 px, flechas y sus extremos deshabilitados, deslizamiento táctil, Agregar sin navegación accidental y apertura de otro producto con regreso al inicio. Diez pruebas existentes y build con tipos aprobados. Evidencias adicionales privadas en `.local/hover-preview-2026-10-28/` y `.local/layout-2026-10-28/`.
+
+Los servicios y auxiliares de desarrollo quedaron apagados al cierre. Los pendientes de cuotas, costos por lote, contenido y compra real están reunidos en [revisión técnica](REVISION_PROYECTO.md); no forman parte de esta sección ya terminada.

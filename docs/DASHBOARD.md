@@ -2,6 +2,17 @@
 
 En `/admin`, el resumen muestra ventas e inventario consultados en la base de datos. No contiene porcentajes ni series de ejemplo. Requiere una sesión ADMIN.
 
+Actualización del 30 de octubre de 2026: [abonos y autorización de cobros](VENTAS_ADMIN.md#abonos-saldo-y-autorización-de-cobros) implementados. El Dashboard separa cobros autorizados, abonos y saldo del importe vendido. Siguen pendientes los [costos por lote de recepción](COMPRAS_GASTOS.md#pendiente-costos-variables-por-resurtido); el margen de productos sigue sin equivaler a utilidad neta.
+
+## Cobros, abonos y saldo
+
+- **Cobros autorizados de hoy/del mes:** total de ventas vigentes completamente pagadas y con autorización explícita vigente, por fecha de autorización en Colombia. Registrar una venta o completar sus abonos no las incluye automáticamente.
+- **Abonos registrados del mes:** pagos no anulados de ventas vigentes por fecha real del pago, aunque la venta aún no esté autorizada. Incluye parciales y pagos completos. No sumar este indicador a los cobros autorizados: pueden representar el mismo dinero.
+- **Saldo pendiente total:** suma del saldo de todas las ventas vigentes con pagos revisados, independiente del mes. Un aviso identifica las ventas anteriores cuyos pagos siguen sin revisar; estas no se incluyen inventando una deuda.
+- Anular un abono recalcula el saldo y revoca la autorización. Anular una venta la excluye de los indicadores; sus abonos se conservan como historial, sin efectuar reembolsos. Retirar/reautorizar un cobro cambia su inclusión y periodo vigente; los eventos auditados conservan el historial.
+
+Los siguientes indicadores conservan su cálculo por fecha de venta y ahora se rotulan **Importe vendido** para distinguirlos del dinero recibido. Incluyen ventas con pagos pendientes; sus costos históricos, margen, gráficos y ranking no dependen de la autorización del cobro. El endpoint incorpora `authorizedCollectionsToday`, `authorizedCollectionsMonth`, `recordedPaymentsMonth`, `outstandingBalance` y `unreviewedPayments`.
+
 ## Indicadores
 
 - **Ventas de hoy y del mes:** suma de los totales después de descuentos, con número de ventas confirmadas. Las anuladas quedan excluidas.

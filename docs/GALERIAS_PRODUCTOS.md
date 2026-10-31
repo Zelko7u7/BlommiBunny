@@ -1,6 +1,6 @@
 # Fotografías, galerías y descripciones de Bloomi Bunny
 
-Actualización del 28 de octubre de 2026. El catálogo real conserva sus 25 referencias y 84 unidades. Se incorporaron las 21 descripciones oficiales a 23 SKU, contando los tonos separados de Toy Story. No se modificaron precios, costos, cantidades, categorías, identificadores, nombres ni estados de publicación.
+Actualización del 28 de octubre de 2026. En las comprobaciones de la jornada se conservaron 25 referencias y 84 unidades; consultar la base antes de futuros cambios, porque estas cifras son una referencia temporal. Se incorporaron las 21 descripciones oficiales a 23 SKU, contando los tonos separados de Toy Story. La importación no modificó precios, costos, cantidades, categorías, identificadores, nombres ni estados de publicación.
 
 ## Resultado por producto
 
@@ -50,9 +50,9 @@ Inventario → Editar permite consultar y cambiar las fotografías secundarias e
 
 - Labial Doble Vaquero conserva los SKU 11 y 12, tonos 2 y 3. Cada uno tiene tres fotografías propias. Seleccionar otro tono reinicia la galería en su portada y cambia el SKU del carrito.
 - Tintas Vaqueras conserva los SKU 13 y 6, tonos 4 y 6. Cada uno tiene su propia fotografía. No se mezclan sus imágenes.
-- Tinta Gloss Corazón tiene un único registro de inventario, ID 18. Sus fotografías incluyen el producto y la carta general de tonos. El documento confirma 03, 05 y 06, pero no reparte las seis unidades entre ellos: no se crean SKU, precios, selectores de compra ni existencias ficticias por tono. Para venderlos separadamente falta confirmar ese reparto.
+- Tinta Gloss Corazón tiene un único registro de inventario, ID 18. Sus fotografías incluyen el producto y la carta general de tonos. El documento confirma 03, 05 y 06, pero no reparte las existencias entre ellos: no se crean SKU, precios, selectores de compra ni existencias ficticias por tono. Para venderlos separadamente falta confirmar ese reparto y las fotos identificables de cada tono.
 - Kit Pizza Planet, ID 3, y Rubor En Crema Lotso, ID 5, no tienen descripción oficial ni fotografías propias en el material entregado. Se conservan sin asignarles contenido de otros productos.
-- Los ocho registros actualizados que estaban ocultos (1, 2, 4, 7, 8, 9, 10 y 19) permanecen ocultos. Sus imágenes y descripciones se pueden revisar en Inventario antes de habilitarlos expresamente. Las referencias públicas actuales conservan su estado.
+- Durante la importación se conservaron ocultos los ocho registros que entonces lo estaban (1, 2, 4, 7, 8, 9, 10 y 19). En una comprobación posterior del mismo día la API ya entregaba 23 SKU publicados, equivalentes a 21 tarjetas agrupadas; las tareas de recomendaciones y estilos preservaron ese estado. No utilizar la lista anterior como estado actual ni cambiar publicación automáticamente al repetir una verificación.
 
 ## Persistencia y actualización reproducible
 
@@ -86,3 +86,11 @@ python tools/update_product_media.py --verify
 Se verificaron las 66 rutas con HTTP 200, MIME correcto, SHA256 y decodificación real en Chrome. Las 67 fotografías originales conservaron sus huellas. Las pruebas de navegador comprueban miniaturas, flechas, ampliación, Escape/foco, carga lenta, fotos fallidas, recuperación, separación de tonos, límite real de carrito y párrafos íntegros. Ficha y zoom sin desbordamientos a 320/390/768/1440 px. El guardado administrativo se interceptó y simuló; no creó escrituras comerciales de prueba.
 
 La comparación de datos confirma que las 25 referencias, precios, stock, categorías, códigos, publicación, cuentas, favoritos, catálogos, ventas, compras, gastos y movimientos se conservaron. Solo cambiaron descripciones, portadas faltantes, galerías y sus metadatos de actualización/versionado. La segunda ejecución del importador produjo cero cambios.
+
+## Ajustes posteriores y cierre del día
+
+La galería quedó vertical también en móvil y sus miniaturas son circulares: 68 × 68 px en escritorio/tablet y 44 × 44 px en móvil pequeño. El último ajuste visual comparte el contenedor público de 1400 px, equilibra las dos columnas desde 960 px y centra verticalmente la galería; por debajo, apila foto e información. La descripción conserva todos sus párrafos, con ancho de lectura limitado y título lateral en escritorio. No cambia datos ni imágenes.
+
+Las tarjetas compartidas muestran la primera secundaria ordenada del mismo SKU al pasar el mouse; mantienen la portada si no existe o falla. Ese efecto no mezcla tonos ni se activa por toque móvil. Las fichas incorporan el carrusel descrito en [productos relacionados](PRODUCTOS_RELACIONADOS.md).
+
+Se comprobó la distribución final a 375/430/768/1024/1440/1920 px, sin desbordamiento horizontal, conservando miniaturas, flechas, zoom, foco, selector de tonos y carrito. Backend/frontend y auxiliares quedaron apagados por petición de la propietaria al finalizar; respaldos y evidencias privadas se conservan. Resumen y pendientes en [revisión técnica](REVISION_PROYECTO.md).

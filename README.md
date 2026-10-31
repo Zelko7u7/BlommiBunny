@@ -1,10 +1,46 @@
 # Bloomi Bunny
 
-Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos y pagos en línea siguen pendientes.
+Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, solicitudes de compra por WhatsApp, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos persistidos y pagos electrónicos siguen pendientes.
+
+## Carrusel de banners
+
+El Hero muestra Bienvenida y Labios con textos HTML, altura estable de 310 px en escritorio, desvanecido lavanda y versión móvil sin fotografías detrás del texto. Avanza cada 6 segundos, con flechas laterales, indicadores inferiores y gesto táctil. No muestra control de pausa/reanudación. El cursor, el foco y el gesto táctil pausan temporalmente; cuando termina la interacción y el foco/cursor salen del carrusel comienza un nuevo intervalo completo. La pestaña oculta y el movimiento reducido también detienen el cambio automático. La preferencia de movimiento reducido elimina la transición, conservando los controles manuales.
+
+La configuración está en `BloomiFront/src/data/hero-banners.ts`. Para añadir un tercer banner:
+
+1. Conservar el original en `BloomiBanners/` y copiar el WebP a `BloomiFront/public/banners/`, sin alterar la imagen.
+2. Añadir un objeto con `id` único, `image` (ruta pública), `label`, `title`, `description`, `buttonText` y `buttonAction` al arreglo `heroBanners`.
+3. Usar `buttonAction: { type: 'catalog' }` para ir al catálogo actual; para una categoría, usar `{ type: 'category', category: 'Nombre real', aliases: ['Alias opcional'], fallbackQuery: 'búsqueda alternativa' }`. No crear categorías en la base para un banner. El CTA de Labios utiliza la categoría real existente, limpia búsquedas incompatibles y conserva el orden seleccionado.
+
+`BannerCarousel.tsx` genera controles, indicadores y navegación circular según el número de objetos, sin duplicar componentes. `StoreHero.tsx` conecta las acciones con los filtros de la tienda. Build con tipos, 38 pruebas frontend y comprobaciones en navegador a 375/768/1024/1440/1920 px aprobados; sin cambios de backend, productos o base de datos.
+
+## Pedidos por WhatsApp desde el carrito
+
+El botón **Realizar pedido por WhatsApp** prepara todos los artículos con sus SKU/tonos, cantidades, precios COP y subtotal para que el cliente los revise y envíe manualmente, sin registro obligatorio. Actualiza el catálogo al abrir el carrito y bloquea solicitudes incompletas o inválidas. Incluye copia completa y contacto manual si la ventana se bloquea o el mensaje excede el límite preventivo del enlace.
+
+Configurar `VITE_WHATSAPP_NUMBER=573242213841` en `BloomiFront/.env.local` (número público oficial confirmado; también aparece en `.env.example`). Debe tener formato internacional sin `+`, espacios o guiones; sin una configuración válida la función queda deshabilitada. No vacía el carrito, reserva stock, crea ventas ni registra cobros. Configuración, variantes, límites y pruebas en [VENTAS_WHATSAPP.md](docs/VENTAS_WHATSAPP.md).
+
+Validación de esta funcionalidad: build con tipos, 33 pruebas frontend, 52 backend sin base de datos y navegador responsive aprobados; 59 integraciones backend omitidas. No se modificaron backend, base de datos ni inventario comercial. Las aperturas de WhatsApp de las pruebas fueron simuladas, sin mensajes reales.
+
+## Avance del 30 de octubre de 2026
+
+Ventas permite elegir **Pago pendiente, Pago parcial o Pago completo** al registrar la venta, incluyendo el abono inicial y su medio cuando corresponda. También permite añadir pagos posteriores, consultar saldo y filtrar por estado. Toda venta nueva comienza sin autorización. Cuando el saldo llega a cero, la administradora puede autorizar expresamente el cobro con motivo; se conserva responsable, fecha e historial. Corregir un abono retira la autorización. El Dashboard distingue importe vendido, abonos por fecha del pago, cobros completos autorizados por fecha de autorización y saldo pendiente total. Guía y límites en [ventas administrativas](docs/VENTAS_ADMIN.md).
+
+La migración aditiva `010_sale_payments.sql` está aplicada localmente con respaldo. No inventa pagos anteriores ni modifica stock; una instalación existente distinta debe revisar y respaldar su base antes de aplicarla. Validación posterior al selector de pago inicial: 111 pruebas backend aprobadas sin omisiones (59 PostgreSQL aisladas), build con tipos y navegador responsive aprobados. No se crearon ventas comerciales de prueba. Backend y frontend quedan activos. Costos por lote son el siguiente pendiente; cuotas programadas, caja, pedidos persistidos y pagos electrónicos públicos siguen sin implementarse.
 
 Las fichas incorporan galerías ordenadas por producto/tono, miniaturas, flechas, ampliación y descripciones oficiales persistidas en PostgreSQL. Inventario permite editar las fotografías secundarias. Alcance, productos actualizados, excepciones y procedimiento seguro de importación en [galerías de productos](docs/GALERIAS_PRODUCTOS.md).
 
 Las fichas también incluyen **Te puede interesar**, un carrusel de hasta seis productos disponibles relacionados por categoría, tipo, complementariedad y temática. Reutiliza el catálogo público y las tarjetas existentes, respeta tonos y límites del carrito y no requiere consultas individuales ni migraciones. Reglas y validación en [productos relacionados](docs/PRODUCTOS_RELACIONADOS.md).
+
+## Estado al cierre del 28 de octubre de 2026
+
+Identidad lavanda pastel unificada, galerías verticales con miniaturas circulares, 21 descripciones oficiales persistidas en 23 SKU y previsualización de la segunda fotografía al pasar el mouse. La distribución pública comparte un contenedor máximo de 1400 px y márgenes interiores fluidos; el catálogo adapta entre una y cinco columnas. Las fichas equilibran galería e información y conservan tonos, carrito y recomendaciones.
+
+Los cinco avances del día están publicados en `main`, hasta `da7b119`: paleta lavanda, integración de fotografías/descripciones, recomendaciones, previsualización con mouse y distribución responsive. La [revisión técnica](docs/REVISION_PROYECTO.md) reúne el alcance, las comprobaciones y los pendientes.
+
+Backend, frontend y auxiliares de desarrollo quedaron **apagados por petición de la propietaria** al terminar la jornada. Los navegadores aislados de prueba están cerrados. Para retomar, arrancar los servicios siguiendo las instrucciones inferiores; los PID históricos no acreditan que un proceso siga activo.
+
+Las prioridades registradas en este cierre histórico eran ventas a cuotas/abonos y costos por lote. Los abonos y la autorización de cobros se completaron el 30 de octubre; continúan pendientes [costos variables por lote de recepción](docs/COMPRAS_GASTOS.md#pendiente-costos-variables-por-resurtido), pedido real desde carrito, pagos públicos, contenido de dos productos, confirmación de existencias por tono de Gloss Corazón y preparación del despliegue.
 
 ## Estructura
 
@@ -42,11 +78,12 @@ mvn test
 # Desde BloomiFront
 npm run build
 .\node_modules\.bin\tsc.cmd --noEmit --noCheck false --incremental false
+node --test tests/*.test.mjs
 ```
 
-Actualización del 22 de octubre de 2026: build frontend aprobado con comprobación de tipos activada, sin exclusiones `@ts-nocheck`. Las pantallas administrativas se cargan bajo demanda: el JavaScript inicial ronda 421 kB y el gráfico se descarga al abrir Dashboard. La compilación ya no muestra el aviso de tamaño. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
+Actualización del 28 de octubre de 2026: build frontend aprobado con comprobación de tipos activada, sin exclusiones `@ts-nocheck`. Las pantallas administrativas se cargan bajo demanda: el JavaScript inicial ronda 430 kB y el gráfico se descarga al abrir Dashboard. La compilación no muestra el aviso de tamaño. Diez pruebas de recomendaciones aprobadas y comparación visual antes/después a 375, 430, 768, 1024, 1440 y 1920 px sin desbordamiento horizontal. Ver [revisión técnica](docs/REVISION_PROYECTO.md).
 
-El backend cuenta con 77 pruebas aprobadas: 20 de acceso/validación, 17 de productos, 5 unitarias del dashboard y 35 de integración PostgreSQL de ventas, dashboard, compras, gastos y revisión general. Las 35 de integración se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [ventas administrativas](docs/VENTAS_ADMIN.md), [dashboard](docs/DASHBOARD.md) y [compras y gastos](docs/COMPRAS_GASTOS.md).
+El conjunto completo del backend aprobó 89 pruebas durante la integración de galerías, incluidas 41 de integración PostgreSQL de productos, ventas, dashboard, compras, gastos y revisión general. Esas 41 se omiten en el `mvn test` normal y exigen un esquema aislado de pruebas; ver [galerías](docs/GALERIAS_PRODUCTOS.md), [ventas administrativas](docs/VENTAS_ADMIN.md), [dashboard](docs/DASHBOARD.md) y [compras y gastos](docs/COMPRAS_GASTOS.md). En el cierre de documentación no se reiniciaron servicios ni se repitieron pruebas ya aprobadas.
 
 Ventas permite registrar operaciones externas, consultar historial y detalle y anular devolviendo existencias. El dashboard usa ventas confirmadas, costos históricos, margen de productos, gráficos reales y alertas con filtros de inventario. Trabaja con fechas de Colombia y señala costos desconocidos. Compras registra recepciones de proveedores y suma inventario; Gastos conserva conceptos, importes y referencias de comprobantes. Ambos tienen historial, detalle, filtros, totales y anulación auditada. Caja/movimientos de dinero, reportes y configuración siguen pendientes. Las políticas están en borrador.
 
