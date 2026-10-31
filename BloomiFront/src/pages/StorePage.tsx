@@ -12,6 +12,7 @@ import ProductRecommendations from '../components/store/ProductRecommendations';
 import CatalogFilters from '../components/store/CatalogFilters';
 import CartDialog from '../components/store/CartDialog';
 import ProductPhoto from '../components/store/ProductPhoto';
+import WhatsAppCheckout from '../components/store/WhatsAppCheckout';
 import { useAuth } from '../contexts/AuthContext';
 import { readCart, changeQuantity, cartLines } from '../services/cart';
 
@@ -65,7 +66,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
   });
   const [cartOpen, setCartOpen] = useState(false);
   const cartTrigger = useRef<HTMLElement | null>(null);
-  const openCart = (trigger: HTMLElement) => { cartTrigger.current = trigger; setCartOpen(true); };
+  const openCart = (trigger: HTMLElement) => { cartTrigger.current = trigger; void storeProducts.refetch(); setCartOpen(true); };
   useEffect(() => { try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch { /* Shopping remains available without local storage. */ } }, [cart, cartKey]);
   const fullCatalog = favoritesPage ? buildCatalog(session ? favorites.data ?? [] : [], true, false) : buildCatalog(data);
   const categories = [...new Set(fullCatalog.flatMap(entry => entry.variants.map(variant => variant.category)))].sort((a, b) => a.localeCompare(b, 'es'));
@@ -75,7 +76,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
   const filtersActive = !!(query.trim() || category);
   const catalogBackTo = `${location.pathname}${location.search}#catalogo`;
   const detailProducts = detail.data && !detail.isError ? [detail.data, ...(detail.data.variants ?? [])] : [];
-  const cartProducts = [...detailProducts, ...data.filter(product => !detailProducts.some(current => current.id === product.id) && !(detail.isError && (detail.error as any)?.code === 'NOT_FOUND' && product.id === Number(productId)))];
+  const cartProducts = cartOpen ? data : [...detailProducts, ...data.filter(product => !detailProducts.some(current => current.id === product.id) && !(detail.isError && (detail.error as any)?.code === 'NOT_FOUND' && product.id === Number(productId)))];
   const lines = cartLines(cart, cartProducts);
   const count = lines.reduce((sum, line) => sum + line.quantity, 0);
   const total = lines.reduce((sum, line) => sum + line.product.salePrice * line.quantity, 0);
@@ -142,8 +143,8 @@ function Storefront({ cartKey }: { cartKey: string }) {
             <strong>{currency(product.salePrice * quantity)}</strong>
           </article>)}</div>
           <div className="cart-total"><span>Total de productos</span><strong>{currency(total)}</strong></div>
-          {lines.length > 0 && <p className="catalog-notice">La compra y el pago estarán disponibles próximamente.</p>}
         </>}
+        <WhatsAppCheckout cart={cart} products={data} checking={isLoading || storeProducts.isFetching} failed={isError} onRemove={id => setCart(current => current.filter(item => item.productId !== id))} onRefresh={() => { void storeProducts.refetch(); }}/>
         {cart.length > 0 && <button className="cart-clear" onClick={() => { setCart([]); toast.info('Carrito vaciado'); }}>Vaciar carrito</button>}
         <button className="primary" onClick={() => setCartOpen(false)}>Seguir explorando</button>
     </CartDialog>}

@@ -165,6 +165,26 @@
 .store .cart-item > div:not(.cart-photo) { min-width: 0; }
 .store .cart-item h3, .store .cart-item > strong { overflow-wrap: anywhere; }
 .store .cart-clear { min-height: 44px; }
+.store .whatsapp-checkout { display:grid; gap:12px; margin-block:20px; min-width:0; }
+.store .whatsapp-order-button { width:100%; min-height:50px; line-height:1.5; background:var(--color-primary); border-radius:12px; box-shadow:0 6px 14px var(--color-shadow-button); transition:background .2s,box-shadow .2s; }
+.store .whatsapp-order-button svg { flex-shrink:0; }
+.store .whatsapp-order-button:hover:not(:disabled) { background:var(--color-primary-hover); box-shadow:0 8px 18px var(--color-shadow-button); }
+.store .whatsapp-order-button:disabled { cursor:not-allowed; opacity:.6; }
+.store .checkout-explanation { margin:0; color:var(--color-text-secondary); font-size:12px; line-height:1.65; overflow-wrap:anywhere; }
+.store .checkout-notice,.store .checkout-issues { margin:0; padding:12px; color:var(--color-text); background:var(--color-primary-light); border:1px solid var(--color-border); border-radius:10px; font-size:13px; line-height:1.6; overflow-wrap:anywhere; }
+.store .checkout-issues p { margin-top:0; }
+.store .checkout-issues ul { padding-left:18px; margin-bottom:0; }
+.store .checkout-issues li+li { margin-top:12px; }
+.store .checkout-alternatives { display:grid; gap:8px; }
+.store .checkout-secondary { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:10px; background:var(--color-surface); color:var(--color-primary-hover); border:1px solid var(--color-border-strong); border-radius:10px; font:inherit; font-size:13px; text-decoration:none; cursor:pointer; }
+.store .checkout-secondary:hover:not(:disabled) { background:var(--color-primary-light); }
+.store .checkout-text-button { min-height:44px; background:transparent; color:var(--color-primary-hover); border:0; padding:8px 0; font:inherit; font-size:13px; text-align:left; text-decoration:underline; cursor:pointer; }
+.store .checkout-message { min-width:0; color:var(--color-text-secondary); font-size:12px; }
+.store .checkout-message summary { cursor:pointer; padding-block:12px; min-height:44px; }
+.store .checkout-message label { display:grid; gap:8px; }
+.store .checkout-message textarea { width:100%; resize:vertical; margin-bottom:8px; padding:12px; border:1px solid var(--color-border-strong); border-radius:8px; background:var(--color-surface); color:var(--color-text); font:inherit; line-height:1.6; }
+.store .whatsapp-checkout :focus-visible { outline:3px solid var(--color-primary-hover); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { .store .whatsapp-order-button { transition:none; } }
 .login-form .input input { min-width: 0; font-size: 16px; }
 .login-form .input button { min-width: 40px; min-height: 44px; display: grid; place-items: center; }
 .login-form form > small { display: block; color: var(--color-primary-hover); font-size: 12px; line-height: 1.5; }
