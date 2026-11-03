@@ -14,7 +14,8 @@ import java.util.*;
 @Service @Transactional
 public class AdminPurchaseService {
  private final PurchaseRepository purchases;private final ProductRepository products;private final SupplierRepository suppliers;private final InventoryMovementRepository movements;private final OperationSupport ops;
- public AdminPurchaseService(PurchaseRepository purchases,ProductRepository products,SupplierRepository suppliers,InventoryMovementRepository movements,OperationSupport ops){this.purchases=purchases;this.products=products;this.suppliers=suppliers;this.movements=movements;this.ops=ops;}
+ private final InventoryLotService lots;
+ public AdminPurchaseService(PurchaseRepository purchases,ProductRepository products,SupplierRepository suppliers,InventoryMovementRepository movements,OperationSupport ops,InventoryLotService lots){this.purchases=purchases;this.products=products;this.suppliers=suppliers;this.movements=movements;this.ops=ops;this.lots=lots;}
 
  public PurchaseResponse create(PurchaseRequest request,String actor){
   var fingerprint=ops.request(request.requestId(),request);
@@ -39,7 +40,7 @@ public class AdminPurchaseService {
    var item=new PurchaseItem();item.setPurchase(purchase);item.setProduct(product);item.setProductName(product.getName());item.setProductCode(product.getCode());item.setShade(product.getShade());item.setQuantity(line.quantity());item.setUnitCost(ops.amount(line.unitCost()));item.setSubtotal(ops.amount(line.unitCost().multiply(BigDecimal.valueOf(line.quantity()))));purchase.getItems().add(item);total=ops.amount(total.add(item.getSubtotal()));
   }
   purchase.setTotal(total);var saved=purchases.saveAndFlush(purchase);
-  for(var item:saved.getItems()){var product=item.getProduct();product.setStock(product.getStock()+item.getQuantity());movement(product,MovementType.PURCHASE,item.getQuantity(),"Compra #"+saved.getId()+" · "+actor);}
+  for(var item:saved.getItems()){var product=item.getProduct();lots.receive(product,saved,item);product.setStock(product.getStock()+item.getQuantity());movement(product,MovementType.PURCHASE,item.getQuantity(),"Compra #"+saved.getId()+" · "+actor);}
   products.flush();return map(saved);
  }
 
@@ -52,6 +53,8 @@ public class AdminPurchaseService {
   for(var entry:quantities.entrySet()){
    var product=products.lockById(entry.getKey()).orElseThrow(()->new ResourceNotFoundException("Producto original no encontrado"));
    if(product.getStock()<entry.getValue())throw new BusinessException("No se puede anular: stock insuficiente para "+product.getName()+". Parte de las unidades pudo venderse o ajustarse.");
+   var line=purchase.getItems().stream().filter(i->i.getProduct().getId().equals(entry.getKey())).findFirst().orElseThrow();
+   lots.cancelReceipt(product,line);
    product.setStock(product.getStock()-entry.getValue());movement(product,MovementType.ADJUSTMENT_OUT,entry.getValue(),"Anulación compra #"+purchase.getId()+" · "+actor);
   }
   purchase.setCancelled(true);purchase.setCancelledAt(ops.now());purchase.setCancelledBy(actor);purchase.setCancellationReason(explanation);purchases.flush();return map(purchase);

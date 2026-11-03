@@ -2,6 +2,26 @@
 
 Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, solicitudes de compra por WhatsApp, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos persistidos y pagos electrónicos siguen pendientes.
 
+## Avance de la jornada del 2 de noviembre de 2026
+
+Restock con costos por lote y salida FIFO, eliminación de lotes agotados salvo el último vacío, valorización del inventario y costos exactos de ventas. En la tienda, búsqueda superior y filtros desplegables; se retiró el contador público de productos y resultados. Se conservan cantidades del carrito y controles administrativos. La arquitectura y validaciones están en [revisión técnica](docs/REVISION_PROYECTO.md).
+
+Próximo ajuste visual acordado: artes independientes para PC y móvil y toda la imagen de cada banner clicable. Está pendiente de recibir los artes definitivos y de implementarse; los banners actuales conservan su contenido y enlaces HTML. También siguen pendientes contenido/tonos de productos y condiciones comerciales por confirmar.
+
+## Búsqueda superior y filtros desplegables
+
+La tienda incorpora una barra de búsqueda en la cabecera, visible en PC y móvil. En catálogo/favoritos filtra al escribir; Enter o la lupa llevan a los resultados. Desde una ficha o página informativa, enviar la búsqueda abre el catálogo. Categoría y orden están en el botón **Filtros**, cerrado inicialmente: se puede desplegar/ocultar sin perder selecciones. Muestra un indicador de filtros activos; **Limpiar filtros** conserva la búsqueda. Consulta, categoría y orden siguen en la URL. Conserva navegación, carrito y favoritos, con identidad lavanda.
+
+Build con TypeScript, 38 pruebas frontend y comprobaciones de navegador entre 320 y 1920 px aprobados. Sin cambios de backend o datos comerciales.
+
+## Retoma local del 2 de noviembre de 2026
+
+Avance posterior: **restock por lotes FIFO implementado**. Inventario → menú del producto → Ver lotes / Reponer permite consultar y reponer un SKU existente con el costo de esa compra. Los lotes agotados se eliminan, conservando solo el último vacío; compras y costos de ventas permanecen como historial independiente. Stock valorizado por lotes y devolución al costo original. Migración 011 aplicada localmente con respaldo, sin cambiar las 84 unidades anteriores. Guía en [Compras y lotes](docs/COMPRAS_GASTOS.md). Validación completa: 126 pruebas backend, 38 frontend, build con tipos y navegador responsive aprobados.
+
+Arquitectura revisada por carpetas y documentada en la sección inicial de [revisión técnica](docs/REVISION_PROYECTO.md). Backend y frontend quedaron activos en [API local](http://localhost:8080/api/store/products) y [tienda local](http://localhost:5173), con [panel administrativo](http://localhost:5173/admin). Usar `localhost` para mantener el origen CORS configurado. Este estado sustituye los apagados históricos descritos más abajo.
+
+Validación de la revisión inicial: build con TypeScript y 38 pruebas frontend aprobados; 52 pruebas backend aprobadas y 59 integraciones omitidas; 126 comprobaciones HTTP satisfactorias. Durante esa revisión los datos comerciales se conservaron y no se modificaron funcionalidades ni se ejecutaron importaciones o SQL manuales. El avance posterior de lotes descrito arriba incorporó la migración 011 y su validación completa.
+
 ## Carrusel de banners
 
 El Hero muestra Bienvenida y Labios con textos HTML, altura estable de 310 px en escritorio, desvanecido lavanda y versión móvil sin fotografías detrás del texto. Avanza cada 6 segundos, con flechas laterales, indicadores inferiores y gesto táctil. No muestra control de pausa/reanudación. El cursor, el foco y el gesto táctil pausan temporalmente; cuando termina la interacción y el foco/cursor salen del carrusel comienza un nuevo intervalo completo. La pestaña oculta y el movimiento reducido también detienen el cambio automático. La preferencia de movimiento reducido elimina la transición, conservando los controles manuales.

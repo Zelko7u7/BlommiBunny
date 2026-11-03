@@ -2,6 +2,8 @@
 
 En `/admin`, el resumen muestra ventas e inventario consultados en la base de datos. No contiene porcentajes ni series de ejemplo. Requiere una sesión ADMIN.
 
+Actualización del 2 de noviembre de 2026: los costos por lotes FIFO están implementados. Las ventas nuevas conservan un costo total exacto por línea, utilizado por el Dashboard sin multiplicar un promedio redondeado. Los costos de ventas anteriores y las reglas de cobros/abonos se conservan. Detalle en [Compras y lotes](COMPRAS_GASTOS.md#restock-por-lotes-y-costo-propio--2-de-noviembre-de-2026). Este estado sustituye las menciones históricas de lotes pendientes.
+
 Actualización del 30 de octubre de 2026: [abonos y autorización de cobros](VENTAS_ADMIN.md#abonos-saldo-y-autorización-de-cobros) implementados. El Dashboard separa cobros autorizados, abonos y saldo del importe vendido. Siguen pendientes los [costos por lote de recepción](COMPRAS_GASTOS.md#pendiente-costos-variables-por-resurtido); el margen de productos sigue sin equivaler a utilidad neta.
 
 ## Cobros, abonos y saldo

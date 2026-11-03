@@ -2,6 +2,8 @@
 
 El panel **Administración → Ventas**, ruta `/admin/ventas`, registra ventas de contado o con pago pendiente recibidas por WhatsApp, Instagram u otro canal. Desde el 30 de octubre de 2026 permite registrar abonos, consultar el saldo y autorizar expresamente la inclusión en cobros confirmados. No procesa pagos ni reembolsos.
 
+Desde el 2 de noviembre, las ventas nuevas descuentan **lotes FIFO** y guardan el costo total exacto de cada línea y un desglose por lote consumido. El detalle muestra ese costo y desglose; el promedio unitario no se utiliza para recalcular totales. Anular una venta restaura las cantidades a sus costos y orden originales, recreando los lotes eliminados cuando sea necesario. Las ventas anteriores conservan sus costos históricos. Reglas y límites en [Compras y lotes](COMPRAS_GASTOS.md#restock-por-lotes-y-costo-propio--2-de-noviembre-de-2026).
+
 ## Abonos, saldo y autorización de cobros
 
 El formulario de registro incluye **Estado del pago**: Pago pendiente (selección inicial), Pago parcial / abono inicial y Pago completo. Pendiente guarda la venta sin pagos; Parcial exige un importe mayor que cero y menor que el total; Completo registra el total después del descuento. Para pagos parciales/completos se elige el medio del pago recibido. Venta y pago inicial se guardan en una sola transacción, con un reintento común que evita duplicar pagos y stock. El pago inicial usa el día de registro en Colombia; los pagos posteriores permiten indicar su fecha real desde el detalle.

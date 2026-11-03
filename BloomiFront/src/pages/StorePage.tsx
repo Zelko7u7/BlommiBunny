@@ -10,6 +10,7 @@ import type { StoreProduct } from '../types';
 import ProductCard from '../components/store/ProductCard';
 import ProductRecommendations from '../components/store/ProductRecommendations';
 import CatalogFilters from '../components/store/CatalogFilters';
+import StoreSearch from '../components/store/StoreSearch';
 import CartDialog from '../components/store/CartDialog';
 import ProductPhoto from '../components/store/ProductPhoto';
 import StoreHero from '../components/store/StoreHero';
@@ -57,6 +58,16 @@ function Storefront({ cartKey }: { cartKey: string }) {
   };
   const favoriteDisabled = !!session && (favorites.isLoading || favorites.isError || favorites.change.isPending);
   const informationalPage = location.pathname === '/nosotros' || location.pathname.startsWith('/politicas/');
+  const catalogPage = !informationalPage && !productId;
+  const clearRefinements = () => setSearchParams(current => {
+    const next = new URLSearchParams(current); next.delete('category'); next.delete('sort'); return next;
+  }, { replace: true, preventScrollReset: true });
+  const searchCatalog = (value: string) => {
+    const params = catalogPage ? new URLSearchParams(location.search) : new URLSearchParams();
+    if (value) params.set('q', value); else params.delete('q');
+    navigate({ pathname: catalogPage ? location.pathname : '/', search: params.toString(), hash: '#catalogo' }, { preventScrollReset: true });
+    if (catalogPage) document.getElementById('catalogo')?.scrollIntoView();
+  };
   const detail = useStoreProduct(productId);
   const [selectedVariant, setSelectedVariant] = useState<{ routeId?: string; id: number }>();
   const purchaseProduct = selectedVariant?.routeId === productId ? detail.data?.variants?.find(variant => variant.id === selectedVariant?.id) ?? detail.data : detail.data;
@@ -95,12 +106,13 @@ function Storefront({ cartKey }: { cartKey: string }) {
   return <div className="store">
     <header className="store-header">
       <Link to="/" className="store-brand" aria-label="Bloomi Bunny, inicio"><div className="brand-mark">B</div><div><strong>Bloomi Bunny</strong><span>Belleza que florece</span></div></Link>
-      <nav aria-label="Navegación principal"><Link to="/#catalogo">Catálogo</Link><Link to="/nosotros">Nosotros</Link></nav>
+      <StoreSearch query={query} onChange={catalogPage ? value => updateFilter('q', value) : undefined} onSearch={searchCatalog}/>
       <div className="store-actions">
         {session ? <><span className="store-username">Hola, {session.username}</span>{session.role === 'ADMIN' && <Link to="/admin" aria-label="Administración"><Shield/><span className="admin-link-label">Administración</span></Link>}<button onClick={logout} aria-label="Cerrar sesión"><LogOut/></button></> : <Link to="/login" aria-label="Iniciar sesión"><UserRound/></Link>}
         <button className="favorites-header" onClick={() => session ? navigate('/favoritos') : requestLogin()} aria-label={`Favoritos${session ? `: ${favorites.data?.length ?? 0} productos` : ', inicia sesión'}`} title="Favoritos"><Heart/>{session && <b>{favorites.data?.length ?? 0}</b>}</button>
         <button onClick={event => openCart(event.currentTarget)} aria-label={`Carrito con ${count} productos`}><ShoppingBag/><b>{count}</b></button>
       </div>
+      <nav aria-label="Navegación principal"><Link to="/#catalogo">Catálogo</Link><Link to="/nosotros">Nosotros</Link></nav>
     </header>
     {informationalPage ? <LegalPage/> : productId ? <ProductDetails key={productId} backTo={location.state?.catalogBackTo ?? '/#catalogo'} product={purchaseProduct} variants={detail.data?.variants} onSelectVariant={id => setSelectedVariant({routeId: productId, id})} loading={detail.isLoading} error={detail.error} validId={validProductId(productId)} favorite={favoriteIds.has(purchaseProduct?.id ?? Number(productId))} favoriteDisabled={favoriteDisabled} onFavorite={() => toggleFavorite(purchaseProduct?.id ?? Number(productId))} cartQuantity={purchaseProduct ? Math.min(cart.find(item => item.productId === purchaseProduct.id)?.quantity ?? 0, purchaseProduct.stock) : 0} onRetry={() => detail.refetch()} onOpenCart={openCart} onAdd={quantity => {
       if (!purchaseProduct || detail.isError) return;
@@ -110,8 +122,8 @@ function Storefront({ cartKey }: { cartKey: string }) {
     }} recommendations={purchaseProduct && !detail.isError && !isError ? <ProductRecommendations key={purchaseProduct.id} current={purchaseProduct} products={data} cart={cart} backTo={location.state?.catalogBackTo ?? '/#catalogo'} onAdd={addProduct}/> : undefined}/> : <>
     {!favoritesPage && <StoreHero categories={categories}/>}
     <main id="catalogo" className="store-catalog">
-      <div className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div><span role="status" aria-live="polite" aria-atomic="true">{catalogLoading ? 'Consultando…' : catalogError ? 'Sin actualizar' : `${catalog.length}${filtersActive ? ` de ${fullCatalog.length}` : ''} ${catalog.length === 1 && !filtersActive ? 'producto' : 'productos'}`}</span></div>
-      {(!favoritesPage || session) && <CatalogFilters query={query} category={category} sort={sort} categories={categories} onChange={updateFilter} onReset={resetFilters}/>}
+      <div className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div></div>
+      {(!favoritesPage || session) && <CatalogFilters key={location.pathname} category={category} sort={sort} categories={categories} onChange={updateFilter} onReset={clearRefinements}/>}
       {favoritesPage && !session ? <p className="state">Inicia sesión para guardar y consultar tus favoritos. <Link to="/login">Ingresar</Link></p> : <>
         {catalogLoading && <p className="catalog-notice" role="status">{favoritesPage ? 'Cargando favoritos…' : 'Consultando precios y disponibilidad…'}</p>}
         {catalogError && <p className="catalog-notice catalog-error" role="alert">No pudimos actualizar {favoritesPage ? 'tus favoritos' : 'los productos'}. Revisa tu conexión y vuelve a intentarlo. <button type="button" onClick={() => favoritesPage ? favorites.refetch() : storeProducts.refetch()}>Reintentar</button></p>}

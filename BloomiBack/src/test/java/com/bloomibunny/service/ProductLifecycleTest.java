@@ -23,9 +23,16 @@ class ProductLifecycleTest {
  @Mock BrandRepository brands;
  @Mock SupplierRepository suppliers;
  @Mock InventoryMovementRepository movements;
+ @Mock InventoryLotService lots;
  @InjectMocks ProductServiceImpl service;
 
- Product product(){var c=new Category();c.setName("Labios");var p=new Product();p.setName("Gloss");p.setCode("TEST-GLOSS");p.setCategory(c);p.setStock(3);p.setPurchasePrice(new BigDecimal("5000"));p.setSalePrice(new BigDecimal("12000"));p.setImageUrl("/products/gloss.png");return p;}
+ @BeforeEach void lotCollaborator(){
+  lenient().when(products.lockById(anyLong())).thenAnswer(i->products.findById(i.getArgument(0)));
+  lenient().when(lots.values(anyList())).thenAnswer(i->{var result=new HashMap<Long,InventoryLotService.Valuation>();for(Product p:i.<List<Product>>getArgument(0))result.put(p.getId(),new InventoryLotService.Valuation(p.isCostConfirmed()?p.getPurchasePrice().multiply(BigDecimal.valueOf(p.getStock())):BigDecimal.ZERO,p.isCostConfirmed()?0:p.getStock()));return result;});
+ }
+
+ long nextProductId=1;
+ Product product(){var c=new Category();c.setName("Labios");var p=new Product();ReflectionTestUtils.setField(p,"id",nextProductId++);p.setName("Gloss");p.setCode("TEST-GLOSS");p.setCategory(c);p.setStock(3);p.setPurchasePrice(new BigDecimal("5000"));p.setSalePrice(new BigDecimal("12000"));p.setImageUrl("/products/gloss.png");return p;}
  ProductRequest request(){return new ProductRequest("Gloss","TEST-GLOSS",1L,null,null,null,null,null,new BigDecimal("5000"),new BigDecimal("12000"),3,1,null,true,"/products/gloss.png",false,true,null,null,null);}
 
  @Test void disablingAndEnablingChangesOnlyPublication(){

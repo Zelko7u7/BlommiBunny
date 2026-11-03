@@ -36,8 +36,9 @@ public final class SaleDtos {
  public record ReviewPaymentsRequest(@NotNull @Min(0) Long expectedVersion,
   @NotBlank @Size(min=5,max=500) String reason) {}
  public record CollectionEventResponse(Long id,String action,String reason,String recordedBy,Instant date) {}
+ public record CostAllocation(String reference,int quantity,BigDecimal unitCost) {}
  public record SaleLine(Long productId, String product, String code, String shade, int quantity,
-  BigDecimal unitPrice, BigDecimal unitCost, BigDecimal subtotal) {}
+  BigDecimal unitPrice, BigDecimal unitCost, BigDecimal subtotal,BigDecimal costTotal,List<CostAllocation> costAllocations) {}
  public record SaleResponse(Long id, String customer, Instant date, PaymentMethod paymentMethod, SaleChannel channel,
   BigDecimal subtotal, BigDecimal discount, BigDecimal total, BigDecimal costTotal, BigDecimal grossProfit,
   String notes, String recordedBy, boolean cancelled, Instant cancelledAt, String cancellationReason,

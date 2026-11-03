@@ -2,13 +2,31 @@
 
 Compras registra mercancía recibida y Gastos registra gastos realizados del negocio. Las dos secciones requieren ADMIN y permiten consultar historial, detalle, fechas, referencias, notas y anulación con motivo. Movimientos de dinero y saldos quedan pendientes.
 
+## Restock por lotes y costo propio — 2 de noviembre de 2026
+
+Implementado. Cada SKU conserva su código y precio de venta; cada recepción crea un lote con cantidad, costo unitario, fecha y número de compra. En **Inventario → menú del producto → Ver lotes / Reponer** se consulta la cola y se abre Compras con el producto/tono seleccionado. También se puede entrar directamente en Compras. El costo de la nueva recepción empieza vacío y se confirma expresamente, en COP por unidad; no se copia automáticamente el precio anterior.
+
+Ejemplo: tres unidades a $10.000 y cinco recibidas a $12.000 representan ocho unidades y $90.000 de costo de inventario. Una venta de cuatro consume primero las tres anteriores y una nueva: costo de venta $42.000, cuatro restantes a $12.000 y valor restante $48.000. Se aplica **FIFO**: saldo inicial primero y después fecha de recepción, instante de registro e identificador de origen como desempate.
+
+Los lotes agotados se borran físicamente de la cola. Si no queda ninguno con unidades, se conserva únicamente el último con cero; al ingresar un restock se elimina ese lote vacío. Esto no borra compras ni ventas. Cada venta conserva las cantidades y costos de los lotes consumidos en snapshots independientes; anularla restaura sus lotes con el costo y el orden originales, incluso si sus filas ya se habían eliminado. Reintentar una operación no duplica lotes ni unidades.
+
+**Anular una compra exige que todas sus unidades sigan en su propio lote.** Tener stock de otra compra no permite sustituir las unidades consumidas. Si ya se vendieron o ajustaron, la anulación se rechaza completamente; una devolución de venta puede restituirlas antes de corregir la recepción. La compra más antigua que no tenga procedencia por lotes no se reconstruye artificialmente para anularla.
+
+El resumen «Valor del stock a costo de compra» suma unidades restantes por su costo de lote. Los importes de ventas y Dashboard utilizan el costo total exacto de las unidades vendidas; si se mezclan costos, el promedio unitario es solo informativo y no se multiplica para reconstruir el total. Un costo desconocido se conserva como desconocido. Editar el costo de referencia del producto no revaloriza lotes ni ventas anteriores. Los ajustes positivos de stock crean un lote al costo de referencia confirmado; los negativos descuentan FIFO. Para una compra real se debe usar Restock/Compras.
+
+La migración aditiva `011_inventory_lots.sql` quedó aplicada localmente después de un respaldo completo verificado. Conserva las 25 referencias y 84 unidades, inicializadas como saldo previo al seguimiento al costo ya registrado, sin inventar proveedores o compras históricas. Las dieciséis tablas anteriores permanecen intactas; las ventas anteriores conservan sus snapshots. Una futura devolución de una venta anterior sin asignaciones crea una entrada identificada como devolución histórica, a su costo conocido o sin confirmar.
+
+API administrativa nueva: `GET /api/products/{id}/lots`. Los lotes y sus costos no se incorporan a la API pública. Cambios de inventario/compras/ventas invalidan también la consulta de lotes. La migración es manual y requiere backend detenido y respaldo; no repetir otras migraciones ni reimportar Excel.
+
+Validación: 126 pruebas backend aprobadas, incluidas 72 PostgreSQL aisladas; 38 pruebas frontend y build con TypeScript aprobados. Navegador aislado verificó cola real, restock preseleccionado, costo obligatorio, subtotal, payload simulado, último lote vacío y error/reintento a 1440/768/390/320 px. Cero compras o ventas comerciales de prueba. Evidencias y respaldo privados en `.local/restock-2026-11-02/`.
+
 ## Registrar una compra
 
 En `/admin/compras`, seleccionar un proveedor activo, fecha de recepción, referencia de factura opcional y los productos/tonalidades recibidos. Cada línea exige cantidad positiva y costo unitario de esa compra, con hasta dos decimales. Se permite costo cero si ese es el valor real. Una referencia aparece una sola vez y se admiten hasta 100 líneas.
 
 Confirmar suma las unidades al inventario y genera movimientos vinculados al número de compra y a quien registra. Los productos ocultos o agotados pueden recibirse; los eliminados o con datos provisionales no. Para una referencia nueva, crear primero el producto en Inventario con stock cero. No registrar como nueva recepción mercancía que ya se sumó al stock inicial o por un ajuste manual.
 
-La compra conserva nombre del proveedor y nombre/código/tono de cada producto tal como estaban al registrar. Sus costos y totales no cambian al editar el catálogo después. **El costo de referencia del producto no se sobrescribe automáticamente.** Esta primera versión no implementa valoración por lotes ni costo promedio: el costo de referencia puede revisarse desde Inventario, y las ventas siguen guardando ese costo como snapshot cuando se registran. La compra tampoco implica un pago registrado ni una cuenta por pagar.
+La compra conserva nombre del proveedor y nombre/código/tono de cada producto tal como estaban al registrar. Sus costos y totales no cambian al editar el catálogo después. **El costo de referencia del producto no se sobrescribe automáticamente.** Desde el 2 de noviembre, cada recepción tiene su propio lote y las ventas utilizan sus costos FIFO. La compra tampoco implica un pago registrado ni una cuenta por pagar.
 
 ## Registrar un gasto
 
@@ -22,7 +40,7 @@ Ambos historiales permiten buscar, filtrar fechas inclusivas de Colombia y estad
 
 Los registros confirmados no se editan ni borran físicamente. Para corregirlos, anular con un motivo de 5 a 500 caracteres y registrar la operación correcta. Se conserva quién registró/anuló, cuándo y por qué.
 
-- Anular compra retira todas sus cantidades bajo bloqueo de inventario. Si una referencia no tiene stock suficiente, se rechaza toda la anulación sin cambios parciales. No se rastrea de qué lote provienen las unidades disponibles.
+- Anular compra retira sus cantidades bajo bloqueo de inventario, exclusivamente de su propio lote. Si alguna unidad ya se consumió, se rechaza toda la anulación sin cambios parciales, aunque haya stock de otra recepción.
 - Anular gasto conserva el detalle y lo excluye de totales. No modifica inventario.
 - Repetir una anulación no vuelve a aplicar sus efectos. Ninguna anulación registra devoluciones de dinero.
 
@@ -51,7 +69,7 @@ Build frontend con tipos aprobado. Las pruebas del navegador usan respuestas sim
 
 ## Pendiente: costos variables por resurtido
 
-Decisión de continuidad vigente al cierre del 28 de octubre de 2026. **Todavía no implementada:** la compra actual guarda su costo histórico, pero el inventario no conserva unidades restantes por lote y las ventas utilizan el costo de referencia del producto.
+**Implementado el 2 de noviembre de 2026** con FIFO y eliminación de lotes agotados según la sección inicial. El título y la lista siguientes se conservan como requerimiento histórico y para mantener los enlaces existentes.
 
 - Permitir que una recepción tenga un costo distinto para el mismo SKU/tono, conservando costo unitario y unidades restantes por recepción/lote.
 - Identificar cada recepción por fecha e identificador de compra para mantener la trazabilidad.

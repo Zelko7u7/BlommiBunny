@@ -13,4 +13,9 @@ public class SaleItem extends BaseEntity {
  @Column(length=60) private String productCode;
  @Column(length=80) private String shade;
  @Column(precision=14,scale=2) private BigDecimal unitCost;
+ @Column(precision=24,scale=2) private BigDecimal costTotal;
+ @ElementCollection
+ @CollectionTable(name="sale_cost_allocation",joinColumns=@JoinColumn(name="sale_item_id"))
+ @OrderColumn(name="sort_order")
+ private java.util.List<SaleCostAllocation> costAllocations=new java.util.ArrayList<>();
 }

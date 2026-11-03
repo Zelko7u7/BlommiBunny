@@ -25,8 +25,9 @@ public class AdminSaleService {
  private final JdbcTemplate jdbc;
  private final SalePaymentRepository payments;
  private final SaleCollectionEventRepository collectionEvents;
- public AdminSaleService(SaleRepository sales,ProductRepository products,CustomerRepository customers,InventoryMovementRepository movements,JdbcTemplate jdbc,SalePaymentRepository payments,SaleCollectionEventRepository collectionEvents){
-  this.sales=sales;this.products=products;this.customers=customers;this.movements=movements;this.jdbc=jdbc;this.payments=payments;this.collectionEvents=collectionEvents;
+ private final InventoryLotService lots;
+ public AdminSaleService(SaleRepository sales,ProductRepository products,CustomerRepository customers,InventoryMovementRepository movements,JdbcTemplate jdbc,SalePaymentRepository payments,SaleCollectionEventRepository collectionEvents,InventoryLotService lots){
+  this.sales=sales;this.products=products;this.customers=customers;this.movements=movements;this.jdbc=jdbc;this.payments=payments;this.collectionEvents=collectionEvents;this.lots=lots;
  }
 
  public SaleResponse create(CreateSaleRequest request,String actor){
@@ -59,7 +60,9 @@ public class AdminSaleService {
    var price=amount(line.unitPrice()==null?product.getSalePrice():line.unitPrice());
    var item=new SaleItem();item.setSale(sale);item.setProduct(product);item.setQuantity(line.quantity());item.setUnitPrice(price);
    item.setSubtotal(amount(price.multiply(BigDecimal.valueOf(line.quantity()))));item.setProductName(product.getName());item.setProductCode(product.getCode());item.setShade(product.getShade());
-   item.setUnitCost(product.isCostConfirmed()?product.getPurchasePrice():null);
+   var allocations=lots.consume(product,line.quantity());item.getCostAllocations().addAll(allocations);
+   var cost=allocations.stream().anyMatch(a->a.getUnitCost()==null)?null:allocations.stream().map(a->a.getUnitCost().multiply(BigDecimal.valueOf(a.getQuantity()))).reduce(BigDecimal.ZERO,BigDecimal::add);
+   item.setCostTotal(cost);item.setUnitCost(cost==null?null:cost.divide(BigDecimal.valueOf(line.quantity()),2,java.math.RoundingMode.HALF_UP));
    sale.getItems().add(item);subtotal=amount(subtotal.add(item.getSubtotal()));
   }
   var discount=amount(request.discount()==null?BigDecimal.ZERO:request.discount());
@@ -92,7 +95,8 @@ public class AdminSaleService {
   for(var item:sale.getItems())quantities.merge(item.getProduct().getId(),item.getQuantity(),Math::addExact);
   for(var entry:quantities.entrySet()){
    var product=products.lockById(entry.getKey()).orElseThrow(()->new ResourceNotFoundException("No se encontró el producto original de la venta."));
-   try{product.setStock(Math.addExact(product.getStock(),entry.getValue()));}catch(ArithmeticException ex){throw new BusinessException("La devolución excede la cantidad máxima del inventario.");}
+   try{Math.addExact(product.getStock(),entry.getValue());}catch(ArithmeticException ex){throw new BusinessException("La devolución excede la cantidad máxima del inventario.");}
+   for(var item:sale.getItems())if(item.getProduct().getId().equals(entry.getKey())){lots.restore(product,item);product.setStock(product.getStock()+item.getQuantity());}
    movement(product,MovementType.ADJUSTMENT_IN,entry.getValue(),"Anulación venta #"+sale.getId()+" · "+actor);
   }
   sale.setCancelled(true);sale.setCancelledAt(Instant.now());sale.setCancellationReason(reason.trim());sale.setCancelledBy(actor);
@@ -120,8 +124,8 @@ public class AdminSaleService {
 
  private SaleResponse map(Sale sale){
   boolean snapshot=sale.getItems().stream().allMatch(item->item.getProductName()!=null);
-  var lines=sale.getItems().stream().map(item->new SaleLine(item.getProduct().getId(),item.getProductName()==null?item.getProduct().getName():item.getProductName(),item.getProductCode()==null?item.getProduct().getCode():item.getProductCode(),item.getProductName()==null?item.getProduct().getShade():item.getShade(),item.getQuantity(),item.getUnitPrice(),item.getUnitCost(),item.getSubtotal())).toList();
-  BigDecimal cost=lines.stream().anyMatch(line->line.unitCost()==null)?null:lines.stream().map(line->line.unitCost().multiply(BigDecimal.valueOf(line.quantity()))).reduce(BigDecimal.ZERO,BigDecimal::add);
+  var lines=sale.getItems().stream().map(item->new SaleLine(item.getProduct().getId(),item.getProductName()==null?item.getProduct().getName():item.getProductName(),item.getProductCode()==null?item.getProduct().getCode():item.getProductCode(),item.getProductName()==null?item.getProduct().getShade():item.getShade(),item.getQuantity(),item.getUnitPrice(),item.getUnitCost(),item.getSubtotal(),InventoryLotService.totalCost(item),item.getCostAllocations().stream().map(a->new CostAllocation(a.getReference(),a.getQuantity(),a.getUnitCost())).toList())).toList();
+  BigDecimal cost=lines.stream().anyMatch(line->line.costTotal()==null)?null:lines.stream().map(SaleLine::costTotal).reduce(BigDecimal.ZERO,BigDecimal::add);
   var paymentRows=payments.findBySaleIdOrderByPaymentDateAscIdAsc(sale.getId());
   var paid=paymentRows.stream().filter(p->!p.isCancelled()).map(SalePayment::getAmount).reduce(BigDecimal.ZERO,BigDecimal::add);
   var balance=sale.getTotal().subtract(paid);

@@ -31,9 +31,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 class AccessControlTest {
  @Configuration @EnableWebMvc @EnableWebSecurity
- @Import({SecurityConfig.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,TransactionController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
+ @Import({SecurityConfig.class,InventoryLotController.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,TransactionController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
  static class Config {
   @Bean ProductService products(){return mock(ProductService.class);}
+  @Bean InventoryLotService lots(){return mock(InventoryLotService.class);}
+  @Bean com.bloomibunny.repository.ProductRepository productRows(){return mock(com.bloomibunny.repository.ProductRepository.class);}
   @Bean AuthService auth(){return mock(AuthService.class);}
   @Bean FavoriteService favorites(){return mock(FavoriteService.class);}
   @Bean AdminSaleService adminSales(){return mock(AdminSaleService.class);}
@@ -68,9 +70,17 @@ class AccessControlTest {
  }
 
  @Test void guestCanBrowseWithoutSeeingInternalData()throws Exception{
+  mvc.perform(get("/api/products/1/lots")).andExpect(status().isUnauthorized());
   mvc.perform(get("/api/store/products")).andExpect(status().isOk()).andExpect(jsonPath("$.content[0].salePrice").value(12000)).andExpect(jsonPath("$.content[0].purchasePrice").doesNotExist()).andExpect(jsonPath("$.content[0].profit").doesNotExist()).andExpect(jsonPath("$.content[0].supplier").doesNotExist());
   mvc.perform(get("/api/products")).andExpect(status().isUnauthorized());
   mvc.perform(get("/api/products/summary")).andExpect(status().isUnauthorized());
+ }
+
+ @Test @WithMockUser(roles="CUSTOMER") void customerCannotReadPurchaseLots()throws Exception{mvc.perform(get("/api/products/1/lots")).andExpect(status().isForbidden());}
+ @Test @WithMockUser(roles="ADMIN") void adminCanReadPurchaseLots()throws Exception{
+  var rows=context.getBean(com.bloomibunny.repository.ProductRepository.class);var p=new com.bloomibunny.entity.Product();when(rows.findById(1L)).thenReturn(Optional.of(p));
+  when(context.getBean(InventoryLotService.class).list(p)).thenReturn(List.of(new InventoryLotService.LotResponse("opening","Saldo inicial",java.time.LocalDate.of(2026,1,1),3,new BigDecimal("10000"),new BigDecimal("30000"),true)));
+  mvc.perform(get("/api/products/1/lots")).andExpect(status().isOk()).andExpect(jsonPath("$[0].remaining").value(3)).andExpect(jsonPath("$[0].costValue").value(30000));
  }
 
  @Test @WithMockUser(roles="ADMIN") void malformedDatesAndProductMoneyAreRejected()throws Exception{

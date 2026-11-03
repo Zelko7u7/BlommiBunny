@@ -1,3 +1,4 @@
+import ProductLots from '../components/inventory/ProductLots';
 import { productImage } from '../services/catalog';
 import { MoreHorizontal, Plus, Eye, EyeOff, Trash2, Pencil } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -18,6 +19,7 @@ export default function InventoryPage() {
   const summary = useInventorySummary(q,stock);
   const totals = summary.data;
   const { create, update, setActive, remove } = useProductActions();
+  const [lotProduct,setLotProduct]=useState<Product|null>(null);
   const [creating, setCreating] = useState(false);
   const [deleting, setDeleting] = useState<Product | null>(null);
   const [editing, setEditing] = useState<Product | null>(null);
@@ -47,7 +49,7 @@ export default function InventoryPage() {
     <Card>
       <div className="table-tools inventory-filters"><SearchBox value={q} onChange={setQ} placeholder="Buscar por nombre o código…"/><label>Existencias<select aria-label="Filtrar existencias" value={stock} onChange={event=>setParams(current=>{const next=new URLSearchParams(current);if(event.target.value==='all')next.delete('stock');else next.set('stock',event.target.value);return next;},{replace:true})}><option value="all">Todas</option><option value="low">Stock bajo</option><option value="out">Agotados</option></select></label>{(q||stock!=='all')&&<button type="button" className="inventory-secondary" onClick={()=>setParams({},{replace:true})}>Limpiar filtros</button>}<span>{!summary.isError && totals ? `${data.length} de ${totals.totalProducts}` : data.length} productos</span></div>
       {isLoading ? <Loading/> : isError ? <p className="error" role="alert">No pudimos cargar el inventario. Revisa tu sesión y vuelve a intentarlo.</p> : data.length === 0 ? <Empty text="No encontramos productos."/> : <div className="table-wrap"><table>
-        <thead><tr><th>Producto</th><th>Categoría</th><th>Costo/u</th><th>Venta/u</th><th>Ganancia/u</th><th>Stock</th><th>Valor stock (venta)</th><th>Estado</th><th/></tr></thead>
+        <thead><tr><th>Producto</th><th>Categoría</th><th>Costo/u de referencia</th><th>Venta/u</th><th>Margen/u de referencia</th><th>Stock</th><th>Valor stock (venta)</th><th>Estado</th><th/></tr></thead>
         <tbody>{data.map(p => <tr key={p.id}>
           <td><div className="product-cell"><div className="product-thumb">{productImage(p) ? <img src={productImage(p)} alt={p.name} loading="lazy"/> : p.name[0]}</div><div><strong>{p.name}</strong>{p.shade && <span>Tono: {p.shade}</span>}{p.provisionalData && <span className="provisional-label">Precio y stock provisionales</span>}<span>{p.code} · {p.presentation || 'Sin presentación'}</span></div></div></td>
           <td>{p.category}</td><td>{p.costConfirmed === false ? "Por confirmar" : money(p.purchasePrice)}</td><td><strong>{money(p.salePrice)}</strong></td><td className="profit">{p.profit == null || p.provisionalData ? "Por confirmar" : money(p.profit)}</td><td>{p.stock} <small>uds.</small></td><td>{p.provisionalData ? "Por confirmar" : money(p.stock * p.salePrice)}</td>
@@ -55,19 +57,20 @@ export default function InventoryPage() {
           <td><button className="icon-button product-actions-trigger" data-inventory-menu aria-label={`Acciones de ${p.name}`} aria-haspopup="menu" aria-expanded={menu?.id === p.id} disabled={busy} onClick={event => {
             if (menu?.id === p.id) { setMenu(null); return; }
             const rect = event.currentTarget.getBoundingClientRect();
-            setMenu({ id: p.id, left: Math.max(8, Math.min(rect.right - 220, window.innerWidth - 228)), top: rect.bottom + 200 < window.innerHeight ? rect.bottom + 6 : Math.max(8, rect.top - 190) });
+            setMenu({ id: p.id, left: Math.max(8, Math.min(rect.right - 220, window.innerWidth - 228)), top: rect.bottom + 250 < window.innerHeight ? rect.bottom + 6 : Math.max(8, rect.top - 240) });
           }}><MoreHorizontal/></button></td>
         </tr>)}</tbody>
       </table></div>}
     </Card>
-    {menu && menuProduct && <ProductActionMenu product={menuProduct} left={menu.left} top={menu.top} onClose={() => setMenu(null)} onEdit={() => { setMenu(null); setEditing(menuProduct); }} onToggle={() => toggleProduct(menuProduct)} onCreate={() => { setMenu(null); setCreating(true); }} onDelete={() => { setMenu(null); setDeleting(menuProduct); }}/>}
+    {menu && menuProduct && <ProductActionMenu product={menuProduct} left={menu.left} top={menu.top} onClose={() => setMenu(null)} onEdit={() => { setMenu(null); setEditing(menuProduct); }} onToggle={() => toggleProduct(menuProduct)} onCreate={() => { setMenu(null); setCreating(true); }} onLots={() => {setMenu(null);setLotProduct(menuProduct);}} onDelete={() => { setMenu(null); setDeleting(menuProduct); }}/>}
+    {lotProduct && <ProductLots product={lotProduct} onClose={()=>setLotProduct(null)}/>}
     {creating && <ProductCreateDialog busy={create.isPending} onClose={() => setCreating(false)} onCreate={createProduct}/>}
     {editing && <ProductEditDialog key={editing.id} product={editing} busy={update.isPending} onClose={() => setEditing(null)} onSave={async input => { await update.mutateAsync({ id: editing.id, data: input }); setEditing(null); toast.success('Producto actualizado'); }}/>}
     {deleting && <ProductDeleteDialog product={deleting} busy={remove.isPending} onClose={() => setDeleting(null)} onDelete={async () => { await remove.mutateAsync(deleting.id); setDeleting(null); toast.success('Producto eliminado del inventario'); }}/>}
   </>;
 }
 
-function ProductActionMenu({ product, left, top, onClose, onEdit, onToggle, onCreate, onDelete }: { product: Product; left: number; top: number; onClose: () => void; onEdit: () => void; onToggle: () => void; onCreate: () => void; onDelete: () => void }) {
+function ProductActionMenu({ product, left, top, onClose, onEdit, onToggle, onCreate, onLots, onDelete }: { product: Product; left: number; top: number; onClose: () => void; onEdit: () => void; onToggle: () => void; onCreate: () => void; onLots: () => void; onDelete: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     ref.current?.querySelector<HTMLButtonElement>('button')?.focus();
@@ -84,6 +87,7 @@ function ProductActionMenu({ product, left, top, onClose, onEdit, onToggle, onCr
       buttons[(index + (event.key === 'ArrowDown' ? 1 : buttons.length - 1)) % buttons.length].focus();
     }
   }}>
+    <button role="menuitem" onClick={onLots}><Plus size={17}/> Ver lotes / Reponer</button>
     <button role="menuitem" onClick={onEdit}><Pencil size={17}/> Editar producto</button>
     <button role="menuitem" onClick={onToggle}>{product.active ? <EyeOff size={17}/> : <Eye size={17}/>} {product.active ? 'Deshabilitar producto' : 'Habilitar producto'}</button>
     <button role="menuitem" onClick={onCreate}><Plus size={17}/> Nuevo producto</button>

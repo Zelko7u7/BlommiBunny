@@ -17,3 +17,12 @@
 .product-gallery-preview figure { width:64px; margin:0; padding:4px; border:1px solid var(--color-border); border-radius:8px; background:var(--color-surface); }
 .product-gallery-preview img { display:block; width:54px; height:64px; object-fit:contain; }
 .product-gallery-preview figcaption { text-align:center; color:var(--color-text-secondary); font-size:11px; margin-top:4px; }
+.product-lots-table td small { display:block; margin-top:4px; color:var(--color-text-secondary); }
+@media(max-width:600px) {
+ .product-lots-table, .product-lots-table tbody { display:block; width:100%; min-width:0; }
+ .product-lots-table thead { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+ .product-lots-table tr { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; padding:14px; margin-bottom:12px; border:1px solid var(--color-border); border-radius:10px; }
+ .product-lots-table td { display:block; padding:0; border:0; overflow-wrap:anywhere; }
+ .product-lots-table td:first-child { grid-column:1/-1; }
+ .product-lots-table td::before { content:attr(data-label); display:block; color:var(--color-text-secondary); font-size:11px; margin-bottom:5px; }
+}

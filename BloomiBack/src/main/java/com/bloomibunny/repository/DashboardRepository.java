@@ -18,7 +18,7 @@ public interface DashboardRepository extends Repository<SaleItem,Long> {
  Revenue revenue(@Param("from") Instant from,@Param("to") Instant to);
 
  @Query("""
-  select coalesce(sum(case when i.unitCost is not null then i.unitCost*i.quantity else 0 end),0) as knownCost,
+  select coalesce(sum(case when i.unitCost is not null then coalesce(i.costTotal,i.unitCost*i.quantity) else 0 end),0) as knownCost,
   count(distinct case when i.unitCost is null then s.id else null end) as unknownSales,
   coalesce(sum(case when i.unitCost is null then i.quantity else 0 end),0) as unknownUnits
   from SaleItem i join i.sale s where s.cancelled=false and s.saleDate>=:from and s.saleDate<:to

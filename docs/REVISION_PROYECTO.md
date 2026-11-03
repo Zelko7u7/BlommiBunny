@@ -1,5 +1,69 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Cierre del avance del 2 de noviembre de 2026
+
+La jornada incorpora lotes FIFO y costos propios de restock, la búsqueda en cabecera y filtros desplegables de la tienda. Por petición posterior se retiró el contador junto al título del catálogo/favoritos (incluido el conteo de resultados filtrados), conservando avisos de carga/error y cantidades del carrito. Se conserva el código y las pruebas detalladas en las secciones siguientes.
+
+Se acordó preparar imágenes diferentes para PC/móvil y hacer clicable toda la imagen de cada banner, conservando controles del carrusel y navegación accesible. Es una decisión futura, pendiente de artes definitivos e implementación; los recursos actuales no incluyen texto ni botones dibujados. Se mantienen también los pendientes de contenido/tonos y condiciones comerciales definitivas. Caja, pagos públicos y pedidos persistidos no se ampliaron.
+
+Para publicar el avance se revisan los archivos versionables y se excluyen configuración real, memoria comercial, Excel, respaldos, compilados y evidencias privadas. Se conservan las 126 pruebas backend completas aprobadas y la repetición posterior de las 13 de lotes; se verifica la compilación frontend final. La publicación Git no registra operaciones comerciales ni ejecuta migraciones adicionales.
+
+## Búsqueda superior y filtros desplegables del 2 de noviembre de 2026
+
+Por petición de la propietaria, la búsqueda se trasladó del cuadro de filtros a una barra prominente en la cabecera pública, con lupa, borrado y soporte de Enter/teclado móvil. Reutiliza la búsqueda existente, sin tildes y sobre el catálogo completo. En catálogo/favoritos filtra al escribir; al enviar lleva a resultados. Desde fichas/Nosotros/políticas permite enviar una búsqueda hacia el catálogo. `StoreSearch.tsx` concentra el formulario; `StorePage` coordina las rutas y parámetros.
+
+`CatalogFilters.tsx` presenta un botón Filtros con panel de categoría/orden cerrado inicialmente, indicador y resumen de selecciones activas. Abrir/cerrar no modifica filtros; Limpiar filtros conserva la búsqueda independiente. Los controles ocultos salen del recorrido de foco; Escape cierra y devuelve foco al botón. Consulta, categoría y orden siguen en URL y se conservan al volver de una ficha. CSS público adapta la cabecera y el panel, sin modificar banners, fotografías, tarjetas ni administración.
+
+Compilación con TypeScript y 38 pruebas frontend aprobadas; JavaScript inicial 445,18 kB. Chrome aislado comprobó quince combinaciones de ancho/rol entre 320–1920 px, sin desbordamientos ni superposición de marca/acciones/búsqueda. También búsqueda, filtros combinados, orden, recarga, teclado, lupa/Enter, navegación desde ficha/Nosotros, favoritos, carrito, errores vacíos y CTA del banner. Cero errores JavaScript o escrituras API; catálogo público idéntico antes/después. Evidencias privadas en `.local/search-filters-2026-11-02/`; Chrome de pruebas cerrado y servicios existentes activos. Sin cambios backend, migraciones ni pruebas PostgreSQL nuevas para este ajuste.
+
+## Restock por lotes FIFO del 2 de noviembre de 2026
+
+La propietaria aprobó lotes por producto y la eliminación de los agotados salvo el último vacío. Se implementó la cola FIFO, costos propios de recepción, valor del inventario por unidades restantes, asignaciones históricas de costo exacto por venta y restauración al anular. Los lotes agotados se eliminan físicamente sin borrar compras ni costos vendidos. Anular una compra exige todas sus unidades en su propio lote; no sustituye stock consumido con mercancía de otro lote. Inventario incorpora Ver lotes / Reponer y Compras preselecciona el SKU con costo nuevo obligatorio. API de lotes solo ADMIN, sin cambios de la tienda pública. Detalle en [Compras y lotes](COMPRAS_GASTOS.md).
+
+Migración 011 aplicada con backend detenido y respaldo completo verificado. Las dieciséis tablas anteriores permanecen intactas; 25 lotes de saldo inicial conservan 84 unidades y $994.000 de costo registrado. No se reconstruyen compras anteriores. Validación: 126 pruebas backend aprobadas (72 PostgreSQL aisladas), 38 frontend, build con tipos y navegador a 1440/768/390/320 px. Compra de prueba interceptada y simulada, sin escrituras comerciales reales. Este avance sustituye el pendiente histórico de costos por lote; las demás prioridades siguen como se documentan más abajo.
+
+## Retoma y arquitectura revisada el 2 de noviembre de 2026
+
+Se revisaron los Markdown del proyecto y se contrastaron con las rutas, contratos, componentes, servicios, persistencia, migraciones, pruebas y herramientas actuales. Se inventariaron 324 archivos propios, configuraciones y recursos originales, con tamaño y SHA256. Dependencias, compilados y contenido interno de perfiles/respaldos privados se trataron como artefactos; no se auditó el código de terceros. El inventario privado está en `.local/review-2026-11-02/files.json`. Las secciones inferiores conservan antecedentes: sus diagnósticos antiguos no deben interpretarse como pendientes actuales.
+
+### Mapa de carpetas vigente
+
+| Carpeta | Responsabilidad y conexiones |
+| --- | --- |
+| `BloomiFront/src/` | `main.tsx` monta Router, QueryClient, autenticación y avisos; `App.tsx` declara rutas públicas y administrativas. Las pantallas administrativas se cargan bajo demanda. |
+| `BloomiFront/src/pages/` | `StorePage` coordina catálogo, filtros, variantes, favoritos, carrito y WhatsApp; las demás pantallas cubren acceso, inventario, ventas, compras/gastos y directorios. `DashboardPage` delega en el componente de resumen; `PlaceholderPage` queda para rutas administrativas no implementadas. |
+| `BloomiFront/src/components/` | Componentes públicos de tarjetas, fotografías, galerías, ficha, recomendaciones, banners, carrito, WhatsApp y páginas informativas; componentes administrativos de formularios de inventario, pagos, dashboard y directorios. |
+| `BloomiFront/src/services/` | `http` centraliza Axios, JWT y errores de sesión; `api` contiene contratos y lectura de todas las páginas de productos. `catalog`, `cart`, `recommendations`, `heroNavigation` y `whatsappCheckout` concentran lógica reutilizable. |
+| `BloomiFront/src/hooks/`, `contexts/`, `types/` | Consultas/mutaciones e invalidación de caché, sesión por cuenta y contratos TypeScript compartidos. Los datos operativos se actualizan periódicamente; el carrito se conserva por visitante o cuenta. |
+| `BloomiFront/src/data/`, `styles/` | Banners configurables, manifiesto histórico de fotografías, información comercial/políticas en borrador y doce CSS con tokens lavanda, adaptación de tamaño y movimiento reducido. |
+| `BloomiFront/public/`, `tests/` | Fotografías y banners servidos por Vite; tres archivos de pruebas para recomendaciones, navegación del Hero y carrito/WhatsApp. |
+| `BloomiBack/src/main/java/com/bloomibunny/controller/` | Ocho controladores REST: autenticación, catálogos, dashboard, favoritos, productos, ventas, tienda y compras/gastos. Las respuestas comerciales y administrativas se distinguen mediante DTO. |
+| `BloomiBack/.../service/`, `service/impl/` | Reglas transaccionales de inventario y operaciones; snapshots históricos, pagos y autorizaciones, validación de medios, favoritos y consultas del dashboard. Bloqueos de productos/ventas y UUID con huella protegen concurrencia y reintentos. |
+| `BloomiBack/.../repository/`, `entity/`, `dto/` | Catorce repositorios, veintitrés entidades/clases base/enumeraciones y siete archivos de contratos. PostgreSQL conserva productos, galerías, cuentas, favoritos, movimientos, ventas/líneas/pagos/eventos y compras/líneas/gastos. |
+| `BloomiBack/.../security/`, `config/`, `exception/` | JWT, consulta de rol/estado vigente, BCrypt, autorización ADMIN, CORS, reloj de Colombia, inicialización de cuenta/categorías si faltan y errores HTTP estructurados. |
+| `BloomiBack/src/main/resources/` | Configuración local privada y plantilla pública; diez SQL manuales. No hay ejecutor automático de migraciones. Hibernate usa `ddl-auto=update` en desarrollo. |
+| `BloomiBack/src/test/` | Diez clases: acceso, ciclo de productos, medios, dashboard, ventas, pagos, compras/gastos y revisión general. Las integraciones requieren un esquema PostgreSQL exclusivo de pruebas. |
+| `tools/` | Importadores históricos de Excel y medios, mapeo de fotografías y SQL privados de ajustes anteriores. Son herramientas operativas separadas del arranque; no se ejecutaron importaciones ni ajustes. |
+| `Blommiimages/`, `Productos/`, `BloomiBanners/` | Once fotografías originales iniciales, 56 fotografías adicionales y los dos banners con sus instrucciones. Se conservan los archivos fuente y las copias públicas. |
+| `docs/` y Markdown de raíz | Siete guías funcionales/técnicas, README, instrucciones, memoria privada y fuente oficial de descripciones. La memoria más reciente resuelve las diferencias entre estados históricos. |
+| `.local/`, `.git/`, `Django/` | Evidencias/respaldos privados, repositorio independiente y estructura duplicada inactiva con un archivo vacío, respectivamente. Se conservaron. |
+
+### Estado funcional y límites confirmados por el código
+
+El flujo público es navegador → API comercial → servicios/JPA → PostgreSQL. Las fotografías se sirven desde el frontend. El flujo administrativo utiliza JWT y exige ADMIN en el servidor; ocultar el panel en React no es el control de acceso definitivo. Favoritos toma la cuenta de la autenticación. La API comercial excluye referencias ocultas, eliminadas y provisionales, y omite costos/proveedores/margen; conserva stock en JSON para los límites de compra, aunque la ficha solo presenta disponibilidad.
+
+El carrito vive en el navegador y WhatsApp prepara una solicitud manual: no existe entidad de pedido público ni reserva o pasarela. Una venta administrativa descuenta stock y conserva sus precios/costos; una compra suma unidades y conserva su costo de recepción sin cambiar el costo de referencia del producto. Los gastos no afectan existencias. Los pagos y la autorización de cobros tienen historial independiente del importe vendido.
+
+Siguen pendientes los costos y unidades restantes por lote, con método de asignación por acordar; artes y destinos definitivos de banners; contenido propio de Kit Pizza Planet/Rubor Lotso y reparto real por tonos de Gloss Corazón; políticas definitivas y preparación de producción. Caja, reportes avanzados, calendario de cuotas y pedidos/pagos públicos persistidos no están implementados. No se implementaron funciones nuevas durante esta retoma.
+
+### Comprobaciones de esta sesión
+
+`npm run build` aprobado con TypeScript y JavaScript inicial de 442,85 kB; 38 pruebas frontend aprobadas. `mvn test` aprobado: 52 pruebas ejecutadas sin fallos/errores y 59 integraciones omitidas por no configurar un esquema aislado. Estos resultados no equivalen a repetir las 111 pruebas completas de la sesión anterior.
+
+La lectura PostgreSQL anterior al arranque confirmó 25 referencias no eliminadas, 84 unidades y 23 SKU publicados. Los valores siguen calculándose a partir del costo de referencia actual, sin valoración por lotes. No se reimportó Excel ni se ejecutaron SQL manuales.
+
+Backend y frontend quedaron activos en `http://localhost:8080` y `http://localhost:5173`, con logs privados en `.local/runtime-2026-11-02/`. Se aprobaron 126 comprobaciones HTTP de rutas, transformación de TSX, recursos, catálogo/detalle, acceso administrativo, protección sin sesión y CORS. La comparación PostgreSQL posterior confirma las dieciséis tablas comerciales idénticas. Evidencias en `.local/review-2026-11-02/`, sin contraseñas ni tokens. Esta sesión no incluyó una nueva revisión visual responsive en navegador.
+
 ## Cierre de implementación del 30 de octubre de 2026
 
 Este resumen prevalece sobre los estados históricos siguientes. Quedan implementadas las ventas con pagos pendientes, parciales y completos, abonos y autorización auditada de cobros; las solicitudes manuales por WhatsApp desde el carrito; y el carrusel responsive de Bienvenida/Labios con flechas laterales e indicadores, sin control visible de pausa. Se retiró el bloque de presentación/redes duplicado bajo el catálogo, conservando el pie y la página Nosotros.
