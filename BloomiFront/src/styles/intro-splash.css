@@ -1,0 +1,68 @@
+.intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: #F7EEFF;
+  color: #35204F;
+  pointer-events: none;
+  animation: intro-splash-exit 500ms cubic-bezier(.65, 0, .35, 1) 2000ms both;
+}
+.intro-splash-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(16px, 3vh, 24px);
+  width: 100%;
+  text-align: center;
+  font-family: Georgia, serif;
+}
+.intro-splash-brand {
+  margin: 0;
+  font-size: clamp(32px, 7vw, 58px);
+  line-height: 1.2;
+  font-weight: 500;
+  animation: intro-splash-appear 400ms ease-out both;
+}
+.intro-splash-words {
+  position: relative;
+  width: 100%;
+  height: 1.4em;
+  font-size: clamp(27px, 6vw, 46px);
+  line-height: 1.4;
+  color: #9270C4;
+}
+.intro-splash-word {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.intro-splash-buy { animation: intro-splash-word 600ms ease-in-out 200ms both; }
+.intro-splash-enjoy { animation: intro-splash-word 600ms ease-in-out 800ms both; }
+.intro-splash-bloom { animation: intro-splash-appear 350ms ease-out 1400ms both; }
+.intro-splash-tagline {
+  margin: 0;
+  font-size: clamp(18px, 4vw, 25px);
+  line-height: 1.4;
+  animation: intro-splash-appear 400ms ease-out 200ms both;
+}
+.intro-splash-tagline span { color: #C9B3E7; }
+@keyframes intro-splash-appear {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes intro-splash-word {
+  0% { opacity: 0; transform: translateY(8px); }
+  25%, 75% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+@keyframes intro-splash-exit {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-splash { display: none; animation: none; }
+  .intro-splash * { animation: none; }
+}

@@ -22,6 +22,14 @@ Arquitectura revisada por carpetas y documentada en la sección inicial de [revi
 
 Validación de la revisión inicial: build con TypeScript y 38 pruebas frontend aprobados; 52 pruebas backend aprobadas y 59 integraciones omitidas; 126 comprobaciones HTTP satisfactorias. Durante esa revisión los datos comerciales se conservaron y no se modificaron funcionalidades ni se ejecutaron importaciones o SQL manuales. El avance posterior de lotes descrito arriba incorporó la migración 011 y su validación completa.
 
+## Intro tipográfica de bienvenida
+
+Desde el 3 de noviembre, la tienda muestra una intro de unos 2,5 segundos con Bloomi Bunny, Compra → Disfruta → Florece (una palabra a la vez) y A tu manera ♡. Fondo lavanda, tipografía Georgia y salida deslizándose hacia abajo; la tienda se renderiza detrás. `IntroSplash.tsx` y `intro-splash.css` controlan la secuencia y sus estilos, sin dependencias adicionales. Se monta desde `StorePage`, sin alterar el carrusel.
+
+Se muestra una vez por sesión de pestaña mediante `sessionStorage`, clave `bloomi.intro.seen`, y se omite con `prefers-reduced-motion: reduce` o almacenamiento de sesión no disponible. Al terminar se desmonta y limpia temporizadores y listener. Para volver a verla en la misma pestaña, ejecutar `sessionStorage.removeItem('bloomi.intro.seen')` en la consola de la tienda y recargar. La reducción de movimiento debe estar desactivada para probarla.
+
+Build con TypeScript y revisión en Chrome aprobados: secuencia exclusiva de palabras, altura fija, duración/desmontaje, tienda detrás, recarga/navegación, almacenamiento bloqueado, cambio de preferencia de movimiento y centrado a 320/390/768/1440 px. Sin escrituras API.
+
 ## Carrusel de banners
 
 El Hero muestra Bienvenida y Labios con textos HTML, altura estable de 310 px en escritorio, desvanecido lavanda y versión móvil sin fotografías detrás del texto. Avanza cada 6 segundos, con flechas laterales, indicadores inferiores y gesto táctil. No muestra control de pausa/reanudación. El cursor, el foco y el gesto táctil pausan temporalmente; cuando termina la interacción y el foco/cursor salen del carrusel comienza un nuevo intervalo completo. La pestaña oculta y el movimiento reducido también detienen el cambio automático. La preferencia de movimiento reducido elimina la transición, conservando los controles manuales.

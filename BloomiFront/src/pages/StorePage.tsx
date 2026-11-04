@@ -15,12 +15,13 @@ import CartDialog from '../components/store/CartDialog';
 import ProductPhoto from '../components/store/ProductPhoto';
 import StoreHero from '../components/store/StoreHero';
 import WhatsAppCheckout from '../components/store/WhatsAppCheckout';
+import IntroSplash from '../components/store/IntroSplash';
 import { useAuth } from '../contexts/AuthContext';
 import { readCart, changeQuantity, cartLines } from '../services/cart';
 
 export default function StorePage() {
   const { session } = useAuth();
-  return <Storefront key={session?.username ?? 'guest'} cartKey={`bloomi.cart.${session?.username ? `user:${session.username}` : 'guest'}`}/>;
+  return <><IntroSplash/><Storefront key={session?.username ?? 'guest'} cartKey={`bloomi.cart.${session?.username ? `user:${session.username}` : 'guest'}`}/></>;
 }
 
 function Storefront({ cartKey }: { cartKey: string }) {

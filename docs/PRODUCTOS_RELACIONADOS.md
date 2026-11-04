@@ -1,5 +1,7 @@
 # Productos relacionados: Te puede interesar
 
+Actualización del 3 de noviembre de 2026: las imágenes de tarjetas de catálogo, favoritos y relacionados mantienen un marco cuadrado sin límites de altura que alteren su proporción. Portada y previsualización usan recorte centrado (`object-fit: cover`) para llenar el cuadro sin deformarse. Las fichas y el zoom conservan la foto completa. Este ajuste sustituye las menciones históricas a `contain` en las tarjetas. Build con tipos y navegador a320/375/390/768/1024/1440/1920 aprobados, sin desbordamiento.
+
 La ficha `/producto/:id` incorpora un carrusel horizontal **TE PUEDE INTERESAR** después de la descripción. Conserva la galería vertical de miniaturas circulares, los tonos, las fotografías originales y el carrito. No requiere migraciones, dependencias nuevas ni cambios del backend.
 
 ## Datos y cálculo

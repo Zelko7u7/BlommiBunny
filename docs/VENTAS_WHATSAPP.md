@@ -2,6 +2,8 @@
 
 Implementado el 30 de octubre de 2026. El carrito permite preparar una solicitud completa de compra sin iniciar sesión. No hay pasarela, cobro, reserva ni pedido persistido en esta etapa.
 
+Actualización del 3 de noviembre de 2026: por petición de la propietaria se retiraron los botones **Copiar pedido completo** y **Abrir WhatsApp sin mensaje** para simplificar el carrito. Se mantienen **Realizar pedido por WhatsApp**, la vista del mensaje y la selección manual del texto. Si falla la apertura o el pedido excede el límite del enlace, se despliega el mensaje completo para copiarlo manualmente y contactar al número indicado. Las menciones posteriores al portapapeles automático y al enlace alternativo describen la implementación histórica anterior a este ajuste.
+
 ## Funcionamiento
 
 1. El cliente elige productos y, cuando corresponda, el SKU del tono desde la ficha existente.
