@@ -147,6 +147,19 @@
   padding: 20px 22px max(22px, env(safe-area-inset-bottom));
 }
 .store dialog.cart-panel::backdrop { background: var(--color-backdrop); }
+.store dialog.cart-panel[open] { animation: cart-panel-enter 200ms cubic-bezier(.2,.7,.2,1) both; }
+.store dialog.cart-panel[open]::backdrop { animation: cart-backdrop-enter 180ms ease-out both; }
+@keyframes cart-panel-enter {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes cart-backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .store dialog.cart-panel[open], .store dialog.cart-panel[open]::backdrop { animation: none; }
+}
 .store .cart-panel header { position: sticky; top: -20px; z-index: 1; background: var(--color-background); border-bottom: 1px solid var(--color-border); padding-block: 8px; }
 .store .cart-panel header button { display: grid; place-items: center; min-width: 44px; min-height: 44px; border-radius: 8px; }
 .store .cart-panel header button:hover { background: var(--color-primary-light); }

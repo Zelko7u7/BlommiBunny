@@ -2,6 +2,22 @@
 
 Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, solicitudes de compra por WhatsApp, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos persistidos y pagos electrónicos siguen pendientes.
 
+## Retoma y verificación del 12 de noviembre de 2026
+
+El carrito incorpora una entrada suave de 200 ms con fundido y desplazamiento lateral corto; el fondo aparece gradualmente en 180 ms. Respeta movimiento reducido y conserva el foco, Escape y los controles. Build con tipos y comprobación en Chrome a 320/390/768/1440 px aprobados.
+
+Backend y frontend **activos** para continuar el trabajo: [tienda](http://localhost:5173), [administración](http://localhost:5173/admin) y [catálogo API](http://localhost:8080/api/store/products). Usar localhost por CORS. Este arranque sustituye el apagado histórico inferior.
+
+Comprobación actual: build con TypeScript, 38 pruebas frontend y 126 backend aprobadas sin omisiones, incluidas 72 integraciones PostgreSQL aisladas; 129 comprobaciones HTTP y navegador público a 320/390/768/1440 px. Datos comerciales intactos. La revisión de producción encontró avisos de seguridad en dos paquetes npm de ejecución; deben evaluarse y corregirse antes de publicar. Prioridades y límites en [revisión técnica](docs/REVISION_PROYECTO.md#revisión-y-prioridades-de-producción--12-de-noviembre-de-2026).
+
+## Cierre del 3 de noviembre de 2026
+
+Backend, frontend y auxiliares de pruebas quedan **apagados por petición de la propietaria**. Se verificó ausencia de procesos de desarrollo del proyecto y de escuchas en 5173/8080/9255/9256. PostgreSQL compartido y procesos ajenos conservados. Este estado prevalece sobre los arranques históricos descritos más abajo; iniciar de nuevo solo cuando una nueva tarea lo requiera.
+
+El avance de hoy está publicado en `main`, commit `6aacb10`: intro tipográfica de 2,5 segundos por sesión, imágenes cuadradas en tarjetas con recorte centrado y carrito simplificado, conservando la vista del mensaje. Compilación con tipos y comprobaciones de navegador aprobadas. No se modificaron backend ni datos comerciales. En el cierre solo se actualiza documentación y se apagan procesos; no se repiten pruebas que requieran arrancar servicios.
+
+Pendientes: artes definitivos de banners PC/móvil, contenido de Kit Pizza Planet y Rubor Lotso, reparto real por tonos de Gloss Corazón, condiciones comerciales/políticas y preparación del despliegue. Los lotes FIFO y los abonos/autorización ya están implementados.
+
 ## Avance de la jornada del 2 de noviembre de 2026
 
 Restock con costos por lote y salida FIFO, eliminación de lotes agotados salvo el último vacío, valorización del inventario y costos exactos de ventas. En la tienda, búsqueda superior y filtros desplegables; se retiró el contador público de productos y resultados. Se conservan cantidades del carrito y controles administrativos. La arquitectura y validaciones están en [revisión técnica](docs/REVISION_PROYECTO.md).
@@ -123,7 +139,7 @@ La API pública excluye productos deshabilitados, eliminados y provisionales. In
 
 Repositorio del proyecto: [Zelko7u7/BlommiBunny](https://github.com/Zelko7u7/BlommiBunny). Frontend y backend se versionan juntos en la rama `main`.
 
-El `.gitignore` conserva fuera de Git las credenciales locales, `.local/`, el Excel comercial, la memoria privada, los scripts de corrección histórica de inventario, las dependencias y compilados. Los archivos siguen en el equipo. La estructura duplicada `Django/` está excluida porque solo contiene un archivo vacío y no es la aplicación activa.
+El `.gitignore` conserva fuera de Git las credenciales locales, `.local/`, el Excel comercial, la memoria privada, los scripts de corrección histórica de inventario, las dependencias y compilados. El 12 de noviembre se eliminaron por autorización los perfiles temporales de Chrome de pruebas y la estructura duplicada interna `Django/`, que solo contenía un archivo vacío. Respaldos, capturas, resultados y scripts privados se conservan. La exclusión `/Django/` queda como protección ante una recreación accidental del duplicado.
 
 En el equipo de origen `Proyecto` tiene su propio repositorio `.git`, independiente del repositorio de la carpeta superior. Ejecutar los comandos desde `Proyecto` y comprobar que la raíz corresponde a esta carpeta:
 

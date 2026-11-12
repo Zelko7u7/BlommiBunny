@@ -4,6 +4,8 @@ Implementado el 30 de octubre de 2026. El carrito permite preparar una solicitud
 
 Actualización del 3 de noviembre de 2026: por petición de la propietaria se retiraron los botones **Copiar pedido completo** y **Abrir WhatsApp sin mensaje** para simplificar el carrito. Se mantienen **Realizar pedido por WhatsApp**, la vista del mensaje y la selección manual del texto. Si falla la apertura o el pedido excede el límite del enlace, se despliega el mensaje completo para copiarlo manualmente y contactar al número indicado. Las menciones posteriores al portapapeles automático y al enlace alternativo describen la implementación histórica anterior a este ajuste.
 
+También se retiraron los párrafos «Tú revisas el mensaje y decides enviarlo…» y «Si no se abre la app…». Se conservan la explicación principal, los avisos operativos de error/carga y el mensaje completo. Ajustes publicados en `6aacb10`, con build con tipos aprobado. Backend/frontend y auxiliares de pruebas apagados al cerrar el 3 de noviembre; este estado sustituye las menciones históricas de servicios activos.
+
 ## Funcionamiento
 
 1. El cliente elige productos y, cuando corresponda, el SKU del tono desde la ficha existente.
