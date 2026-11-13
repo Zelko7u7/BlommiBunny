@@ -93,6 +93,7 @@ Las prioridades registradas en este cierre histórico eran ventas a cuotas/abono
 | `BloomiFront/` | React 19, TypeScript, Vite y TanStack Query. |
 | `BloomiBack/` | Java 25, Spring Boot 4, Spring Security, JPA y PostgreSQL. |
 | `Blommiimages/` | Fotografías originales de productos. Las copias usadas por la web están en `BloomiFront/public/products/`. |
+| `BloomiIconosYLogos/` | Originales oficiales de los iconos y logos de la tienda. El favicon elegido usa una copia idéntica de `isotipoB-Transparente.svg` en `BloomiFront/public/brand/`. Los originales y variantes se conservan intactos. Los próximos reemplazos de iconos provisionales tomarán sus recursos de esta carpeta. |
 | `tools/` | Importador histórico del inventario. Su uso es independiente del arranque de la aplicación. |
 | `docs/` | Revisión técnica y estado del avance. |
 
