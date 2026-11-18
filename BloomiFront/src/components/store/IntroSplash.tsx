@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import '../../styles/intro-splash.css';
+import BrandLogo from '../common/BrandLogo';
 
 const SESSION_KEY = 'bloomi.intro.seen';
 const DURATION_MS = 2500;
@@ -43,7 +44,7 @@ export default function IntroSplash() {
     if (event.target === event.currentTarget && event.animationName === 'intro-splash-exit') setVisible(false);
   }}>
     <div className="intro-splash-text">
-      <p className="intro-splash-brand">Bloomi Bunny</p>
+      <BrandLogo className="intro-splash-brand" priority/>
       <div className="intro-splash-words">
         <span className="intro-splash-word intro-splash-buy">Compra</span>
         <span className="intro-splash-word intro-splash-enjoy">Disfruta</span>

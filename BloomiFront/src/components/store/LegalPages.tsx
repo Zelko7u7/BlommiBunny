@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, Instagram, MessageCircle, Music2 } from 'lucide-react';
 import { legalPolicies, legalProfile, legalSources, whatsappUrl } from '../../data/legal';
+import BrandLogo from '../common/BrandLogo';
 
 export function SocialLinks() {
   return <div className="store-social-links"><a href={whatsappUrl('Hola, Bloomi Bunny. Quisiera información sobre sus productos.')} target="_blank" rel="noopener noreferrer"><MessageCircle size={18}/> WhatsApp</a><a href={legalProfile.instagram} target="_blank" rel="noopener noreferrer"><Instagram size={18}/> Instagram</a><a href={legalProfile.tiktok} target="_blank" rel="noopener noreferrer"><Music2 size={18}/> TikTok</a></div>;
@@ -10,7 +11,7 @@ export function PolicyLinks() {
   return <div className="about-policy-links">{legalPolicies.map(policy => <Link key={policy.slug} to={`/politicas/${policy.slug}`}><strong>{policy.title}</strong><span>{policy.summary}</span><ArrowUpRight size={18}/></Link>)}</div>;
 }
 export function StoreFooter() {
-  return <footer className="store-footer"><div className="store-footer-content"><div><strong>Bloomi Bunny</strong><p>Tienda virtual · {legalProfile.city}, {legalProfile.country}</p><p><a href={`mailto:${legalProfile.email}`}>{legalProfile.email}</a></p><SocialLinks/></div><nav aria-label="Información de la tienda"><Link to="/nosotros">Nosotros</Link>{legalPolicies.map(policy => <Link key={policy.slug} to={`/politicas/${policy.slug}`}>{policy.title}</Link>)}<a href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer">Superintendencia de Industria y Comercio</a></nav></div></footer>;
+  return <footer className="store-footer"><div className="store-footer-content"><div><Link className="footer-brand" to="/" aria-label="Bloomi Bunny, inicio"><BrandLogo loading="lazy"/></Link><p>Tienda virtual · {legalProfile.city}, {legalProfile.country}</p><p><a href={`mailto:${legalProfile.email}`}>{legalProfile.email}</a></p><SocialLinks/></div><nav aria-label="Información de la tienda"><Link to="/nosotros">Nosotros</Link>{legalPolicies.map(policy => <Link key={policy.slug} to={`/politicas/${policy.slug}`}>{policy.title}</Link>)}<a href="https://www.sic.gov.co/" target="_blank" rel="noopener noreferrer">Superintendencia de Industria y Comercio</a></nav></div></footer>;
 }
 function DraftNotice() {
   return legalProfile.finalized ? null : <div className="legal-draft-notice" role="note"><strong>Políticas en preparación</strong><p>Versión de trabajo para la operación de Bloomi Bunny en Colombia, sin fecha de entrada en vigencia.</p></div>;

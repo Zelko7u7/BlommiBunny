@@ -1,5 +1,43 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Identidad oficial integrada — 18 de noviembre de 2026
+
+Implementación exclusivamente frontend del logotipo de `BloomiIconos_Logos/`, fuente oficial vigente. Header, intro, footer, acceso/registro y administración comparten `BrandLogo`. Se conserva la B transparente oficial en favicon y se reutiliza para la barra contraída. Se mantienen los SVG originales sin cambios y las copias web se comparan byte por byte; sin filtros, recortes ni nombre duplicado. Paleta lavanda conservada.
+
+Build final con TypeScript y 38 pruebas frontend aprobados. Navegador aislado a 375/430/768/1024/1440/1920 px, con roles simulados para comprobar distribución: logos cargados/proporcionados, sin solapamientos/desbordamiento, menú móvil y barra compacta correctos. Intro de unos 2,5 segundos, palabras exclusivas, entrada fade/escala 0,98→1, salida inferior, sesión y movimiento reducido comprobados. Cero excepciones JS y escrituras API. Sin pruebas backend, cambios PostgreSQL, inventario u operaciones comerciales. Servicios activos conservados. Detalles en [Identidad visual](IDENTIDAD_VISUAL.md); evidencias privadas en `.local/official-brand-2026-11-18/`. Cambios locales previos preservados.
+
+## Sesión activa y validada — 18 de noviembre de 2026
+
+Backend y frontend **activos en local** por petición de la propietaria: [tienda](http://localhost:5173), [administración](http://localhost:5173/admin) y [catálogo API](http://localhost:8080/api/store/products). Este estado sustituye los apagados históricos inferiores. Usar localhost por CORS. Raíz de trabajo: `C:\Users\Zelko Jun\Desktop\UrkuForge\BloomiBunny`.
+
+Revisión de fuentes, documentación, configuración y recursos propios: 342 archivos inventariados. Build con TypeScript y 38 pruebas frontend aprobados; Maven clean package con 126 pruebas backend aprobadas sin omisiones, incluidas 72 integraciones PostgreSQL aisladas. 133 comprobaciones HTTP aprobadas de rutas, componentes, recursos, autenticación, permisos y CORS. Las 18 tablas públicas permanecen idénticas antes/después; sin operaciones comerciales de prueba ni ajustes de inventario.
+
+Backend ejecutado desde el JAR compilado con Hibernate `validate`, sin cambios automáticos de esquema ni cambios a la configuración persistida. Logs y evidencias privadas en `.local/session-2026-11-18/`; frontend vigente en frontend-authorized.log y procesos comprobados en verified-runtime.json. Sin cambios funcionales, commit ni push. Las prioridades de producción documentadas siguen pendientes; no se repitió la revisión visual responsive ni una auditoría exhaustiva de dependencias.
+
+## Nombre y ruta vigentes — 18 de noviembre de 2026
+
+La carpeta activa se renombró a `C:\Users\Zelko Jun\Desktop\UrkuForge\BloomiBunny`. El contenido conservado y el estado Git se verificaron antes/después del cambio de nombre. La copia anterior en `Desktop\Django\Proyecto` sigue siendo respaldo. Las referencias inferiores a `UrkuForge\Proyecto` describen el traslado previo; los informes y auxiliares históricos de `.local/` se conservan sin reescribir. No se iniciaron servicios ni se modificó PostgreSQL.
+
+## Traslado local validado — 18 de noviembre de 2026
+
+Raíz vigente: `C:\Users\Zelko Jun\Desktop\UrkuForge\Proyecto`. El origen `Desktop\Django\Proyecto` queda como respaldo, sin borrado. Copia completa de 15.661 archivos verificada mediante SHA-256; repositorio, cambios locales, configuración real, Excel y `.local/` conservados. Dependencias existentes reutilizadas; compilados backend/frontend regenerados desde el destino, sin actualizar versiones. PostgreSQL permanece fuera del proyecto y se creó un respaldo personalizado legible con pg_restore.
+
+Validación: build frontend y 38 pruebas aprobados; Maven clean package aprobado con 54 pruebas ejecutadas y 72 integraciones omitidas por requerir esquema aislado; 127 comprobaciones HTTP de recursos, tienda, autenticación, administración y CORS. Conexión JDBC temporal de solo lectura y Hibernate validate: las 18 tablas públicas conservaron sus huellas. El primer intento con connection-init-sql falló al configurar Hikari; se corrigió únicamente la conexión temporal usando options en la URL JDBC. No se modificó la configuración persistida ni se ejecutaron importadores/migraciones. Servicios temporales apagados al terminar.
+
+Los auxiliares y evidencias históricos de `.local/` se preservaron sin reemplazos masivos: algunas rutas antiguas siguen presentes como contexto histórico. Para reutilizar un auxiliar, revisar su ruta antes de ejecutarlo. Evidencias actuales en `.local/migration-2026-11-18/`. No hubo commit/push ni cambios comerciales. Los estados de arranque anteriores son históricos.
+
+## Cierre de sesión — 12 de noviembre de 2026
+
+Backend, frontend y auxiliares del proyecto **apagados por petición expresa**. Se identificaron 11 procesos por rutas, comandos, argfile Java, ascendencia y fechas de creación antes de detenerlos; comprobación final sin procesos seleccionados restantes ni escuchas en 5173/8080/9257/9258/9259. PostgreSQL compartido, editor y aplicaciones ajenas conservados. Este cierre prevalece sobre los estados activos históricos inferiores. No reiniciar hasta una nueva tarea.
+
+Quedan terminados la revisión funcional, la entrada suave del carrito, el favicon **isotipoB-Transparente.svg** y la limpieza autorizada de perfiles temporales/duplicado interno Django. Publicado en main hasta `0b20954`, con el ajuste del carrito en `669b091`. Se conservan originales oficiales en `BloomiIconosYLogos/`; por petición de la propietaria se dejan fuera de public/brand y dist/brand las alternativas de favicon descartadas y se consolida la continuidad en la B transparente.
+
+Validación del día ya aprobada: 126 pruebas backend (72 PostgreSQL aisladas), 38 frontend, build con tipos, 129 comprobaciones HTTP, navegador público responsive y comprobaciones específicas de entrada del carrito/favicon. Comparación de 18 tablas comerciales sin cambios durante las pruebas; última lectura de inventario de la sesión: 25 referencias/83 unidades, no un valor fijo para la próxima jornada. No se repiten pruebas que reinicien servicios al cerrar. Evidencias privadas del apagado en `.local/session-close-2026-11-12/`.
+
+Para retomar: leer PROJECT_MEMORY, arrancar backend/frontend cuando se solicite y usar localhost:5173 por CORS. Antes de producción siguen pendientes evaluar/corregir avisos npm y auditar Maven; configuración/HTTPS/migraciones/respaldos restaurables; acceso/recuperación de cuentas; políticas y condiciones comerciales; artes de banners y contenido/tonos confirmados. Lotes FIFO y abonos/autorización ya están implementados. Los detalles y criterios de cierre están en la tabla siguiente.
+
+Documentación de cierre y eliminación de copias públicas descartadas pendientes localmente de un nuevo commit/push; los avances anteriores siguen publicados y los respaldos privados intactos.
+
 ## Revisión y prioridades de producción — 12 de noviembre de 2026
 
 Mejora posterior: apertura del carrito con fundido y desplazamiento de 24 px durante 200 ms, fondo con fundido de 180 ms y animaciones desactivadas con movimiento reducido. Cambio exclusivo de CSS; conserva modal, foco, Escape y retorno al disparador. Build con TypeScript y comprobación Chrome a 320/390/768/1440 px aprobados, sin desbordamiento ni excepciones JavaScript. Evidencias privadas en `.local/cart-motion-2026-11-12/`; perfil temporal retirado tras cerrar Chrome.

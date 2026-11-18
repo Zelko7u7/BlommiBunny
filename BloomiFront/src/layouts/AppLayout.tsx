@@ -1,8 +1,9 @@
 import { useState, type ReactNode } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { BarChart3, Boxes, ChevronLeft, ChevronRight, LogOut, Menu, PackagePlus, ReceiptText, Search, ShoppingBag, Sparkles, Tags, Truck, UsersRound, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/admin-layout.css';
+import BrandLogo from '../components/common/BrandLogo';
 
 const groups = [
  ['GENERAL', [['/admin', 'Dashboard', BarChart3]]],
@@ -18,7 +19,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
  const { session, logout } = useAuth();
  return <div className={`shell ${compact ? 'compact' : ''}`}>
   <aside id="admin-navigation" className={mobile ? 'open' : ''}>
-   <div className="brand"><div className="brand-mark">B</div><div><strong>Bloomi Bunny</strong><span>Administración</span></div></div>
+   <div className="brand"><Link className="brand-home" to="/" aria-label="Bloomi Bunny, inicio"><BrandLogo compact={compact && !mobile}/></Link><span className="brand-caption">Administración</span></div>
    <button className="admin-nav-close" aria-label="Cerrar navegación" onClick={() => setMobile(false)}><X/></button>
    <NavLink to="/" className="store-return">Ver tienda</NavLink>
    <nav aria-label="Administración">{groups.map(([title, items]) => <div className="nav-group" key={title}><small>{title}</small>{items.map(([to, label, Icon]) => <NavLink to={to} key={to} end={to === '/admin'} onClick={() => setMobile(false)}><Icon/><span>{label}</span></NavLink>)}</div>)}</nav>

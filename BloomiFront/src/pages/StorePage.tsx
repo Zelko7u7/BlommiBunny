@@ -16,6 +16,7 @@ import ProductPhoto from '../components/store/ProductPhoto';
 import StoreHero from '../components/store/StoreHero';
 import WhatsAppCheckout from '../components/store/WhatsAppCheckout';
 import IntroSplash from '../components/store/IntroSplash';
+import BrandLogo from '../components/common/BrandLogo';
 import { useAuth } from '../contexts/AuthContext';
 import { readCart, changeQuantity, cartLines } from '../services/cart';
 
@@ -106,7 +107,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
 
   return <div className="store">
     <header className="store-header">
-      <Link to="/" className="store-brand" aria-label="Bloomi Bunny, inicio"><div className="brand-mark">B</div><div><strong>Bloomi Bunny</strong><span>Belleza que florece</span></div></Link>
+      <Link to="/" className="store-brand" aria-label="Bloomi Bunny, inicio"><BrandLogo priority/></Link>
       <StoreSearch query={query} onChange={catalogPage ? value => updateFilter('q', value) : undefined} onSearch={searchCatalog}/>
       <div className="store-actions">
         {session ? <><span className="store-username">Hola, {session.username}</span>{session.role === 'ADMIN' && <Link to="/admin" aria-label="Administración"><Shield/><span className="admin-link-label">Administración</span></Link>}<button onClick={logout} aria-label="Cerrar sesión"><LogOut/></button></> : <Link to="/login" aria-label="Iniciar sesión"><UserRound/></Link>}

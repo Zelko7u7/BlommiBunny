@@ -1,6 +1,38 @@
 # Bloomi Bunny
 
+## Logotipo oficial integrado — 18 de noviembre de 2026
+
+La tienda usa el SVG oficial de `BloomiIconos_Logos/` en header, intro, pie, acceso/registro y administración. Un componente `BrandLogo` comparte el recurso y conserva sus colores, proporciones y transparencia; la B oficial sigue como favicon y se utiliza también al contraer la barra administrativa. Se retiran las letras y textos provisionales de esas ubicaciones, sin duplicar el nombre del dibujo.
+
+Intro de unos 2,5 segundos conservada, con entrada suave del logo y las palabras Compra → Disfruta → Florece. Build con tipos, 38 pruebas frontend y revisión en navegador a 375/430/768/1024/1440/1920 px aprobados. Backend, base de datos y flujos comerciales intactos; servicios activos. Recursos, archivos y validaciones en [Identidad visual oficial](docs/IDENTIDAD_VISUAL.md). Esta carpeta oficial sustituye las referencias históricas a `BloomiIconosYLogos/`.
+
+## Sesión activa y validada — 18 de noviembre de 2026
+
+Backend y frontend **activos en local** por petición de la propietaria: [tienda](http://localhost:5173), [administración](http://localhost:5173/admin) y [catálogo API](http://localhost:8080/api/store/products). Este estado sustituye los apagados históricos inferiores. Usar localhost por CORS. Raíz de trabajo: `C:\Users\Zelko Jun\Desktop\UrkuForge\BloomiBunny`.
+
+Revisión de fuentes, documentación, configuración y recursos propios: 342 archivos inventariados. Build con TypeScript y 38 pruebas frontend aprobados; Maven clean package con 126 pruebas backend aprobadas sin omisiones, incluidas 72 integraciones PostgreSQL aisladas. 133 comprobaciones HTTP aprobadas de rutas, componentes, recursos, autenticación, permisos y CORS. Las 18 tablas públicas permanecen idénticas antes/después; sin operaciones comerciales de prueba ni ajustes de inventario.
+
+Backend ejecutado desde el JAR compilado con Hibernate `validate`, sin cambios automáticos de esquema ni cambios a la configuración persistida. Logs y evidencias privadas en `.local/session-2026-11-18/`; frontend vigente en frontend-authorized.log y procesos comprobados en verified-runtime.json. Sin cambios funcionales, commit ni push. Las prioridades de producción documentadas siguen pendientes; no se repitió la revisión visual responsive ni una auditoría exhaustiva de dependencias.
+
+## Ubicación local vigente — 18 de noviembre de 2026
+
+La carpeta se renombró de `Proyecto` a `BloomiBunny` por petición de la propietaria.
+
+El proyecto se trasladó a `C:\Users\Zelko Jun\Desktop\UrkuForge\BloomiBunny`. Abrir esa carpeta como raíz de trabajo. La carpeta anterior en `Desktop\Django\Proyecto` se conserva como respaldo; evitar desarrollar en ambas copias. PostgreSQL permanece en su instalación existente.
+
+Copia completa comprobada mediante SHA-256, incluidos Git, configuración privada y respaldos. Compilación frontend/backend, 38 pruebas frontend, 54 pruebas backend y 127 comprobaciones HTTP aprobadas; 72 integraciones que requieren un esquema aislado se omitieron. Las 18 tablas públicas permanecen idénticas. Los servicios temporales de validación quedaron apagados. Evidencias privadas en `.local/migration-2026-11-18/`.
+
 Tienda virtual de maquillaje y cuidado de belleza con administración de inventario. Incluye catálogo con búsqueda, filtros y orden por precio, fichas por tonalidad, carrito local, solicitudes de compra por WhatsApp, cuentas, favoritos, inventario, ventas administrativas, compras recibidas y gastos. Los pedidos persistidos y pagos electrónicos siguen pendientes.
+
+## Cierre del 12 de noviembre de 2026
+
+Backend, frontend y auxiliares del proyecto **apagados por petición de la propietaria**. Verificados cero procesos del proyecto restantes y ninguna escucha en 5173/8080/9257/9258/9259. PostgreSQL compartido y aplicaciones ajenas conservados. Este cierre prevalece sobre los arranques históricos siguientes; no iniciar de nuevo hasta una nueva tarea.
+
+Avances publicados en `main`: `669b091` (entrada suave del carrito y revisión de producción) y `0b20954` (favicon B transparente y recursos oficiales de marca). Hoy también se limpiaron los perfiles temporales de Chrome y el duplicado interno Django, recuperando unos 3,26 GiB y conservando respaldos/evidencias. El favicon elegido es **isotipoB-Transparente.svg**; se retiraron las copias públicas de las alternativas descartadas, manteniendo los originales en `BloomiIconosYLogos/` para futuros recursos de marca.
+
+Validación del día: 126 pruebas backend, 38 frontend, build con TypeScript, 129 verificaciones HTTP y navegador responsive aprobados. Apertura del carrito de 200 ms y fondo de 180 ms, con movimiento reducido respetado. Sin operaciones comerciales de prueba; datos comparados intactos. Los pendientes de seguridad, despliegue, políticas y contenido están en [revisión técnica](docs/REVISION_PROYECTO.md). La próxima sesión debe empezar leyendo `PROJECT_MEMORY.md` y consultando la base antes de cualquier cambio de inventario.
+
+La documentación de cierre y la retirada de copias públicas descartadas quedan como cambios locales posteriores a `0b20954`, sin nuevo commit/push solicitado para este cierre. Configuración real, memoria y evidencias privadas siguen excluidas de Git.
 
 ## Retoma y verificación del 12 de noviembre de 2026
 
@@ -93,7 +125,7 @@ Las prioridades registradas en este cierre histórico eran ventas a cuotas/abono
 | `BloomiFront/` | React 19, TypeScript, Vite y TanStack Query. |
 | `BloomiBack/` | Java 25, Spring Boot 4, Spring Security, JPA y PostgreSQL. |
 | `Blommiimages/` | Fotografías originales de productos. Las copias usadas por la web están en `BloomiFront/public/products/`. |
-| `BloomiIconosYLogos/` | Originales oficiales de los iconos y logos de la tienda. El favicon elegido usa una copia idéntica de `isotipoB-Transparente.svg` en `BloomiFront/public/brand/`. Los originales y variantes se conservan intactos. Los próximos reemplazos de iconos provisionales tomarán sus recursos de esta carpeta. |
+| `BloomiIconosYLogos/` | Originales oficiales de los iconos y logos de la tienda. El favicon elegido usa una copia idéntica de `isotipoB-Transparente.svg`, único favicon en `BloomiFront/public/brand/`. Los originales de marca se conservan intactos. Los próximos reemplazos de iconos provisionales tomarán sus recursos de esta carpeta. |
 | `tools/` | Importador histórico del inventario. Su uso es independiente del arranque de la aplicación. |
 | `docs/` | Revisión técnica y estado del avance. |
 
@@ -150,6 +182,6 @@ git remote get-url origin
 git status --short
 ```
 
-La raíz debe terminar en `Django/Proyecto` y `origin` debe apuntar a `Zelko7u7/BlommiBunny`. El historial de los proyectos vecinos no forma parte de este repositorio.
+La raíz vigente es `C:/Users/Zelko Jun/Desktop/UrkuForge/BloomiBunny` y `origin` debe apuntar a `Zelko7u7/BlommiBunny`. El historial de los proyectos vecinos no forma parte de este repositorio.
 
 Los archivos privados de memoria y respaldo corresponden al trabajo local y no son requisitos para ejecutar un clon nuevo.

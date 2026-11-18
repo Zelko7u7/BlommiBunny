@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import BrandLogo from '../components/common/BrandLogo';
 
 export default function LoginPage({ register = false }: { register?: boolean }) {
   const { login, signup } = useAuth();
@@ -30,7 +31,7 @@ export default function LoginPage({ register = false }: { register?: boolean }) 
     <section className="login-story"><div className="story-content"><span className="story-tag"><Sparkles/> Belleza que florece</span><h1>Tu belleza,<br/>tu propio ritual.</h1><p>Encuentra tus favoritos y descubre nuestra colección de maquillaje y cuidado.</p></div><div className="orb one"/><div className="orb two"/></section>
     <section className="login-form"><form onSubmit={submit} aria-busy={loading}>
       <Link className="login-back" to="/">← Volver a la tienda</Link>
-      <div className="login-logo"><div className="brand-mark">B</div><div><strong>Bloomi Bunny</strong><span>Belleza que florece</span></div></div>
+      <Link className="login-logo brand-home" to="/" aria-label="Bloomi Bunny, inicio"><BrandLogo/></Link>
       <div className="welcome"><span>{register ? 'TU CUENTA BLOOMI' : 'BIENVENIDA DE NUEVO'}</span><h2>{register ? 'Crea tu cuenta' : 'Hola, qué gusto verte'}</h2><p>{register ? 'Regístrate para disfrutar de la tienda.' : 'Ingresa con tu usuario y contraseña.'}</p></div>
       <label>Usuario<div className="input"><input name="username" value={user} onChange={e => setUser(e.target.value)} autoComplete="username" autoCapitalize="none" spellCheck={false} maxLength={80} disabled={loading} aria-describedby={error ? 'account-error' : undefined} required/></div></label>
       <label>Contraseña<div className="input"><LockKeyhole aria-hidden="true"/><input name="password" type={show ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} autoComplete={register ? 'new-password' : 'current-password'} minLength={register ? 8 : undefined} maxLength={100} disabled={loading} aria-describedby={register ? 'password-help' : undefined} required/><button type="button" onClick={() => setShow(!show)} disabled={loading} aria-pressed={show} aria-label={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}>{show ? <EyeOff/> : <Eye/>}</button></div></label>

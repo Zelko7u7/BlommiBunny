@@ -1,0 +1,43 @@
+/* The supplied SVGs keep their original shapes, texture, colors and viewBox. */
+.brand-logo {
+  display: block;
+  width: 164px;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 8663.09 / 4142.24;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.brand-logo--compact { aspect-ratio: 1; }
+.store .store-brand { display: block; min-width: 0; line-height: 0; }
+.store .store-brand .brand-logo { width: 164px; }
+.store .store-header { column-gap: 24px; padding-top: 12px; }
+.store-brand:focus-visible, .brand-home:focus-visible, .footer-brand:focus-visible {
+  outline: 2px solid #553184;
+  outline-offset: 5px;
+  border-radius: 4px;
+}
+.brand-home, .footer-brand { display: inline-block; max-width: 100%; text-decoration: none; }
+.login-form .login-logo { display: block; width: fit-content; margin: 24px auto 0; }
+.login-logo .brand-logo { width: 176px; }
+.login-form .welcome { margin-top: 30px; }
+.shell .brand { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+.shell .brand .brand-logo { width: 164px; }
+.shell .brand .brand-caption { font-size: 12px; color: var(--color-text-secondary); }
+.store-footer .brand-logo { width: 160px; }
+@media (min-width: 901px) {
+  .shell.compact .brand { align-items: center; }
+  .shell.compact .brand .brand-logo { width: 48px; }
+  .shell.compact .brand .brand-caption { display: none; }
+}
+@media (max-width: 899px) {
+  .store .store-brand .brand-logo { width: 156px; }
+  .store .store-header { column-gap: 8px; }
+}
+@media (max-width: 479px) {
+  .store .store-brand .brand-logo { width: 136px; }
+  .login-logo .brand-logo { width: 168px; }
+}
+@media (max-width: 359px) {
+  .store .store-brand .brand-logo { width: 124px; }
+}
