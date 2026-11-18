@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Minus, Plus, ShoppingBag, Heart } from 'lucide-react';
 import ProductGallery from './ProductGallery';
+import RevealOnScroll from './RevealOnScroll';
 import type { StoreProduct } from '../../types';
 import { whatsappUrl } from '../../data/legal';
 
@@ -46,7 +47,7 @@ export default function ProductDetails({ product, variants = [], onSelectVariant
         <button className="detail-secondary" onClick={event => onOpenCart(event.currentTarget)}>Ver carrito</button>
       </div>
     </section>
-    <section className="detail-description"><h2>Descripción del producto</h2>{(product.description?.trim() || 'La descripción de este producto estará disponible pronto.').split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}<a className="detail-question" href={whatsappUrl(`Hola, Bloomi Bunny. Quisiera más información sobre ${product.name}${product.shade ? `, ${product.shade}` : ''}${product.presentation ? ` (${product.presentation})` : ''}.`)} target="_blank" rel="noopener noreferrer">¿Tienes dudas sobre este producto? Escríbenos →</a></section>
+    <RevealOnScroll as="section" className="detail-description"><h2>Descripción del producto</h2>{(product.description?.trim() || 'La descripción de este producto estará disponible pronto.').split(/\n\s*\n/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}<a className="detail-question" href={whatsappUrl(`Hola, Bloomi Bunny. Quisiera más información sobre ${product.name}${product.shade ? `, ${product.shade}` : ''}${product.presentation ? ` (${product.presentation})` : ''}.`)} target="_blank" rel="noopener noreferrer">¿Tienes dudas sobre este producto? Escríbenos →</a></RevealOnScroll>
     {recommendations}
   </main>;
 }

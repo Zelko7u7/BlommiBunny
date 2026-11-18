@@ -17,6 +17,7 @@ import StoreHero from '../components/store/StoreHero';
 import WhatsAppCheckout from '../components/store/WhatsAppCheckout';
 import IntroSplash from '../components/store/IntroSplash';
 import BrandLogo from '../components/common/BrandLogo';
+import RevealOnScroll from '../components/store/RevealOnScroll';
 import { useAuth } from '../contexts/AuthContext';
 import { readCart, changeQuantity, cartLines } from '../services/cart';
 
@@ -124,7 +125,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
     }} recommendations={purchaseProduct && !detail.isError && !isError ? <ProductRecommendations key={purchaseProduct.id} current={purchaseProduct} products={data} cart={cart} backTo={location.state?.catalogBackTo ?? '/#catalogo'} onAdd={addProduct}/> : undefined}/> : <>
     {!favoritesPage && <StoreHero categories={categories}/>}
     <main id="catalogo" className="store-catalog">
-      <div className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div></div>
+      <RevealOnScroll className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div></RevealOnScroll>
       {(!favoritesPage || session) && <CatalogFilters key={location.pathname} category={category} sort={sort} categories={categories} onChange={updateFilter} onReset={clearRefinements}/>}
       {favoritesPage && !session ? <p className="state">Inicia sesión para guardar y consultar tus favoritos. <Link to="/login">Ingresar</Link></p> : <>
         {catalogLoading && <p className="catalog-notice" role="status">{favoritesPage ? 'Cargando favoritos…' : 'Consultando precios y disponibilidad…'}</p>}
@@ -133,7 +134,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       </>}
       {session && favorites.isError && !favoritesPage && <p role="alert" className="catalog-notice">No pudimos consultar tus favoritos. <button onClick={() => favorites.refetch()}>Reintentar</button></p>}
       <div className="product-grid">
-        {catalog.map(entry => <ProductCard key={entry.key} entry={entry} backTo={catalogBackTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={addProduct} individualTone={favoritesPage} favorite={favoriteIds.has(entry.product!.id)} favoriteDisabled={favoriteDisabled} onFavorite={() => toggleFavorite(entry.product!.id)}/>)}
+        {catalog.map(entry => <ProductCard reveal key={entry.key} entry={entry} backTo={catalogBackTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={addProduct} individualTone={favoritesPage} favorite={favoriteIds.has(entry.product!.id)} favoriteDisabled={favoriteDisabled} onFavorite={() => toggleFavorite(entry.product!.id)}/>)}
       </div>
     </main>
     </>}

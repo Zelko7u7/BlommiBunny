@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { catalogPrice, type CatalogEntry } from '../../services/catalog';
 import type { StoreProduct } from '../../types';
 import ProductPhoto from './ProductPhoto';
+import { useRevealOnScroll } from '../../hooks/useRevealOnScroll';
 
 type Props = {
   entry: CatalogEntry;
@@ -13,18 +14,20 @@ type Props = {
   favorite?: boolean;
   favoriteDisabled?: boolean;
   onFavorite?: () => void;
+  reveal?: boolean;
 };
 
 /** Shared card for the catalog, saved products and related products. */
-export default function ProductCard({ entry, backTo, cartQuantity, onAdd, individualTone = false, favorite, favoriteDisabled, onFavorite }: Props) {
+export default function ProductCard({ entry, backTo, cartQuantity, onAdd, individualTone = false, favorite, favoriteDisabled, onFavorite, reveal = false }: Props) {
   const navigate = useNavigate();
+  const revealRef = useRevealOnScroll<HTMLElement>({ enabled: reveal, stagger: true });
   const product = entry.product;
   if (!product) return null;
   const to = `/producto/${product.id}`;
   const state = { catalogBackTo: backTo };
   const maximum = cartQuantity >= product.stock;
   const previewImage = product.galleryImages?.find(url => url.trim() && url !== entry.imageUrl);
-  return <article className="product-card catalog-product-card" data-product-id={product.id} data-product-key={entry.key} onClick={event => {
+  return <article ref={revealRef} className="product-card catalog-product-card" data-product-id={product.id} data-product-key={entry.key} onClick={event => {
     if (!(event.target as Element).closest('a,button') && !window.getSelection()?.toString()) navigate(to, { state });
   }}>
     {onFavorite && <button type="button" className={`favorite-toggle ${favorite ? 'is-saved' : ''}`} aria-label={`${favorite ? 'Quitar de' : 'Guardar en'} favoritos: ${entry.name}`} aria-pressed={favorite} disabled={favoriteDisabled} onClick={event => { event.stopPropagation(); onFavorite(); }}><Heart size={19} fill={favorite ? 'currentColor' : 'none'}/></button>}

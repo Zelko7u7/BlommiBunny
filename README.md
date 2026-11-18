@@ -1,5 +1,11 @@
 # Bloomi Bunny
 
+## Aparición progresiva pública — 18 de noviembre de 2026
+
+El catálogo, favoritos, recomendaciones y bloques informativos públicos incorporan Scroll Reveal: opacidad y desplazamiento de 20 px durante 550 ms, con escalonado de 70 ms en las tarjetas. El contenido inicialmente visible aparece inmediatamente; cada elemento se anima una vez por montaje y respeta movimiento reducido y navegación por teclado. Búsqueda, filtros y acciones conservados. Administración, header, splash, banners, carrito y modales sin este efecto.
+
+Build con tipos, 38 pruebas frontend y navegador a 375/430/768/1024/1440/1920 px aprobados. Sin cambios de backend, base, fotografías ni inventario; servicios activos. Detalle de componentes, comportamiento y verificaciones en [Scroll Reveal público](docs/SCROLL_REVEAL.md).
+
 ## Logotipo oficial integrado — 18 de noviembre de 2026
 
 La tienda usa el SVG oficial de `BloomiIconos_Logos/` en header, intro, pie, acceso/registro y administración. Un componente `BrandLogo` comparte el recurso y conserva sus colores, proporciones y transparencia; la B oficial sigue como favicon y se utiliza también al contraer la barra administrativa. Se retiran las letras y textos provisionales de esas ubicaciones, sin duplicar el nombre del dibujo.

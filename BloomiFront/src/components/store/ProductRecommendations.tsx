@@ -4,6 +4,7 @@ import { recommendProducts } from '../../services/recommendations';
 import type { CartItem } from '../../services/cart';
 import type { StoreProduct } from '../../types';
 import ProductCard from './ProductCard';
+import RevealOnScroll from './RevealOnScroll';
 import '../../styles/recommendations.css';
 
 type Props = { current: StoreProduct; products: StoreProduct[]; cart: CartItem[]; backTo: string; onAdd: (product: StoreProduct) => void };
@@ -43,7 +44,7 @@ export default function ProductRecommendations({ current, products, cart, backTo
     element.scrollBy({ left: direction * step * cards, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
   return <section className="related-products" aria-labelledby={`${id}-title`}>
-    <div className="related-heading"><h2 id={`${id}-title`}>TE PUEDE INTERESAR</h2>{navigation.overflow && <div className="related-navigation" role="group" aria-label="Navegar productos relacionados">
+    <div className="related-heading"><RevealOnScroll as="h2" id={`${id}-title`}>TE PUEDE INTERESAR</RevealOnScroll>{navigation.overflow && <div className="related-navigation" role="group" aria-label="Navegar productos relacionados">
       <button type="button" disabled={!navigation.previous} onClick={() => move(-1)} aria-label="Productos relacionados anteriores" aria-controls={`${id}-track`}><ChevronLeft size={22}/></button>
       <button type="button" disabled={!navigation.next} onClick={() => move(1)} aria-label="Productos relacionados siguientes" aria-controls={`${id}-track`}><ChevronRight size={22}/></button>
     </div>}</div>
@@ -53,7 +54,7 @@ export default function ProductRecommendations({ current, products, cart, backTo
       if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') move(event.key === 'ArrowLeft' ? -1 : 1);
       else track.current?.scrollTo({ left: event.key === 'Home' ? 0 : track.current.scrollWidth, behavior: 'auto' });
     }}>
-      {entries.map(entry => <ProductCard key={entry.key} entry={entry} backTo={backTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={onAdd}/>)}
+      {entries.map(entry => <ProductCard reveal key={entry.key} entry={entry} backTo={backTo} cartQuantity={cart.find(item => item.productId === entry.product!.id)?.quantity ?? 0} onAdd={onAdd}/>)}
     </div>
   </section>;
 }

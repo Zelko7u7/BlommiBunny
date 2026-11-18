@@ -1,0 +1,30 @@
+/* Only opted-in buyer content inside the public storefront can animate. */
+.store [data-scroll-reveal='pending'] {
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+}
+.store [data-scroll-reveal='entering'] {
+  animation: bloomi-scroll-reveal 550ms ease-out var(--reveal-delay, 0ms) both;
+  will-change: opacity, transform;
+}
+@keyframes bloomi-scroll-reveal {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Keyboard focus must never land in visually hidden content. */
+.store [data-scroll-reveal]:focus-within {
+  opacity: 1;
+  transform: none;
+  animation: none;
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .store [data-scroll-reveal] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    pointer-events: auto;
+    will-change: auto;
+  }
+}

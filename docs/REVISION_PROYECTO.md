@@ -1,5 +1,11 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Scroll Reveal público — 18 de noviembre de 2026
+
+Implementación exclusiva de comprador con useRevealOnScroll, RevealOnScroll y CSS limitado a `.store`. Un IntersectionObserver compartido, desconexión al revelar, 550 ms/ease-out/opacidad/20 px y escalonado de 70 ms con espera acotada. Contenido visible inicial inmediato, una aparición por montaje, limpieza de referencias y salida segura ante movimiento reducido, foco o falta/fallo de API. Se conservan estructura y acciones de tarjetas, filtro/búsqueda y recomendaciones horizontales.
+
+Build TypeScript/Vite y 38 pruebas frontend aprobados; Chrome a 375/430/768/1024/1440/1920 px comprobó catálogo, filtros/búsqueda, entrada y no repetición, contenido público, recomendaciones, foco y acciones. Administración y formulario de categoría sin reveal a 375/1440 px; lecturas privadas simuladas, cero escrituras API/excepciones JS. Comprobadas preferencias reducidas iniciales/dinámicas y animación interrumpida. 232 archivos protegidos intactos por SHA-256. Sin backend/DB/migraciones, dependencias, modificaciones de identidad ni cambios a splash/banners/carrito/WhatsApp. Servicios activos conservados; navegador aislado cerrado. [Guía y archivos](SCROLL_REVEAL.md), evidencias en `.local/scroll-reveal-2026-11-18/`.
+
 ## Identidad oficial integrada — 18 de noviembre de 2026
 
 Implementación exclusivamente frontend del logotipo de `BloomiIconos_Logos/`, fuente oficial vigente. Header, intro, footer, acceso/registro y administración comparten `BrandLogo`. Se conserva la B transparente oficial en favicon y se reutiliza para la barra contraída. Se mantienen los SVG originales sin cambios y las copias web se comparan byte por byte; sin filtros, recortes ni nombre duplicado. Paleta lavanda conservada.
