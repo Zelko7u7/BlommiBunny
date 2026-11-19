@@ -179,6 +179,24 @@ class AccessControlTest {
   verify(auth).register(new RegisterRequest("cliente","password123",Role.CUSTOMER));
  }
 
+ @Test void guestCannotUseAdministrativeRegistration()throws Exception{
+  mvc.perform(post("/api/auth/register").contentType("application/json").content("{\"username\":\"intruso\",\"password\":\"fixture-password\",\"role\":\"ADMIN\"}")).andExpect(status().isUnauthorized());
+  verifyNoInteractions(auth);
+ }
+ @Test @WithMockUser(roles="ADMIN") void evenAdminCannotUseAdministrativeRegistration()throws Exception{
+  for(String path:List.of("/api/auth/register","/api/auth/register/")){
+   mvc.perform(post(path).contentType("application/json").content("{\"username\":\"segunda-admin\",\"password\":\"fixture-password\",\"role\":\"ADMIN\"}")).andExpect(status().isForbidden());
+  }
+  verifyNoInteractions(auth);
+ }
+ @Test void injectedSignupRoleCannotGrantPrivileges()throws Exception{
+  when(auth.register(any())).thenReturn(new AuthResponse("token","cliente",Role.CUSTOMER));
+  for(String role:List.of("ADMIN","EMPLOYEE")){
+   mvc.perform(post("/api/auth/signup").contentType("application/json").content("{\"username\":\"cliente\",\"password\":\"fixture-password\",\"role\":\""+role+"\"}")).andExpect(status().isCreated()).andExpect(jsonPath("$.role").value("CUSTOMER"));
+  }
+  verify(auth,times(2)).register(new RegisterRequest("cliente","fixture-password",Role.CUSTOMER));
+ }
+
  @Test void guestCannotAccessSalesDetailsOrCancellation()throws Exception{
   mvc.perform(get("/api/sales/1")).andExpect(status().isUnauthorized());
   mvc.perform(post("/api/sales").contentType("application/json").content("{}")).andExpect(status().isUnauthorized());

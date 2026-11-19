@@ -1,5 +1,13 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Administradora única — 18 de noviembre de 2026
+
+Registro administrativo retirado del controlador y denegado en seguridad para todos los roles. El servicio de registro rechaza ADMIN/EMPLOYEE y asigna CUSTOMER expresamente. El bootstrap transaccional usa un bloqueo PostgreSQL para serializar arranques; solo crea ADMIN con la tabla de cuentas vacía. Conserva cuentas/contraseñas/estado existentes aunque cambie el nombre configurado, incluye administradoras inactivas y no asciende clientes ni recrea administradoras cuando ya hay cuentas. Más de una administradora impide el arranque para exigir revisión manual.
+
+La migración manual `012_single_admin.sql` crea un índice único parcial sobre el rol ADMIN, incluidas cuentas inactivas, que rechaza tanto una segunda inserción como un ascenso desde CUSTOMER. Aplicar después de respaldo y comprobación de cuentas; si hay duplicados la migración falla sin borrarlos. Hibernate `validate` o `update` no sustituye este índice. La recuperación de una administradora perdida o inactiva requiere intervención privada verificada sobre la cuenta original; no hay recuperación pública implementada. Siguen pendientes limitación de intentos y segundo factor.
+
+Aplicada localmente con respaldo verificado y sin modificar cuentas ni datos comerciales. Las 158 pruebas backend pasan sin omisiones, incluidas 79 integraciones aisladas. Backend actualizado activo con `ddl-auto=validate`; login original e inventario funcionan, y el alta administrativa devuelve 403 a la propia administradora. Las 18 tablas públicas conservan sus contenidos. El despliegue en Heroku sigue pendiente.
+
 ## Scroll Reveal público — 18 de noviembre de 2026
 
 Implementación exclusiva de comprador con useRevealOnScroll, RevealOnScroll y CSS limitado a `.store`. Un IntersectionObserver compartido, desconexión al revelar, 550 ms/ease-out/opacidad/20 px y escalonado de 70 ms con espera acotada. Contenido visible inicial inmediato, una aparición por montaje, limpieza de referencias y salida segura ante movimiento reducido, foco o falta/fallo de API. Se conservan estructura y acciones de tarjetas, filtro/búsqueda y recomendaciones horizontales.
