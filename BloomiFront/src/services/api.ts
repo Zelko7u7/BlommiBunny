@@ -15,6 +15,10 @@ async function allProducts<T extends {id:number}>(path:string): Promise<T[]> {
 }
 
 export const api={
+ uploadProductImage:(file:File,signal?:AbortSignal)=>{
+  const form=new FormData();form.append('file',file);
+  return http.post<{imageUrl:string;contentType:string;size:number}>('/media/images',form,{headers:{'Content-Type':undefined},timeout:28000,signal}).then(r=>r.data);
+ },
  operations:(kind:'purchases'|'expenses',filters:import('../types').OperationFilters)=>{
   const params=new URLSearchParams({page:String(filters.page),size:'20'});
   for(const key of ['q','from','to'] as const)if(filters[key])params.set(key,filters[key]);

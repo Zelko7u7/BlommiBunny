@@ -23,7 +23,7 @@ import java.util.List;
    .exceptionHandling(e->e.authenticationEntryPoint((req,res,ex)->res.setStatus(401)).accessDeniedHandler((req,res,ex)->res.setStatus(403)))
    .authorizeHttpRequests(a->a
     .requestMatchers(HttpMethod.POST,"/api/auth/login","/api/auth/signup").permitAll()
-    .requestMatchers(HttpMethod.GET,"/api/store/products","/api/store/products/*").permitAll()
+    .requestMatchers(HttpMethod.GET,"/api/store/products","/api/store/products/*","/api/store/media/*").permitAll()
     .requestMatchers("/api/favorites", "/api/favorites/*").authenticated()
     .requestMatchers("/api/**").hasRole("ADMIN")
     .anyRequest().denyAll())

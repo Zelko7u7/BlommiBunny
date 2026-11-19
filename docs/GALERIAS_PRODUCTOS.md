@@ -1,5 +1,7 @@
 # Fotografías, galerías y descripciones de Bloomi Bunny
 
+Desde el 18 de noviembre de 2026, crear/editar productos permite seleccionar archivos desde el dispositivo, configurar portada y ordenar las secundarias. Consulta [configuración privada y uso de Cloudinary](CLOUDINARY.md). Las fotografías y enlaces anteriores se conservan; esta funcionalidad no importa ni modifica productos automáticamente.
+
 Actualización del 28 de octubre de 2026. En las comprobaciones de la jornada se conservaron 25 referencias y 84 unidades; consultar la base antes de futuros cambios, porque estas cifras son una referencia temporal. Se incorporaron las 21 descripciones oficiales a 23 SKU, contando los tonos separados de Toy Story. La importación no modificó precios, costos, cantidades, categorías, identificadores, nombres ni estados de publicación.
 
 ## Resultado por producto

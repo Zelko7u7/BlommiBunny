@@ -9,6 +9,9 @@ import java.util.*;
 @RestControllerAdvice
 public class ApiExceptionHandler {
  record ApiError(String code,String message,Instant timestamp,String path,Map<String,String> fields){}
+ @ExceptionHandler(ProductImageException.class) ResponseEntity<ApiError> image(ProductImageException e,HttpServletRequest r){return response(e.status(),"IMAGE_UPLOAD_ERROR",e,r,Map.of());}
+ @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) ResponseEntity<ApiError> imageTooLarge(RuntimeException e,HttpServletRequest r){return response(HttpStatus.PAYLOAD_TOO_LARGE,"IMAGE_TOO_LARGE",new RuntimeException("Cada fotografía debe pesar como máximo 5 MB."),r,Map.of());}
+ @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class) ResponseEntity<ApiError> missingImage(Exception e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"IMAGE_REQUIRED",new RuntimeException("Selecciona una fotografía para subir."),r,Map.of());}
  @ExceptionHandler({org.springframework.http.converter.HttpMessageNotReadableException.class,org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class}) ResponseEntity<ApiError> malformed(Exception e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"VALIDATION_ERROR",new RuntimeException("Revisa el formato de fechas, cantidades y opciones seleccionadas."),r,Map.of());}
  @ExceptionHandler(ResourceNotFoundException.class) ResponseEntity<ApiError> notFound(RuntimeException e,HttpServletRequest r){return response(HttpStatus.NOT_FOUND,"NOT_FOUND",e,r,Map.of());}
  @ExceptionHandler({BusinessException.class,IllegalArgumentException.class}) ResponseEntity<ApiError> business(RuntimeException e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"BUSINESS_ERROR",e,r,Map.of());}

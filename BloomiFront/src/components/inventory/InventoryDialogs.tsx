@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import { useContacts, useNamed } from '../../hooks/useApi';
 import images from '../../data/product-images.json';
 import type { Product, ProductInput } from '../../types';
+import ProductImagesEditor from './ProductImagesEditor';
 
 export function InventoryDialog({ title, children, onClose, busy = false }: { title: string; children: ReactNode; onClose: () => void; busy?: boolean }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -33,10 +34,13 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
   const [categoryId, setCategoryId] = useState(String(product?.categoryId ?? ''));
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? '');
   const [galleryText, setGalleryText] = useState((product?.galleryImages ?? []).join('\n'));
+  const [mediaBusy, setMediaBusy] = useState(false);
+  const [mediaPending, setMediaPending] = useState(false);
   const [costKnown, setCostKnown] = useState(product?.costConfirmed ?? true);
   const [error, setError] = useState('');
   async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); if (busy) return;
+    e.preventDefault(); if (busy || mediaBusy) return;
+    if (mediaPending) { setError('Termina de subir las fotografías pendientes o retíralas antes de guardar.'); return; }
     const form = new FormData(e.currentTarget);
     const categoryId = Number(form.get('categoryId'));
     if (!activeCategories.some(category => category.id === categoryId)) { setError('Selecciona una categoría válida.'); return; }
@@ -58,9 +62,9 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
       });
     } catch (failure: any) { setError(failure?.message ?? 'No fue posible guardar el producto. Inténtalo de nuevo.'); }
   }
-  return <InventoryDialog title={product ? 'Editar producto' : 'Nuevo producto'} onClose={onClose} busy={busy}>
+  return <InventoryDialog title={product ? 'Editar producto' : 'Nuevo producto'} onClose={onClose} busy={busy || mediaBusy}>
     <form onSubmit={submit} className="product-form">
-      <fieldset disabled={busy}>
+      <fieldset disabled={busy || mediaBusy}>
         <div className="product-form-grid">
           <label className="form-wide">Nombre<input name="name" maxLength={140} required autoFocus placeholder="Nombre del producto" defaultValue={product?.name ?? ''}/></label>
           <label>Código<input value={code} onChange={e => setCode(e.target.value)} maxLength={60} required/></label>
@@ -76,10 +80,12 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
           <label>Tono<input name="shade" maxLength={80} defaultValue={product?.shade ?? ''}/></label>
           <label className="form-wide">Grupo de tonalidades<input name="variantGroup" maxLength={80} defaultValue={product?.variantGroup ?? ''} placeholder="Ej. labial-doble-vaquero-toy-story"/><small>Usa el mismo grupo para reunir los tonos en una ficha. Cada tono conserva su código, precio y stock.</small></label>
           <label className="form-wide">Descripción<textarea name="description" maxLength={1200} rows={2} defaultValue={product?.description ?? ''}/></label>
-          <label className="form-wide">Foto de la colección<select value={images.some(image => image.imageUrl === imageUrl) ? imageUrl : ''} onChange={e => setImageUrl(e.target.value)}><option value="">Sin foto seleccionada</option>{images.map(image => <option value={image.imageUrl} key={image.imageUrl}>{image.name}</option>)}</select></label>
-          <label className="form-wide">Ruta o enlace de otra foto<input value={imageUrl} onChange={e => setImageUrl(e.target.value)} maxLength={500} placeholder="https://… o /products/…"/></label>
-          <label className="form-wide">Fotografías secundarias<textarea name="galleryImages" value={galleryText} onChange={event => setGalleryText(event.target.value)} maxLength={10020} rows={4} placeholder={'/products/gallery/foto-01.webp\n/products/gallery/foto-02.webp'}/><small>Una ruta /products/ o enlace HTTP/HTTPS por línea. Se muestran en este orden después de la portada, con un máximo de 20. Cada tono conserva su propia galería.</small></label>
-          {galleryText.trim() && <div className="form-wide product-gallery-preview" aria-label="Vista previa de fotografías secundarias">{galleryText.split(/\r?\n/).map(url => url.trim()).filter(Boolean).slice(0,20).map((url,index) => <figure key={`${index}-${url}`}><img src={url} alt={`Fotografía secundaria ${index + 1}`} loading="lazy"/><figcaption>{index + 1}</figcaption></figure>)}</div>}
+          <ProductImagesEditor cover={imageUrl} gallery={galleryText.split(/\r?\n/).map(url => url.trim()).filter(Boolean)} disabled={busy} onChange={(cover, gallery) => { setImageUrl(cover); setGalleryText(gallery.join('\n')); }} onBusyChange={setMediaBusy} onPendingChange={setMediaPending}/>
+          <details className="form-wide product-image-advanced"><summary>Usar fotos de la colección o enlaces existentes</summary>
+            <label>Foto de la colección<select value={images.some(image => image.imageUrl === imageUrl) ? imageUrl : ''} onChange={e => setImageUrl(e.target.value)}><option value="">Sin foto seleccionada</option>{images.map(image => <option value={image.imageUrl} key={image.imageUrl}>{image.name}</option>)}</select></label>
+            <label>Ruta o enlace de la portada<input value={imageUrl} onChange={e => setImageUrl(e.target.value)} maxLength={500} placeholder="https://… o /products/…"/></label>
+            <label>Enlaces de fotografías secundarias<textarea name="galleryImages" value={galleryText} onChange={event => setGalleryText(event.target.value)} maxLength={10020} rows={4} placeholder={'/products/gallery/foto-01.webp\n/products/gallery/foto-02.webp'}/><small>Una ruta o enlace por línea, hasta 20 fotografías. Cada tono conserva su propia galería.</small></label>
+          </details>
         </div>
         <div className="product-form-options">
           <label><input type="checkbox" name="active" defaultChecked={product?.active ?? true}/> Habilitar en la tienda</label>
@@ -92,7 +98,7 @@ function ProductFormDialog({ product, onClose, onSave, busy }: { product?: Produ
         {isError && <p className="error" role="alert">No pudimos cargar las categorías.</p>}
         {!isLoading && !isError && activeCategories.length === 0 && <p className="error">Primero <Link to="/admin/categorias" onClick={onClose}>crea una categoría</Link>.</p>}
         {error && <p className="error" role="alert">{error}</p>}
-        <footer><button type="button" className="inventory-secondary" onClick={onClose}>Cancelar</button><button className="primary" disabled={isLoading || isError || activeCategories.length === 0}>{busy ? 'Guardando…' : product ? 'Guardar cambios' : 'Crear producto'}</button></footer>
+        <footer><button type="button" className="inventory-secondary" onClick={onClose}>Cancelar</button><button className="primary" disabled={mediaPending || isLoading || isError || activeCategories.length === 0}>{mediaBusy ? 'Subiendo fotos…' : busy ? 'Guardando…' : product ? 'Guardar cambios' : 'Crear producto'}</button></footer>
       </fieldset>
     </form>
   </InventoryDialog>;

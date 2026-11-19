@@ -1,5 +1,7 @@
 # Bloomi Bunny
 
+La administración permite subir fotos al crear/editar productos y gestionar portada/galería. Consulta [configuración de Cloudinary](docs/CLOUDINARY.md); requiere credenciales privadas en el backend y reinicio local. El despliegue en Heroku se deja para una etapa posterior.
+
 ## Aparición progresiva pública — 18 de noviembre de 2026
 
 El catálogo, favoritos, recomendaciones y bloques informativos públicos incorporan Scroll Reveal: opacidad y desplazamiento de 20 px durante 550 ms, con escalonado de 70 ms en las tarjetas. El contenido inicialmente visible aparece inmediatamente; cada elemento se anima una vez por montaje y respeta movimiento reducido y navegación por teclado. Búsqueda, filtros y acciones conservados. Administración, header, splash, banners, carrito y modales sin este efecto.

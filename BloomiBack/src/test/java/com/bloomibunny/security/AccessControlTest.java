@@ -31,9 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebAppConfiguration
 class AccessControlTest {
  @Configuration @EnableWebMvc @EnableWebSecurity
- @Import({SecurityConfig.class,InventoryLotController.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,TransactionController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
+ @Import({SecurityConfig.class,ProductImageController.class,InventoryLotController.class,ProductController.class,StoreController.class,AuthController.class,FavoriteController.class,SaleController.class,TransactionController.class,com.bloomibunny.exception.ApiExceptionHandler.class})
  static class Config {
   @Bean ProductService products(){return mock(ProductService.class);}
+  @Bean ProductImageStorage imageStorage(){return mock(ProductImageStorage.class);}
   @Bean InventoryLotService lots(){return mock(InventoryLotService.class);}
   @Bean com.bloomibunny.repository.ProductRepository productRows(){return mock(com.bloomibunny.repository.ProductRepository.class);}
   @Bean AuthService auth(){return mock(AuthService.class);}
@@ -50,6 +51,7 @@ class AccessControlTest {
 
  @Autowired WebApplicationContext context;
  @Autowired ProductService products;
+ @Autowired ProductImageStorage imageStorage;
  @Autowired AuthService auth;
  @Autowired FavoriteService favorites;
  @Autowired AdminSaleService adminSales;
@@ -61,7 +63,7 @@ class AccessControlTest {
  MockMvc mvc;
 
  @BeforeEach void setup(){
-  reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses,salePayments);
+  reset(products,auth,users,favorites,adminSales,adminPurchases,adminExpenses,salePayments,imageStorage);
   mvc=MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
   var product=new ProductResponse(1L,"Gloss","GLOSS-1",1L,"Labiales",null,null,2L,"Proveedor privado","Descripción",null,null,new BigDecimal("5000"),new BigDecimal("12000"),new BigDecimal("7000"),3,1,null,true,"/products/gloss.png","OK",false,true,0L,null,null);
   when(products.list(anyString(),anyInt(),anyInt(),anyString())).thenReturn(new PageImpl<>(List.of(product),org.springframework.data.domain.PageRequest.of(0,20),1));
@@ -74,6 +76,24 @@ class AccessControlTest {
   mvc.perform(get("/api/store/products")).andExpect(status().isOk()).andExpect(jsonPath("$.content[0].salePrice").value(12000)).andExpect(jsonPath("$.content[0].purchasePrice").doesNotExist()).andExpect(jsonPath("$.content[0].profit").doesNotExist()).andExpect(jsonPath("$.content[0].supplier").doesNotExist());
   mvc.perform(get("/api/products")).andExpect(status().isUnauthorized());
   mvc.perform(get("/api/products/summary")).andExpect(status().isUnauthorized());
+ }
+ @Test void guestCannotUploadImages()throws Exception{
+  mvc.perform(multipart("/api/media/images").file(new org.springframework.mock.web.MockMultipartFile("file","photo.png","image/png",new byte[]{1}))).andExpect(status().isUnauthorized());verifyNoInteractions(imageStorage);
+ }
+ @Test @WithMockUser(roles="CUSTOMER") void customerCannotUploadImages()throws Exception{
+  mvc.perform(multipart("/api/media/images").file(new org.springframework.mock.web.MockMultipartFile("file","photo.png","image/png",new byte[]{1}))).andExpect(status().isForbidden());verifyNoInteractions(imageStorage);
+ }
+ @Test @WithMockUser(roles="ADMIN") void adminUploadReturnsPublicUrlWithoutChangingProducts()throws Exception{
+  when(imageStorage.store(any())).thenReturn(new ProductImageStorage.StoredImage("00000000-0000-0000-0000-000000000001.png",null,"image/png",10));
+  mvc.perform(multipart("/api/media/images").file(new org.springframework.mock.web.MockMultipartFile("file","photo.png","image/png",new byte[]{1}))).andExpect(status().isCreated()).andExpect(jsonPath("$.imageUrl").value("http://localhost/api/store/media/00000000-0000-0000-0000-000000000001.png"));
+  verify(products,never()).create(any());verify(products,never()).update(any(),any());
+ }
+ @Test @WithMockUser(roles="ADMIN") void missingImageIsAValidationError()throws Exception{
+  mvc.perform(multipart("/api/media/images")).andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("IMAGE_REQUIRED"));verifyNoInteractions(imageStorage);
+ }
+ @Test void publicImageReadsDoNotRequireAnAccount()throws Exception{
+  when(imageStorage.file(anyString())).thenThrow(new com.bloomibunny.exception.ProductImageException(org.springframework.http.HttpStatus.NOT_FOUND,"Fotografía no encontrada."));
+  mvc.perform(get("/api/store/media/00000000-0000-0000-0000-000000000001.png")).andExpect(status().isNotFound());verify(imageStorage).file(anyString());
  }
 
  @Test @WithMockUser(roles="CUSTOMER") void customerCannotReadPurchaseLots()throws Exception{mvc.perform(get("/api/products/1/lots")).andExpect(status().isForbidden());}
