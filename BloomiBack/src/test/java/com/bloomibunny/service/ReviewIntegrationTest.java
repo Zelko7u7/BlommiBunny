@@ -31,6 +31,12 @@ class ReviewIntegrationTest {
  @Autowired JdbcTemplate jdbc;
  @BeforeEach void reset(){assertTrue(jdbc.queryForObject("select current_schema()",String.class).startsWith("bloomi_sales_test_"));jdbc.execute("truncate table favorite,inventory_movement,sale_item,sale,purchase_item,purchase,expense,product restart identity cascade");}
  Product product(String code,int stock){var p=new Product();p.setName("Producto compartido");p.setCode(code);p.setCategory(categories.findAll().getFirst());p.setStock(stock);p.setSalePrice(new BigDecimal("12000.25"));p.setPurchasePrice(new BigDecimal("5000.50"));return products.saveAndFlush(p);}
+ @Test void originalCreationTimeIsExposedAndSurvivesLaterEdits(){
+  var p=product("CREATION-TIME",1);var created=service.get(p.getId()).createdAt();assertNotNull(created);
+  assertEquals(created,new StoreController(service).get(p.getId()).createdAt());
+  p.setEntryDate(java.time.LocalDate.of(2001,1,1));products.saveAndFlush(p);service.setActive(p.getId(),false);service.setActive(p.getId(),true);
+  assertEquals(created,service.get(p.getId()).createdAt());assertEquals(created,new StoreController(service).get(p.getId()).createdAt());
+ }
  @Test void publicListingHidesUnpublishedProvisionalAndDeletedButKeepsExhausted(){
   var visible=product("VISIBLE",2);var empty=product("EMPTY",0);var hidden=product("HIDDEN",2);hidden.setActive(false);products.saveAndFlush(hidden);var provisional=product("PROVISIONAL",2);provisional.setProvisionalData(true);products.saveAndFlush(provisional);var deleted=product("DELETED",2);deleted.setDeleted(true);products.saveAndFlush(deleted);
   var result=service.publicList("",0,100);assertEquals(2,result.getTotalElements());assertEquals(Set.of(visible.getId(),empty.getId()),new HashSet<>(result.map(ProductResponse::id).getContent()));assertEquals(0,service.publicList("HIDDEN",0,100).getTotalElements());assertEquals(4,service.list("",0,100,"name").getTotalElements());

@@ -9,8 +9,8 @@ export default function CatalogFilters({ category, sort, categories, onChange, o
   const id = useId();
   const [expanded, setExpanded] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
-  const count = Number(!!category) + Number(sort !== 'name');
-  const sortLabel = sort === 'price-asc' ? 'Menor precio' : sort === 'price-desc' ? 'Mayor precio' : '';
+  const count = Number(!!category) + Number(sort !== 'newest');
+  const sortLabel = sort === 'price-asc' ? 'Menor precio' : sort === 'price-desc' ? 'Mayor precio' : sort === 'name' ? 'Nombre: A a Z' : 'Más recientes';
   return <section className="catalog-filter-control" aria-label="Filtros del catálogo" onKeyDown={event => {
     if (event.key === 'Escape' && expanded) { event.preventDefault(); setExpanded(false); trigger.current?.focus(); }
   }}>
@@ -32,7 +32,7 @@ export default function CatalogFilters({ category, sort, categories, onChange, o
       {categories.map(value => <option key={value} value={value}>{value}</option>)}
     </select></div>
     <div><label htmlFor={`${id}-sort`}>Ordenar por</label><select id={`${id}-sort`} name="sort" value={sort} onChange={event => onChange('sort', event.target.value)}>
-      <option value="name">Nombre: A a Z</option><option value="price-asc">Precio: menor a mayor</option><option value="price-desc">Precio: mayor a menor</option>
+      <option value="newest">Más recientes</option><option value="name">Nombre: A a Z</option><option value="price-asc">Precio: menor a mayor</option><option value="price-desc">Precio: mayor a menor</option>
     </select></div>
     </form>
   </section>;

@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useStoreProducts, useStoreProduct, useFavorites, validProductId, useStoreCategories } from '../hooks/useApi';
 import ProductDetails from '../components/store/ProductDetails';
 import { LegalPage, StoreFooter } from '../components/store/LegalPages';
-import { buildCatalog, productImage, filterCatalog, type CatalogSort } from '../services/catalog';
+import { buildCatalog, productImage, filterCatalog, catalogSort, DEFAULT_CATALOG_SORT } from '../services/catalog';
 import type { StoreProduct } from '../types';
 import ProductCard from '../components/store/ProductCard';
 import ProductRecommendations from '../components/store/ProductRecommendations';
@@ -37,7 +37,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
   const categoryId = searchParams.get('categoryId');
   const category = categoryId ? storeCategories.data?.find(c => String(c.id) === categoryId)?.name ?? (storeCategories.isLoading ? 'Cargando categoría…' : 'Categoría no disponible') : searchParams.get('category') ?? '';
   const requestedSort = searchParams.get('sort');
-  const sort: CatalogSort = requestedSort === 'price-asc' || requestedSort === 'price-desc' ? requestedSort : 'name';
+  const sort = catalogSort(requestedSort);
   const updateFilter = (key: 'q' | 'category' | 'sort', value: string) => setSearchParams(current => {
     const next = new URLSearchParams(current);
     if (key === 'category') {
@@ -46,7 +46,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       if (selected) next.set('categoryId', String(selected.id)); else if (value) next.set('category', value);
       return next;
     }
-    if (!value || (key === 'sort' && value === 'name')) next.delete(key); else next.set(key, value);
+    if (!value || (key === 'sort' && value === DEFAULT_CATALOG_SORT)) next.delete(key); else next.set(key, value);
     return next;
   }, { replace: true, preventScrollReset: true });
   const resetFilters = () => setSearchParams(current => {

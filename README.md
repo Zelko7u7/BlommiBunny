@@ -1,5 +1,7 @@
 # Bloomi Bunny
 
+El catálogo muestra primero los productos **Más recientes**, según su fecha real de creación. En **Filtros → Ordenar por** se puede elegir también Nombre, Precio menor a mayor o Precio mayor a menor. El orden elegido se conserva en la URL; limpiar filtros recupera el orden por novedades sin borrar la búsqueda.
+
 **Te puede interesar** muestra hasta diez productos disponibles, combinando similitud de producto y categorías relacionadas. Reserva espacio para otras familias afines, conservando tonos, precios y controles del carrusel. Reglas y comprobaciones en [Productos relacionados](docs/PRODUCTOS_RELACIONADOS.md).
 
 El carrusel se administra desde **Administración → Banners promocionales**: imágenes de escritorio/móvil en Cloudinary, destinos reales por ID, programación, activación, orden y vista previa. Toda la imagen es clicable; sin promociones vigentes se oculta sin recuperar banners estáticos. Los dos originales ya están migrados. Guía, migración 013, pruebas y preparación de alojamiento en [Banners promocionales](docs/BANNERS_PROMOCIONALES.md).

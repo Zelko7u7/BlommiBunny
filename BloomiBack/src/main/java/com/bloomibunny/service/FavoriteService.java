@@ -16,7 +16,7 @@ public class FavoriteService {
 
  @Transactional(readOnly=true)
  public List<StoreProduct> list(String username){
-  return favorites.visible(username).stream().map(f->{var p=f.getProduct();return new StoreProduct(p.getId(),p.getName(),p.getCategory().getName(),p.getBrand()==null?null:p.getBrand().getName(),p.getDescription(),p.getShade(),p.getPresentation(),p.getSalePrice(),p.getStock(),p.isActive(),p.getImageUrl(),p.getVariantGroup(),List.of(),List.copyOf(p.getGalleryImages()));}).toList();
+  return favorites.visible(username).stream().map(f->{var p=f.getProduct();return new StoreProduct(p.getId(),p.getName(),p.getCategory().getName(),p.getBrand()==null?null:p.getBrand().getName(),p.getDescription(),p.getShade(),p.getPresentation(),p.getSalePrice(),p.getStock(),p.isActive(),p.getImageUrl(),p.getVariantGroup(),List.of(),List.copyOf(p.getGalleryImages()),p.getCreatedAt());}).toList();
  }
  public void add(String username,Long productId){
   var user=users.findByUsername(username).filter(u->u.isActive()).orElseThrow(()->new ResourceNotFoundException("Cuenta no disponible"));

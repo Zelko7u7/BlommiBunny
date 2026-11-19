@@ -1,5 +1,11 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Orden predeterminado por novedades — 18 de noviembre de 2026
+
+El catálogo y su selector usan Más recientes como orden inicial. Las respuestas de producto público, detalle, variantes y favoritos incluyen `createdAt`, tomado del campo existente de PostgreSQL; no se usa la fecha editable de ingreso ni la última modificación. No hubo migración ni cambios de datos. Las familias de tonos se ordenan por la incorporación más reciente de sus variantes publicadas, conservando un representante disponible; los empates se resuelven por ID descendente.
+
+Nombre y precios siguen disponibles y se conservan en URL, recarga, filtros y navegación promocional. Al limpiar filtros se recupera Más recientes y se mantiene la búsqueda. Las recomendaciones conservan su orden de relevancia. Verificación: 180 pruebas backend, 57 frontend, build con tipos y navegador real a 375/768/1440 px aprobados; listado completo comparado con sus fechas y primeras tarjetas 30,29,28,27. Las 20 tablas públicas de la referencia de esta tarea permanecen idénticas. Backend actualizado activo con `ddl-auto=validate`; despliegue remoto pendiente.
+
 ## Banners promocionales dinámicos — 18 de noviembre de 2026
 
 Implementada gestión ADMIN de banners con escritorio/móvil, subida segura Cloudinary, fechas opcionales, destinos por referencias reales, vista previa y control de versiones. Carrusel público completamente clicable con categorías por ID en URL, sin configuración estática ni respaldo cuando todos están desactivados. Conserva controles, toque, teclado, seis segundos y movimiento reducido; las imágenes se muestran completas y optimizadas. Migración aditiva 013 aplicada con respaldo; dos banners originales migrados una sola vez. Las 18 tablas anteriores permanecen intactas.

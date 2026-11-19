@@ -14,3 +14,4 @@ test('category destination keeps its stable ID and removes incompatible refineme
 test('product and existing sections stay native routes',()=>{for(const href of ['/producto/12','/nosotros','/favoritos'])assert.equal(heroBannerHref(href,'?q=gloss'),href);});
 test('external links and unknown or injected routes cannot redirect buyers',()=>{for(const href of ['https://evil.invalid','//evil.invalid','javascript:alert(1)','/producto/0','/?categoryId=2&next=https://evil.invalid#catalogo','/admin','/politicas/falsa'])assert.equal(heroBannerHref(href),'/#catalogo');});
 test('invalid previous sort never enters a destination',()=>assert.equal(heroBannerHref('/?categoryId=1#catalogo','?sort=javascript:evil'),'/?categoryId=1#catalogo'));
+test('explicit alphabetical sorting remains selected when navigating through a banner',()=>assert.equal(heroBannerHref('/?categoryId=1#catalogo','?sort=name'),'/?categoryId=1&sort=name#catalogo'));

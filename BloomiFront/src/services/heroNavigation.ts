@@ -4,6 +4,6 @@ export function heroBannerHref(href: string, search = ''): string {
  if (href !== '/#catalogo' && !/^\/\?categoryId=[1-9][0-9]*#catalogo$/.test(href)) return '/#catalogo';
  const destination = new URL(href, 'https://bloomibunny.invalid');
  const sort = new URLSearchParams(search).get('sort');
- if (sort === 'price-asc' || sort === 'price-desc') destination.searchParams.set('sort', sort);
+ if (sort === 'name' || sort === 'price-asc' || sort === 'price-desc') destination.searchParams.set('sort', sort);
  return `${destination.pathname}${destination.search}${destination.hash}`;
 }

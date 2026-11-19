@@ -23,7 +23,18 @@ export type CatalogEntry = {
   variants: StoreProduct[];
 };
 
-export type CatalogSort = 'name' | 'price-asc' | 'price-desc';
+export type CatalogSort = 'newest' | 'name' | 'price-asc' | 'price-desc';
+export const DEFAULT_CATALOG_SORT: CatalogSort = 'newest';
+export function catalogSort(value: string | null): CatalogSort {
+  return value === 'name' || value === 'price-asc' || value === 'price-desc' ? value : DEFAULT_CATALOG_SORT;
+}
+
+function newestCreation(entry: CatalogEntry): number {
+  return Math.max(0, ...entry.variants.map(product => {
+    const date = product.createdAt ? Date.parse(product.createdAt) : NaN;
+    return Number.isFinite(date) ? date : 0;
+  }));
+}
 
 export function catalogPrice(entry: CatalogEntry): number {
   return Math.min(...entry.variants.map(variant => variant.salePrice));
@@ -36,6 +47,7 @@ export function filterCatalog(entries: CatalogEntry[], query: string, category: 
     const text = normalizeProductName([entry.name, ...entry.variants.flatMap(variant => [variant.category, variant.brand, variant.shade, variant.presentation, variant.description])].filter(Boolean).join(' '));
     return words.every(word => text.includes(word));
   }).sort((a, b) => {
+    if (sort === 'newest') return newestCreation(b) - newestCreation(a) || Math.max(...b.variants.map(p => p.id)) - Math.max(...a.variants.map(p => p.id));
     const priceDifference = sort === 'price-asc' ? catalogPrice(a) - catalogPrice(b) : sort === 'price-desc' ? catalogPrice(b) - catalogPrice(a) : 0;
     return priceDifference || a.name.localeCompare(b.name, 'es', { numeric: true, sensitivity: 'base' });
   });
