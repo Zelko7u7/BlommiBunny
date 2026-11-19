@@ -11,6 +11,7 @@ const InventoryPage=lazy(()=>import('./pages/InventoryPage'));
 const NamedCatalog=lazy(()=>import('./pages/CatalogPage').then(module=>({default:module.NamedCatalog})));
 const ContactsPage=lazy(()=>import('./pages/CatalogPage').then(module=>({default:module.ContactsPage})));
 const SalesPage=lazy(()=>import('./pages/SalesPage'));
+const BannersPage=lazy(()=>import('./pages/BannersPage'));
 const OperationsPage=lazy(()=>import('./pages/OperationsPage'));
 
 function AdminOnly() {
@@ -33,6 +34,7 @@ export default function App() {
     <Route path="/admin" element={<AdminOnly/>}>
       <Route index element={<DashboardPage/>}/>
       <Route path="inventario" element={<InventoryPage/>}/>
+      <Route path="banners" element={<BannersPage/>}/>
       <Route path="ventas" element={<SalesPage/>}/>
       <Route path="compras" element={<OperationsPage key="purchases" kind="purchases"/>}/>
       <Route path="gastos" element={<OperationsPage key="expenses" kind="expenses"/>}/>

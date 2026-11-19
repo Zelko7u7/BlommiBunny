@@ -1,5 +1,11 @@
 # Revisión técnica y estado de Bloomi Bunny
 
+## Banners promocionales dinámicos — 18 de noviembre de 2026
+
+Implementada gestión ADMIN de banners con escritorio/móvil, subida segura Cloudinary, fechas opcionales, destinos por referencias reales, vista previa y control de versiones. Carrusel público completamente clicable con categorías por ID en URL, sin configuración estática ni respaldo cuando todos están desactivados. Conserva controles, toque, teclado, seis segundos y movimiento reducido; las imágenes se muestran completas y optimizadas. Migración aditiva 013 aplicada con respaldo; dos banners originales migrados una sola vez. Las 18 tablas anteriores permanecen intactas.
+
+179 pruebas backend (94 PostgreSQL aisladas), 44 frontend y build con tipos aprobados. Navegador real validó CRUD, subidas, móvil, filtros compartibles, estados, orden, eliminación, accesibilidad y errores de red sin bloquear catálogo. Sin dependencias nuevas ni despliegue remoto. Detalles, lista completa de archivos y preparación Heroku/frontend en [Banners promocionales](BANNERS_PROMOCIONALES.md).
+
 ## Administradora única — 18 de noviembre de 2026
 
 Registro administrativo retirado del controlador y denegado en seguridad para todos los roles. El servicio de registro rechaza ADMIN/EMPLOYEE y asigna CUSTOMER expresamente. El bootstrap transaccional usa un bloqueo PostgreSQL para serializar arranques; solo crea ADMIN con la tabla de cuentas vacía. Conserva cuentas/contraseñas/estado existentes aunque cambie el nombre configurado, incluye administradoras inactivas y no asciende clientes ni recrea administradoras cuando ya hay cuentas. Más de una administradora impide el arranque para exigir revisión manual.

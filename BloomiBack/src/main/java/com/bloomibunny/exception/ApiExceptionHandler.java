@@ -9,6 +9,7 @@ import java.util.*;
 @RestControllerAdvice
 public class ApiExceptionHandler {
  record ApiError(String code,String message,Instant timestamp,String path,Map<String,String> fields){}
+ @ExceptionHandler(BannerConflictException.class) ResponseEntity<ApiError> bannerConflict(BannerConflictException e,HttpServletRequest r){return response(HttpStatus.CONFLICT,"BANNER_CONFLICT",e,r,Map.of());}
  @ExceptionHandler(ProductImageException.class) ResponseEntity<ApiError> image(ProductImageException e,HttpServletRequest r){return response(e.status(),"IMAGE_UPLOAD_ERROR",e,r,Map.of());}
  @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class) ResponseEntity<ApiError> imageTooLarge(RuntimeException e,HttpServletRequest r){return response(HttpStatus.PAYLOAD_TOO_LARGE,"IMAGE_TOO_LARGE",new RuntimeException("Cada fotografía debe pesar como máximo 5 MB."),r,Map.of());}
  @ExceptionHandler(org.springframework.web.multipart.support.MissingServletRequestPartException.class) ResponseEntity<ApiError> missingImage(Exception e,HttpServletRequest r){return response(HttpStatus.BAD_REQUEST,"IMAGE_REQUIRED",new RuntimeException("Selecciona una fotografía para subir."),r,Map.of());}

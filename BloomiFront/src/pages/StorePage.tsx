@@ -2,7 +2,7 @@ import { ShoppingBag, Plus, UserRound, LogOut, Minus, Trash2, Heart, Shield } fr
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useStoreProducts, useStoreProduct, useFavorites, validProductId } from '../hooks/useApi';
+import { useStoreProducts, useStoreProduct, useFavorites, validProductId, useStoreCategories } from '../hooks/useApi';
 import ProductDetails from '../components/store/ProductDetails';
 import { LegalPage, StoreFooter } from '../components/store/LegalPages';
 import { buildCatalog, productImage, filterCatalog, type CatalogSort } from '../services/catalog';
@@ -33,17 +33,25 @@ function Storefront({ cartKey }: { cartKey: string }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
-  const category = searchParams.get('category') ?? '';
+  const storeCategories = useStoreCategories();
+  const categoryId = searchParams.get('categoryId');
+  const category = categoryId ? storeCategories.data?.find(c => String(c.id) === categoryId)?.name ?? (storeCategories.isLoading ? 'Cargando categoría…' : 'Categoría no disponible') : searchParams.get('category') ?? '';
   const requestedSort = searchParams.get('sort');
   const sort: CatalogSort = requestedSort === 'price-asc' || requestedSort === 'price-desc' ? requestedSort : 'name';
   const updateFilter = (key: 'q' | 'category' | 'sort', value: string) => setSearchParams(current => {
     const next = new URLSearchParams(current);
+    if (key === 'category') {
+      next.delete('categoryId'); next.delete('category');
+      const selected = storeCategories.data?.find(c => c.name === value);
+      if (selected) next.set('categoryId', String(selected.id)); else if (value) next.set('category', value);
+      return next;
+    }
     if (!value || (key === 'sort' && value === 'name')) next.delete(key); else next.set(key, value);
     return next;
   }, { replace: true, preventScrollReset: true });
   const resetFilters = () => setSearchParams(current => {
     const next = new URLSearchParams(current);
-    ['q', 'category', 'sort'].forEach(key => next.delete(key));
+    ['q', 'category', 'categoryId', 'sort'].forEach(key => next.delete(key));
     return next;
   }, { replace: true, preventScrollReset: true });
   const favoritesPage = location.pathname === '/favoritos';
@@ -63,7 +71,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
   const informationalPage = location.pathname === '/nosotros' || location.pathname.startsWith('/politicas/');
   const catalogPage = !informationalPage && !productId;
   const clearRefinements = () => setSearchParams(current => {
-    const next = new URLSearchParams(current); next.delete('category'); next.delete('sort'); return next;
+    const next = new URLSearchParams(current); next.delete('category'); next.delete('categoryId'); next.delete('sort'); return next;
   }, { replace: true, preventScrollReset: true });
   const searchCatalog = (value: string) => {
     const params = catalogPage ? new URLSearchParams(location.search) : new URLSearchParams();
@@ -123,7 +131,7 @@ function Storefront({ cartKey }: { cartKey: string }) {
       setCart(current => changeQuantity(current, product, (current.find(item => item.productId === product.id)?.quantity ?? 0) + quantity));
       toast.success('Producto agregado al carrito', {description: product.shade ? `${product.name} · ${product.shade}` : product.name});
     }} recommendations={purchaseProduct && !detail.isError && !isError ? <ProductRecommendations key={purchaseProduct.id} current={purchaseProduct} products={data} cart={cart} backTo={location.state?.catalogBackTo ?? '/#catalogo'} onAdd={addProduct}/> : undefined}/> : <>
-    {!favoritesPage && <StoreHero categories={categories}/>}
+    {!favoritesPage && <StoreHero/>}
     <main id="catalogo" className="store-catalog">
       <RevealOnScroll className="store-section-title"><div><span className="eyebrow">{favoritesPage ? 'TU COLECCIÓN' : 'NUESTRA COLECCIÓN'}</span><h2>{favoritesPage ? 'Mis favoritos' : 'Encuentra tus favoritos'}</h2></div></RevealOnScroll>
       {(!favoritesPage || session) && <CatalogFilters key={location.pathname} category={category} sort={sort} categories={categories} onChange={updateFilter} onReset={clearRefinements}/>}

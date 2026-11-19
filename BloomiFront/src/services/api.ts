@@ -15,6 +15,7 @@ async function allProducts<T extends {id:number}>(path:string): Promise<T[]> {
 }
 
 export const api={
+ storeCategories:()=>http.get<Named[]>('/store/categories').then(r=>r.data),
  uploadProductImage:(file:File,signal?:AbortSignal)=>{
   const form=new FormData();form.append('file',file);
   return http.post<{imageUrl:string;contentType:string;size:number}>('/media/images',form,{headers:{'Content-Type':undefined},timeout:28000,signal}).then(r=>r.data);

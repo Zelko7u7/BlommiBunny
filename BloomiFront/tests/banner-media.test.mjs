@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict';import test from 'node:test';import {fileURLToPath} from 'node:url';import {buildSync} from 'esbuild';
+const bundle=buildSync({entryPoints:[fileURLToPath(new URL('../src/services/bannerMedia.ts',import.meta.url))],bundle:true,platform:'node',format:'esm',write:false});
+const {bannerImageUrl,bannerSrcSet,colombiaDateInput,colombiaInstant}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
+const image={url:'https://res.cloudinary.com/test/image/upload/v1/bloomi-bunny/banners/photo.webp',publicId:'bloomi-bunny/banners/photo',width:1200,height:300};
+test('delivery preserves image path and uses limits without cropping or upscaling',()=>{const url=bannerImageUrl(image,1800);assert.match(url,/c_limit,w_1200\/q_auto\/f_auto\/v1/);assert.equal(url.includes('c_fill'),false);assert.equal(image.width,1200);});
+test('responsive candidates are deduplicated and never exceed original width',()=>{const set=bannerSrcSet(image);assert.equal(set.split(', ').length,4);assert.equal(set.includes('1800w'),false);assert.equal(set.endsWith('1200w'),true);});
+test('optional publication dates use Colombia time independent of browser timezone',()=>{assert.equal(colombiaInstant('2026-11-20T08:30'),'2026-11-20T13:30:00.000Z');assert.equal(colombiaDateInput('2026-11-20T13:30:00.000Z'),'2026-11-20T08:30');assert.equal(colombiaInstant(''),null);assert.equal(colombiaDateInput(null),'');});

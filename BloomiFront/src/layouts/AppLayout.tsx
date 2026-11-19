@@ -1,12 +1,13 @@
 import { useState, type ReactNode } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { BarChart3, Boxes, ChevronLeft, ChevronRight, LogOut, Menu, PackagePlus, ReceiptText, Search, ShoppingBag, Sparkles, Tags, Truck, UsersRound, X } from 'lucide-react';
+import { BarChart3, Boxes, ChevronLeft, ChevronRight, LogOut, Menu, PackagePlus, ReceiptText, Search, ShoppingBag, Sparkles, Tags, Truck, UsersRound, X, Images } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/admin-layout.css';
 import BrandLogo from '../components/common/BrandLogo';
 
 const groups = [
  ['GENERAL', [['/admin', 'Dashboard', BarChart3]]],
+ ['TIENDA', [['/admin/banners', 'Banners promocionales', Images]]],
  ['OPERACIÓN', [['/admin/inventario', 'Inventario', Boxes], ['/admin/ventas', 'Ventas', ShoppingBag], ['/admin/compras', 'Compras', PackagePlus], ['/admin/gastos', 'Gastos', ReceiptText]]],
  ['CATÁLOGOS', [['/admin/categorias', 'Categorías', Tags], ['/admin/marcas', 'Marcas', Sparkles], ['/admin/proveedores', 'Proveedores', Truck], ['/admin/clientes', 'Clientes', UsersRound]]],
 ] as const;

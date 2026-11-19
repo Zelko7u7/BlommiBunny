@@ -1,5 +1,7 @@
 # Bloomi Bunny
 
+El carrusel se administra desde **Administración → Banners promocionales**: imágenes de escritorio/móvil en Cloudinary, destinos reales por ID, programación, activación, orden y vista previa. Toda la imagen es clicable; sin promociones vigentes se oculta sin recuperar banners estáticos. Los dos originales ya están migrados. Guía, migración 013, pruebas y preparación de alojamiento en [Banners promocionales](docs/BANNERS_PROMOCIONALES.md).
+
 El acceso administrativo está limitado a una única cuenta ADMIN, incluso si está inactiva. El registro público crea exclusivamente clientes; `/api/auth/register` está bloqueado también para la administradora. El arranque solo crea la cuenta inicial si no existe ninguna cuenta y conserva los datos de la administradora existente aunque cambien las variables de bootstrap. Si quedan clientes sin administradora, se requiere recuperación manual, sin ascensos automáticos. La migración `012_single_admin.sql` añade la restricción PostgreSQL; en otras instalaciones debe aplicarse con respaldo y revisión de cuentas, sin eliminar duplicados automáticamente. Esta medida no incluye segundo factor ni limitación de intentos de acceso.
 
 La administración permite subir fotos al crear/editar productos y gestionar portada/galería. Consulta [configuración de Cloudinary](docs/CLOUDINARY.md); requiere credenciales privadas en el backend y reinicio local. El despliegue en Heroku se deja para una etapa posterior.

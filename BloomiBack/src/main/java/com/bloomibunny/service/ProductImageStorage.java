@@ -36,10 +36,8 @@ public class ProductImageStorage {
   try(var input=file.getInputStream()){
    byte[] data=input.readNBytes(MAX_BYTES+1);
    if(data.length>MAX_BYTES)throw failure(HttpStatus.PAYLOAD_TOO_LARGE,"Cada fotografía debe pesar como máximo 5 MB.");
-   String format=format(data);
+   String format=validateImage(data,file.getContentType());
    String mime="image/"+(format.equals("jpg")?"jpeg":format);
-   if(!mime.equalsIgnoreCase(Objects.toString(file.getContentType(),"")))throw bad("El contenido de la foto no coincide con su formato. Usa JPG, PNG o WebP.");
-   if(format.equals("webp"))validateWebp(data);else validateRaster(data);
    if(cloudinary.enabled())return cloudinary.store(data,format,mime);
    String name=UUID.randomUUID()+"."+format;
    Files.createDirectories(directory);
@@ -58,6 +56,12 @@ public class ProductImageStorage {
   return path;
  }
  public String contentType(String name){return name.endsWith(".png")?"image/png":name.endsWith(".webp")?"image/webp":"image/jpeg";}
+ public static String validateImage(byte[] data,String contentType){
+  String format=format(data);String mime="image/"+(format.equals("jpg")?"jpeg":format);
+  if(!mime.equalsIgnoreCase(Objects.toString(contentType,"")))throw bad("El contenido de la foto no coincide con su formato. Usa JPG, PNG o WebP.");
+  if(format.equals("webp"))validateWebp(data);else validateRaster(data);
+  return format;
+ }
  private static String format(byte[] data){
   if(data.length>=8&&Arrays.equals(Arrays.copyOf(data,8),new byte[]{(byte)137,80,78,71,13,10,26,10}))return "png";
   if(data.length>=3&&(data[0]&255)==255&&(data[1]&255)==216&&(data[2]&255)==255)return "jpg";

@@ -24,6 +24,7 @@ import java.util.List;
    .authorizeHttpRequests(a->a
     .requestMatchers("/api/auth/register", "/api/auth/register/**").denyAll()
     .requestMatchers(HttpMethod.POST,"/api/auth/login","/api/auth/signup").permitAll()
+    .requestMatchers(HttpMethod.GET,"/api/banners","/api/store/categories").permitAll()
     .requestMatchers(HttpMethod.GET,"/api/store/products","/api/store/products/*","/api/store/media/*").permitAll()
     .requestMatchers("/api/favorites", "/api/favorites/*").authenticated()
     .requestMatchers("/api/**").hasRole("ADMIN")

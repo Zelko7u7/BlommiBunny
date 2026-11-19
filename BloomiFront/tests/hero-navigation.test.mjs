@@ -1,32 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
-import { buildSync } from 'esbuild';
-
-const bundle = buildSync({ entryPoints: [fileURLToPath(new URL('../src/services/heroNavigation.ts', import.meta.url))], bundle: true, platform: 'node', format: 'esm', write: false });
-const { heroButtonHref } = await import('data:text/javascript;base64,' + Buffer.from(bundle.outputFiles[0].text).toString('base64'));
-const lips = { type: 'category', category: 'Labios', aliases: ['Labiales'], fallbackQuery: 'labios' };
-
-test('collection keeps the current catalogue and navigates to its native fragment', () => {
-  assert.equal(heroButtonHref({ type: 'catalog' }, ['Labios'], '?q=gloss'), '#catalogo');
+import {fileURLToPath} from 'node:url';
+import {buildSync} from 'esbuild';
+const bundle=buildSync({entryPoints:[fileURLToPath(new URL('../src/services/heroNavigation.ts',import.meta.url))],bundle:true,platform:'node',format:'esm',write:false});
+const {heroBannerHref}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
+test('full catalog clears previous category and search but preserves valid price ordering',()=>{
+ assert.equal(heroBannerHref('/#catalogo','?q=sombra&category=Ojos&categoryId=2&sort=price-desc'),'/?sort=price-desc#catalogo');
 });
-test('lips uses the real category and clears an unrelated query/category', () => {
-  const href = heroButtonHref(lips, ['Ojos', 'Labios', 'Rostro'], '?q=sombra&category=Ojos&sort=price-desc');
-  const url = new URL(href, 'https://example.com/');
-  assert.equal(url.searchParams.get('category'), 'Labios');
-  assert.equal(url.searchParams.has('q'), false); assert.equal(url.searchParams.get('sort'), 'price-desc'); assert.equal(url.hash, '#catalogo');
+test('category destination keeps its stable ID and removes incompatible refinements',()=>{
+ const url=new URL(heroBannerHref('/?categoryId=7#catalogo','?q=sombra&category=Ojos&sort=price-asc'),'https://example.com');
+ assert.equal(url.searchParams.get('categoryId'),'7');assert.equal(url.searchParams.get('sort'),'price-asc');assert.equal(url.searchParams.has('q'),false);assert.equal(url.searchParams.has('category'),false);assert.equal(url.hash,'#catalogo');
 });
-test('uses a real alias without inventing a category value', () => {
-  const url = new URL(heroButtonHref(lips, ['LABIALES', 'Ojos'], ''), 'https://example.com/');
-  assert.equal(url.searchParams.get('category'), 'LABIALES');
-});
-test('falls back to the existing search when no equivalent category exists', () => {
-  const url = new URL(heroButtonHref(lips, ['Ojos'], '?q=sombra&category=Ojos'), 'https://example.com/');
-  assert.equal(url.searchParams.get('q'), 'labios'); assert.equal(url.searchParams.has('category'), false);
-});
-test('normalization matches only full category labels and preserves encoding', () => {
-  const action = { type: 'category', category: 'Cuidado de piel', fallbackQuery: 'piel' };
-  const url = new URL(heroButtonHref(action, [' CUIDADO DE PIEL ', 'Cuidado corporal'], ''), 'https://example.com/');
-  assert.equal(url.searchParams.get('category'), ' CUIDADO DE PIEL ');
-  assert.equal(new URL(heroButtonHref(lips, ['Accesorios para labios'], ''), 'https://example.com/').searchParams.has('category'), false);
-});
+test('product and existing sections stay native routes',()=>{for(const href of ['/producto/12','/nosotros','/favoritos'])assert.equal(heroBannerHref(href,'?q=gloss'),href);});
+test('external links and unknown or injected routes cannot redirect buyers',()=>{for(const href of ['https://evil.invalid','//evil.invalid','javascript:alert(1)','/producto/0','/?categoryId=2&next=https://evil.invalid#catalogo','/admin','/politicas/falsa'])assert.equal(heroBannerHref(href),'/#catalogo');});
+test('invalid previous sort never enters a destination',()=>assert.equal(heroBannerHref('/?categoryId=1#catalogo','?sort=javascript:evil'),'/?categoryId=1#catalogo'));

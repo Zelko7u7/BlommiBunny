@@ -33,9 +33,20 @@ public class CloudinaryImageStorage {
  }
  public boolean enabled(){return enabled;}
  public ProductImageStorage.StoredImage store(byte[] data,String format,String contentType){
+  var image=upload(data,format,contentType,"bloomibunny/products",false);
+  return new ProductImageStorage.StoredImage(null,image.url(),contentType,data.length);
+ }
+ public record CloudImage(String url,String publicId,int width,int height){}
+ public CloudImage storeBanner(byte[] data,String format,String contentType){return upload(data,format,contentType,"bloomi-bunny/banners",true);}
+ public boolean validBannerImage(String url,String publicId){
+  if(url==null||publicId==null||!publicId.matches("bloomi-bunny/banners/[a-zA-Z0-9_-]+"))return false;
+  try{var uri=URI.create(url);return url.length()<=500&&"https".equals(uri.getScheme())&&"res.cloudinary.com".equals(uri.getHost())&&uri.getUserInfo()==null&&uri.getPort()==-1&&uri.getQuery()==null&&uri.getFragment()==null&&uri.getPath().matches("/"+java.util.regex.Pattern.quote(cloud)+"/image/upload/v[0-9]+/"+java.util.regex.Pattern.quote(publicId)+"\\.(jpg|jpeg|png|webp)");}catch(RuntimeException e){return false;}
+ }
+ private CloudImage upload(byte[] data,String format,String contentType,String folder,boolean banner){
   if(!enabled||!cloud.matches("[a-zA-Z0-9_-]+")||apiKey.isBlank()||secret.isBlank())throw new ProductImageException(HttpStatus.SERVICE_UNAVAILABLE,"Completa la configuración privada de Cloudinary para poder subir fotografías.");
-  String publicId="bloomibunny/products/"+UUID.randomUUID();
+  String publicId=folder+"/"+UUID.randomUUID();
   var fields=new TreeMap<String,String>();
+  if(banner)fields.put("asset_folder",folder);
   fields.put("overwrite","false");fields.put("public_id",publicId);fields.put("timestamp",Long.toString(clock.instant().getEpochSecond()));
   String boundary="bloomi-"+UUID.randomUUID();
   try{
@@ -62,7 +73,7 @@ public class CloudinaryImageStorage {
     if(!publicId.equals(result.path("public_id").asString(""))||!Set.of("jpg","jpeg","png","webp").contains(result.path("format").asString(""))
        ||!"https".equals(uri.getScheme())||!"res.cloudinary.com".equals(uri.getHost())||uri.getUserInfo()!=null||uri.getPort()!=-1
        ||!uri.getPath().startsWith("/"+cloud+"/image/upload/")||!uri.getPath().contains("/"+publicId+".")||url.length()>500)throw unavailable();
-    return new ProductImageStorage.StoredImage(null,url,contentType,data.length);
+    return new CloudImage(url,publicId,result.path("width").asInt(0),result.path("height").asInt(0));
    }
   }catch(ProductImageException error){throw error;}
   catch(InterruptedException error){Thread.currentThread().interrupt();throw unavailable();}

@@ -3,6 +3,7 @@ export const useDashboard=()=>useQuery({queryKey:["dashboard"],queryFn:api.dashb
 export const useProducts=(q="",stock="all")=>useQuery({queryKey:["products",q,stock],queryFn:()=>api.products(q,stock),refetchInterval:15000,refetchOnWindowFocus:true});
 export const useInventorySummary=(q="",stock="all")=>useQuery({queryKey:["inventory-summary",q,stock],queryFn:()=>api.inventorySummary(q,stock),refetchInterval:15000,refetchOnWindowFocus:true});
 export const useStoreProducts=()=>useQuery({queryKey:["store-products"],queryFn:api.storeProducts,refetchInterval:15000});
+export const useStoreCategories=()=>useQuery({queryKey:['store-categories'],queryFn:api.storeCategories,refetchInterval:15000});
 export function useFavorites(username?:string){
  const qc=useQueryClient();
  const query=useQuery({queryKey:['favorites',username],queryFn:api.favorites,enabled:!!username,refetchInterval:15000});

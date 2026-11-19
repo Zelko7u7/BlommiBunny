@@ -1,5 +1,7 @@
 # Fotografías desde administración
 
+Los banners promocionales utilizan la misma conexión privada, con subida exclusiva ADMIN en `/api/admin/banners/images`, URL segura, public_id y dimensiones. Se organizan en `bloomi-bunny/banners`; no utilizan almacenamiento local. Su administración, programación, migración inicial y entrega optimizada están en [Banners promocionales](BANNERS_PROMOCIONALES.md).
+
 ## Catálogo existente en Cloudinary
 
 Las fotografías de productos y las opciones de colección utilizan enlaces HTTPS de Cloudinary. Los originales en `public/products/` se conservan como respaldo; los banners y logotipos mantienen sus recursos propios. Los productos sin fotografía siguen sin ella: no se asignan imágenes de otras referencias.
