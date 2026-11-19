@@ -1,5 +1,15 @@
 # Fotografías desde administración
 
+## Catálogo existente en Cloudinary
+
+Las fotografías de productos y las opciones de colección utilizan enlaces HTTPS de Cloudinary. Los originales en `public/products/` se conservan como respaldo; los banners y logotipos mantienen sus recursos propios. Los productos sin fotografía siguen sin ella: no se asignan imágenes de otras referencias.
+
+`tools/migrate_product_images_cloudinary.py` permite migrar las fotos existentes por etapas: `prepare`, `upload`, `apply` y `verify`. Lee las referencias actuales de PostgreSQL y la colección, además de los archivos de productos publicados. No reimporta Excel ni modifica precios, existencias, tonos o descripciones. Los planes, comprobantes de subida y respaldos permanecen en `.local/cloudinary-catalog-migration/`, fuera de Git.
+
+Las subidas se firman desde el auxiliar privado con identificadores derivados del contenido y `overwrite=false`; permiten reanudar sin duplicar archivos. Se organizan en `bloomibunny/products/catalog`, conservando el nombre descriptivo y el formato original, incluido el AVIF ya existente. Antes de aplicar los enlaces se comprueban HTTP, tipo y SHA-256 del archivo descargado, y se crea un respaldo PostgreSQL verificado. Una transacción bloquea las filas/tablas necesarias y rechaza un plan si los productos cambiaron desde su preparación. Se conservan portada, orden de secundarias y separación por SKU; se incrementa la versión para impedir que un formulario anterior sobrescriba los enlaces nuevos. También se actualiza la colección del frontend, conservando una copia privada.
+
+No ejecutar de nuevo los importadores históricos para restaurar rutas locales. Para continuar una migración interrumpida, conservar su plan y ejecutar la etapa pendiente. La verificación comprueba que solo cambiaron los enlaces y versiones esperados y que los originales y demás tablas comerciales siguen intactos. Las nuevas fotos subidas desde Inventario continúan utilizando el endpoint administrativo habitual.
+
 ## Configurar Cloudinary en local
 
 En la consola de Cloudinary, abre Settings → API Keys. Consulta Cloud name, API Key y API Secret. No pegues el secreto en conversaciones ni lo añadas al frontend.

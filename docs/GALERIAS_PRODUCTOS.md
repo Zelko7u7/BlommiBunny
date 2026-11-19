@@ -1,5 +1,7 @@
 # Fotografías, galerías y descripciones de Bloomi Bunny
 
+Migración del 18 de noviembre de 2026: las 66 fotos del catálogo ya se sirven desde Cloudinary. PostgreSQL conserva el enlace HTTPS de cada portada y secundaria, con el mismo orden y asociación por SKU/tono; la colección del formulario también utiliza esos enlaces. Se verificaron los 66 archivos remotos byte por byte y las 23 fichas publicadas. Precios, existencias y demás datos comerciales preservados, con respaldo previo y originales locales intactos. El procedimiento está en [Cloudinary](CLOUDINARY.md#catálogo-existente-en-cloudinary). Las rutas locales descritas en la importación histórica inferior se conservan como referencia y respaldo; no reejecutar el importador histórico para reemplazar los enlaces vigentes.
+
 Desde el 18 de noviembre de 2026, crear/editar productos permite seleccionar archivos desde el dispositivo, configurar portada y ordenar las secundarias. Consulta [configuración privada y uso de Cloudinary](CLOUDINARY.md). Las fotografías y enlaces anteriores se conservan; esta funcionalidad no importa ni modifica productos automáticamente.
 
 Actualización del 28 de octubre de 2026. En las comprobaciones de la jornada se conservaron 25 referencias y 84 unidades; consultar la base antes de futuros cambios, porque estas cifras son una referencia temporal. Se incorporaron las 21 descripciones oficiales a 23 SKU, contando los tonos separados de Toy Story. La importación no modificó precios, costos, cantidades, categorías, identificadores, nombres ni estados de publicación.

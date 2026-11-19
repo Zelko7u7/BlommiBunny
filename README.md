@@ -4,6 +4,8 @@ El acceso administrativo está limitado a una única cuenta ADMIN, incluso si es
 
 La administración permite subir fotos al crear/editar productos y gestionar portada/galería. Consulta [configuración de Cloudinary](docs/CLOUDINARY.md); requiere credenciales privadas en el backend y reinicio local. El despliegue en Heroku se deja para una etapa posterior.
 
+Las 66 fotos existentes de productos también están migradas a Cloudinary: las portadas, galerías y opciones de colección utilizan sus enlaces HTTPS. Se verificaron todos los archivos remotos y las 23 fichas publicadas, conservando orden, tonos, precios y existencias. Los originales locales y el respaldo de la base se conservan.
+
 ## Aparición progresiva pública — 18 de noviembre de 2026
 
 El catálogo, favoritos, recomendaciones y bloques informativos públicos incorporan Scroll Reveal: opacidad y desplazamiento de 20 px durante 550 ms, con escalonado de 70 ms en las tarjetas. El contenido inicialmente visible aparece inmediatamente; cada elemento se anima una vez por montaje y respeta movimiento reducido y navegación por teclado. Búsqueda, filtros y acciones conservados. Administración, header, splash, banners, carrito y modales sin este efecto.

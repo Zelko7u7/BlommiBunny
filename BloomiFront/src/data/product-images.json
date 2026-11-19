@@ -1,46 +1,46 @@
 [
-    {
-        "name":  "Hidratante De Labios Bob Esponja",
-        "imageUrl":  "/products/hidratante-de-labios-bob-esponja.png"
-    },
-    {
-        "name":  "Kit X 3 Gloss Mood Pills",
-        "imageUrl":  "/products/kit-x-3-gloss-mood-pills.png"
-    },
-    {
-        "name":  "Mia Blush, Rubor doble",
-        "imageUrl":  "/products/mia-blush-rubor-doble.png"
-    },
-    {
-        "name":  "Mousse Labial Black Kitty",
-        "imageUrl":  "/products/mousse-labial-black-kitty.png"
-    },
-    {
-        "name":  "Pompon Iluminador Cotton",
-        "imageUrl":  "/products/pompon-iluminador-cotton.png"
-    },
-    {
-        "name":  "Serum Hidratante Ácido Hialurónico",
-        "imageUrl":  "/products/serum-hidratante-acido-hialuronico.png"
-    },
-    {
-        "name":  "Sombra Glitter Circus",
-        "imageUrl":  "/products/sombra-glitter-circus.png"
-    },
-    {
-        "name":  "Sombra Perfixt Beauty Glazed",
-        "imageUrl":  "/products/sombra-perfixt-beauty-glazed.png"
-    },
-    {
-        "name":  "Stickers Para Acné Happy Clean",
-        "imageUrl":  "/products/stickers-para-acne-happy-clean.png"
-    },
-    {
-        "name":  "Tinta Gloss Corazón",
-        "imageUrl":  "/products/tinta-gloss-corazon.png"
-    },
-    {
-        "name":  "Tinta para Labios y Mejillas Crimson Skull",
-        "imageUrl":  "/products/tinta-para-labios-y-mejillas-crimson-skull.png"
-    }
+  {
+    "name": "Hidratante De Labios Bob Esponja",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049062/bloomibunny/products/catalog/08afefdba224211d08f109f9024a68e899c589b442cae227cc71018b2d1f93a4.png"
+  },
+  {
+    "name": "Kit X 3 Gloss Mood Pills",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049065/bloomibunny/products/catalog/7577f1694b38942fccc62bf8d0b0554fc02d6d20d7850640e6c93b1b08ac4f21.png"
+  },
+  {
+    "name": "Mia Blush, Rubor doble",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049063/bloomibunny/products/catalog/0b09a9d5f3767bc60b4e47c28a90956719013770a776fc33544ed681c663a0a1.png"
+  },
+  {
+    "name": "Mousse Labial Black Kitty",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049065/bloomibunny/products/catalog/09c772a3d1dcfc7bd5b77d8b16d446a68d63afa7f387892a6055cd60215b5ea0.png"
+  },
+  {
+    "name": "Pompon Iluminador Cotton",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049066/bloomibunny/products/catalog/f3092be46bc7cb9f1dbae3b02735482aa0015ca593daa19eeb3bf6b62e8c78ca.png"
+  },
+  {
+    "name": "Serum Hidratante Ácido Hialurónico",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049071/bloomibunny/products/catalog/ed4df9f646757f92dc1082d065edcb1d5712b2c47af0db54183b05c6a0d23e9f.png"
+  },
+  {
+    "name": "Sombra Glitter Circus",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049068/bloomibunny/products/catalog/33d1f54c8fb64004eb4bf9e495ffb41834a1f5c76966485ba0ecd024ead6432a.png"
+  },
+  {
+    "name": "Sombra Perfixt Beauty Glazed",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049069/bloomibunny/products/catalog/1c7a397921b1738afe76580944e3116d1812890695bf490eaddf8b0581113830.png"
+  },
+  {
+    "name": "Stickers Para Acné Happy Clean",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049071/bloomibunny/products/catalog/b402dff0335f507611cf087bdd0af5702efb1c2b6d8e6e713f228b9b5c438c0f.png"
+  },
+  {
+    "name": "Tinta Gloss Corazón",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049073/bloomibunny/products/catalog/9e11a676dfbb79551dc301d2955bc4965558a7ec47747bf269171d469a4a876d.png"
+  },
+  {
+    "name": "Tinta para Labios y Mejillas Crimson Skull",
+    "imageUrl": "https://res.cloudinary.com/x4oqcrdv/image/upload/v1795049073/bloomibunny/products/catalog/21329fc3762baa2411a96872636526d40f747eaf972f45cb0cac5eab617c8c84.png"
+  }
 ]
